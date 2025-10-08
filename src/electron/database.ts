@@ -21,6 +21,7 @@ export const getUserDataPath = () => {
 // データベースファイルのパス
 export const getDatabasePath = () => {
   const userDataPath = getUserDataPath();
+  console.log(path.join(userDataPath, ".metadata", "app.db"));
   return path.join(userDataPath, ".metadata", "app.db");
 };
 

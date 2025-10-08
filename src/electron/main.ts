@@ -2,12 +2,19 @@ import { app, BrowserWindow } from "electron";
 import isDev from "electron-is-dev";
 import path from "path";
 import { getPrismaClient, disconnectPrisma } from "./database";
+import { registerAllHandlers } from "./handlers";
+
+console.log("🔍 Electron main loaded from:", __dirname);
+console.log("🔍 Expected preload path:", path.join(__dirname, "preload.js"));
 
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
   // データベースの初期化
   getPrismaClient();
+
+  // IPCハンドラーの登録
+  registerAllHandlers();
 
   mainWindow = new BrowserWindow({
     width: 1200,

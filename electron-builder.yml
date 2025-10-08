@@ -1,0 +1,24 @@
+appId: com.yourname.notly
+productName: Notly
+directories:
+  buildResources: public
+  output: release
+files:
+  - dist/**/*
+  - out/**/*
+  - node_modules/**/*
+  - package.json
+mac:
+  category: public.app-category.productivity
+  target:
+    - dmg
+    - zip
+win:
+  target:
+    - nsis
+    - portable
+linux:
+  category: Utility
+  target:
+    - AppImage
+    - deb

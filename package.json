@@ -16,17 +16,16 @@
     "dist:mac": "npm run build && electron-builder --mac",
     "dist:win": "npm run build && electron-builder --win",
     "dist:linux": "npm run build && electron-builder --linux",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "db:push": "prisma db push",
+    "db:seed": "ts-node prisma/seed.ts",
     "lint": "eslint"
   },
   "build": {
     "appId": "com.yourname.notly",
     "productName": "Notly",
-    "files": [
-      "dist/**/*",
-      "out/**/*",
-      "node_modules/**/*",
-      "package.json"
-    ],
     "directories": {
       "buildResources": "public",
       "output": "release"
@@ -50,9 +49,25 @@
         "deb"
       ],
       "category": "Utility"
-    }
+    },
+    "files": [
+      "dist/**/*",
+      "out/**/*",
+      "node_modules/**/*",
+      "package.json",
+      "!node_modules/.prisma/client/*.node",
+      "node_modules/.prisma/client/*.node"
+    ],
+    "asarUnpack": [
+      "node_modules/.prisma",
+      "node_modules/@prisma/client"
+    ]
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.17.0",
     "electron-is-dev": "^3.0.1",
     "next": "15.5.4",
     "react": "19.1.0",
@@ -71,7 +86,9 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "nodemon": "^3.1.10",
+    "prisma": "^6.17.0",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5",
     "wait-on": "^9.0.1"
   }

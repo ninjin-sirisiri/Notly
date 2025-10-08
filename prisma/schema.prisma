@@ -1,0 +1,59 @@
+// prisma/schema.prisma
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "darwin", "darwin-arm64", "windows", "linux-musl"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  title     String
+  filePath  String   @map("file_path")
+  folderId  String?  @map("folder_id")
+  folder    Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  tags      Tag[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("notes")
+}
+
+model Folder {
+  id        String   @id @default(uuid())
+  name      String
+  parentId  String?  @map("parent_id")
+  parent    Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Folder[] @relation("FolderHierarchy")
+  notes     Note[]
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("folders")
+}
+
+model Tag {
+  id    String  @id @default(uuid())
+  name  String  @unique
+  color String?
+  notes Note[]
+
+  @@map("tags")
+}
+
+model Stat {
+  date      DateTime @id
+  noteCount Int      @default(0) @map("note_count")
+
+  @@map("stats")
+}
+
+model Setting {
+  key   String @id
+  value String
+
+  @@map("settings")
+}

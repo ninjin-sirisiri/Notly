@@ -1,10 +1,14 @@
 import { app, BrowserWindow } from "electron";
 import isDev from "electron-is-dev";
 import path from "path";
+import { getPrismaClient, disconnectPrisma } from "./database";
 
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
+  // データベースの初期化
+  getPrismaClient();
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -32,7 +36,8 @@ function createWindow() {
 
 app.whenReady().then(createWindow);
 
-app.on("window-all-closed", () => {
+app.on("window-all-closed", async () => {
+  await disconnectPrisma();
   if (process.platform !== "darwin") {
     app.quit();
   }
@@ -42,4 +47,9 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+// アプリ終了前にPrismaを切断
+app.on("before-quit", async () => {
+  await disconnectPrisma();
 });

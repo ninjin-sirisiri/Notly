@@ -37,7 +37,7 @@ export default function Home() {
   if (loading) return <div>読み込み中...</div>;
 
   return (
-    <div className="p-8">
+    <div className="p-8 bg-gray-50 w-full">
       <h1 className="text-3xl font-bold mb-4">Notly</h1>
       <button
         onClick={createNote}

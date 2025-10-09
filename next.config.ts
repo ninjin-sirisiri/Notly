@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true, // Electronでは画像最適化を無効化
   },
+  outputFileTracingRoot: __dirname,
 };
 
 export default nextConfig;

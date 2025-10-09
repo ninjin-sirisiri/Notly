@@ -38,15 +38,15 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/notly.git
+git clone https://github.com/ninjin-sirisiri/notly.git
 cd notly
 
 # Install dependencies
 pnpm install
 
 # Setup Prisma
-npx prisma generate
-npx prisma migrate dev --name init
+pnpx prisma generate
+pnpx prisma migrate dev --name init
 ```
 
 ### Run in Development
@@ -131,11 +131,11 @@ notly/
 
 ### Phase 1: MVP (Currently in Development)
 
-- [x] Basic note creation and editing
-- [x] Markdown support
-- [x] Folder functionality
-- [x] Local storage
-- [x] Auto-save
+- [ ] Basic note creation and editing
+- [ ] Markdown support
+- [ ] Folder functionality
+- [ ] Local storage
+- [ ] Auto-save
 - [ ] Template selection UI
 
 ### Phase 2: Habit Building Features
@@ -283,9 +283,9 @@ Contributions are welcome! Please follow these steps:
 
 If you encounter any issues, you can get support through:
 
-- 🐛 [Issue Tracker](https://github.com/yourusername/notly/issues)
-- 💬 [Discussions](https://github.com/yourusername/notly/discussions)
-- 📧 Email: support@notly.app (placeholder)
+- 🐛 [Issue Tracker](https://github.com/ninjin-sirisiri/Notly/issues)
+- 💬 [Discussions](https://github.com/ninjin-sirisiri/Notly/discussions)
+- 📧 Email: ubsa17@gmail.com (placeholder)
 
 ---
 

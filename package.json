@@ -24,7 +24,7 @@
     "lint": "eslint"
   },
   "build": {
-    "appId": "com.yourname.notly",
+    "appId": "com.ubsa.notly",
     "productName": "Notly",
     "directories": {
       "buildResources": "public",

@@ -142,6 +142,7 @@ export function registerNoteHandlers() {
         where: { id: data.id },
         data: {
           ...(data.title && { title: data.title }),
+          ...(data.content !== undefined && { content: data.content }),
           ...(data.folderId !== undefined && { folderId: data.folderId }),
         },
         include: {

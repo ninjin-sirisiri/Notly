@@ -1,5 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export function Logo() {
-  return <Image src={"/logo.png"} alt="Notly" width={40} height={40} />;
+  return (
+    <>
+      <Link href="/">
+        <Image src={"/logo.png"} alt="Notly" width={40} height={40} />
+      </Link>
+    </>
+  );
 }

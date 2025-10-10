@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BIZ_UDPGothic } from "next/font/google";
 import "./globals.css";
 import { WindowLayout } from "./components/layout";
+import { NotesProvider } from "@/context/notes-context";
 
 const biz_udpgothic = BIZ_UDPGothic({
   weight: "400",
@@ -23,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${biz_udpgothic.variable} antialiased`}>
-        <WindowLayout>{children}</WindowLayout>
+        <NotesProvider>
+          <WindowLayout>{children}</WindowLayout>
+        </NotesProvider>
       </body>
     </html>
   );

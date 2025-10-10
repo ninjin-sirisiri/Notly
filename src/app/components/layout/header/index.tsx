@@ -1,5 +1,6 @@
+"use client";
+
 import { Logo } from "./logo";
-import { SaveButton } from "./save-button";
 import { SettingButton } from "./setting-button";
 import { Streak } from "./streak";
 
@@ -9,7 +10,6 @@ export function Header() {
       <Logo />
       <Streak />
       <div className="flex items-center justify-center gap-2">
-        <SaveButton />
         <SettingButton />
       </div>
     </div>

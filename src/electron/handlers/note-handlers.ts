@@ -56,6 +56,7 @@ export function registerNoteHandlers() {
         data: {
           id: noteId,
           title: data.title,
+          content: data.content,
           filePath: relativePath,
           folderId: data.folderId,
         },

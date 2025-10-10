@@ -19,6 +19,7 @@ async function testDatabase() {
     const note = await prisma.note.create({
       data: {
         title: "テストノート",
+        content: "これはテストノートです。",
         filePath: "/path/to/test.md",
         folderId: folder.id,
       },

@@ -28,7 +28,6 @@ export function useFolders() {
     const result = await window.api.folder.create({ name, parentId });
     await loadFolders();
     return result;
-    return Promise.reject(new Error("API not available"));
   };
 
   const deleteFolder = async (id: string) => {

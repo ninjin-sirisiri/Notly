@@ -13,7 +13,12 @@ export function FolderTree() {
 
   return (
     <div className="bg-gray-100 w-2xs">
-      <Button onClick={() => createNote("新しいノート", "")}>
+      <Button
+        onClick={async () => {
+          const { note } = await createNote("新しいノート", "");
+          router.push(`/note/${note.id}`);
+        }}
+      >
         ノートを作成
       </Button>
       <ul>

@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotes } from "@/hooks/useNotes";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import remarkBreaks from "remark-breaks";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function Editor({ noteId }: { noteId: string }) {
   const { notes, updateNote } = useNotes();
@@ -45,14 +48,34 @@ export function Editor({ noteId }: { noteId: string }) {
         </TabsList>
         <TabsContent value="editor">
           <textarea
-            className="w-full h-[calc(100vh-222px)] text-2xl"
+            className="w-full min-h-[calc(100vh-222px)] max-h-[calc(100vh-222px)] text-2xl"
+            spellCheck={false}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onBlur={() => updateNote(noteId, title, content)}
           />
         </TabsContent>
         <TabsContent value="preview" className="prose">
-          <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
+          <ScrollArea className="h-[calc(100vh-222px)] w-[calc(100vw-288px)]">
+            <Markdown
+              remarkPlugins={[remarkGfm, remarkBreaks]}
+              components={{
+                code(props) {
+                  const { children, className } = props;
+                  const match = /language-(\w+)/.exec(className || "");
+                  return match ? (
+                    <SyntaxHighlighter language={match[1]}>
+                      {children as string}
+                    </SyntaxHighlighter>
+                  ) : (
+                    <code className={className}>{children}</code>
+                  );
+                },
+              }}
+            >
+              {content}
+            </Markdown>
+          </ScrollArea>
         </TabsContent>
       </Tabs>
     </div>

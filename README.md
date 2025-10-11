@@ -314,4 +314,4 @@ For detailed documentation, see the [docs/](./docs/) folder:
 
 **Start your writing habit with Notly** ✍️
 
-Made with ❤️ by [Your Name]
+Made with ❤️ by [Ubsa]

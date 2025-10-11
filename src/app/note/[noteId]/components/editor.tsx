@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
-import { Separator } from "@/components/ui/separator";
-import { useNotes } from "@/hooks/useNotes";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNotes } from "@/hooks/useNotes";
 
 export function Editor({ noteId }: { noteId: string }) {
   const { notes, updateNote } = useNotes();
@@ -35,11 +38,23 @@ export function Editor({ noteId }: { noteId: string }) {
         onBlur={() => updateNote(noteId, title, content)}
       />
       <Separator />
-      <textarea
-        className="w-full h-[calc(100vh-176px)] text-2xl"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
+      <Tabs defaultValue="editor">
+        <TabsList>
+          <TabsTrigger value="editor">エディタ</TabsTrigger>
+          <TabsTrigger value="preview">プレビュー</TabsTrigger>
+        </TabsList>
+        <TabsContent value="editor">
+          <textarea
+            className="w-full h-[calc(100vh-222px)] text-2xl"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onBlur={() => updateNote(noteId, title, content)}
+          />
+        </TabsContent>
+        <TabsContent value="preview" className="prose">
+          <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

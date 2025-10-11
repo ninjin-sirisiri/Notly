@@ -1,5 +1,6 @@
 // src/electron/preload.ts
 import { contextBridge, ipcRenderer } from "electron";
+
 import type {
   CreateNoteRequest,
   CreateNoteResponse,
@@ -26,8 +27,6 @@ import type {
   Template,
 } from "../types/api";
 import type { Tag } from "../types/database";
-
-console.log("✅ Preload script executed!");
 
 const api = {
   // ノート操作

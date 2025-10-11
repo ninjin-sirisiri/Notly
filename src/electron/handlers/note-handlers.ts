@@ -27,7 +27,7 @@ export function registerNoteHandlers() {
     async (_, data: CreateNoteRequest): Promise<CreateNoteResponse> => {
       const notesPath = getNotesPath();
       const noteId = crypto.randomUUID();
-      const fileName = `${noteId}.md`;
+      const fileName = `${data.title}.md`;
 
       // フォルダ内のパスを決定
       let filePath: string;
@@ -131,19 +131,31 @@ export function registerNoteHandlers() {
 
       if (!note) throw new Error("Note not found");
 
-      // コンテンツの更新
+      // 新しいファイルパスを決定
+      const newFilePath =
+        data.title !== undefined ? `${data.title}.md` : note.filePath;
+
+      const oldFullPath = path.join(notesPath, note.filePath);
+      const newFullPath = path.join(notesPath, newFilePath);
+
+      // タイトルが変更された場合、ファイル名を変更
+      if (data.title !== undefined && note.filePath !== newFilePath) {
+        await fs.rename(oldFullPath, newFullPath);
+      }
+
+      // コンテンツの更新（新しいファイルパスを使用）
       if (data.content !== undefined) {
-        const fullPath = path.join(notesPath, note.filePath);
-        await fs.writeFile(fullPath, data.content, "utf-8");
+        await fs.writeFile(newFullPath, data.content, "utf-8");
       }
 
       // メタデータの更新
       const updatedNote = await prisma.note.update({
         where: { id: data.id },
         data: {
-          ...(data.title && { title: data.title }),
+          ...(data.title !== undefined && { title: data.title }),
           ...(data.content !== undefined && { content: data.content }),
           ...(data.folderId !== undefined && { folderId: data.folderId }),
+          ...(data.title !== undefined && { filePath: newFilePath }),
         },
         include: {
           folder: true,

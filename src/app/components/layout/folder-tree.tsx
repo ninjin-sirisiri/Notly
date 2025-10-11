@@ -2,9 +2,8 @@
 
 import { DeleteIcon } from "@/components/icon/delete-icon";
 import { Button } from "@/components/ui/button";
-import { useFolders } from "@/hooks/useFolders";
 import { useNotes } from "@/hooks/useNotes";
-import { Folder, Notebook } from "lucide-react";
+import { Notebook } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";

@@ -2,15 +2,17 @@
 
 import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotes } from "@/hooks/useNotes";
-import SyntaxHighlighter from "react-syntax-highlighter";
-import remarkBreaks from "remark-breaks";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
+import MarkdownEditor from "./markdown-editor";
 
 export function Editor({ noteId }: { noteId: string }) {
   const { notes, updateNote } = useNotes();
@@ -47,16 +49,14 @@ export function Editor({ noteId }: { noteId: string }) {
           <TabsTrigger value="preview">プレビュー</TabsTrigger>
         </TabsList>
         <TabsContent value="editor">
-          <textarea
-            className="w-full min-h-[calc(100vh-222px)] max-h-[calc(100vh-222px)] text-2xl"
-            spellCheck={false}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
+          <MarkdownEditor
+            content={content}
+            setContent={setContent}
             onBlur={() => updateNote(noteId, title, content)}
           />
         </TabsContent>
         <TabsContent value="preview" className="prose">
-          <ScrollArea className="h-[calc(100vh-222px)] w-[calc(100vw-288px)]">
+          <ScrollArea className="h-[calc(100vh-222px)] w-[calc(100vw-288px)] p-0.5">
             <Markdown
               remarkPlugins={[remarkGfm, remarkBreaks]}
               components={{

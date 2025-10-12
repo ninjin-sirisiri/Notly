@@ -1,6 +1,6 @@
 // src/hooks/useFolders.ts
-import { useState, useEffect } from "react";
-import type { FolderTree } from "../types/api";
+import { useState, useEffect } from 'react';
+import type { FolderTree } from '../types/api';
 
 export function useFolders() {
   const [folders, setFolders] = useState<FolderTree[]>([]);

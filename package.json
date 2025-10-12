@@ -21,7 +21,8 @@
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
     "db:seed": "ts-node prisma/seed.ts",
-    "lint": "eslint && tsc"
+    "lint": "eslint && tsc",
+    "format": "prettier . --write"
   },
   "build": {
     "appId": "com.ubsa.notly",
@@ -101,6 +102,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "nodemon": "^3.1.10",
+    "prettier": "3.6.2",
     "prisma": "^6.17.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",

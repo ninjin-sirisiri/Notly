@@ -1,30 +1,15 @@
-"use client";
+'use client';
 
-import {
-  createContext,
-  useState,
-  useEffect,
-  useCallback,
-  useContext,
-  ReactNode,
-} from "react";
-import type { Note } from "../types/database";
-import { CreateNoteResponse, UpdateNoteResponse } from "@/types/api";
+import { createContext, useState, useEffect, useCallback, useContext, ReactNode } from 'react';
+import type { Note } from '../types/database';
+import { CreateNoteResponse, UpdateNoteResponse } from '@/types/api';
 
 interface NotesContextType {
   notes: Note[];
   loading: boolean;
   error: Error | null;
-  createNote: (
-    title: string,
-    content: string,
-    folderId?: string
-  ) => Promise<CreateNoteResponse>;
-  updateNote: (
-    id: string,
-    title?: string,
-    content?: string
-  ) => Promise<UpdateNoteResponse>;
+  createNote: (title: string, content: string, folderId?: string) => Promise<CreateNoteResponse>;
+  updateNote: (id: string, title?: string, content?: string) => Promise<UpdateNoteResponse>;
   deleteNote: (id: string) => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -53,11 +38,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     loadNotes();
   }, [loadNotes]);
 
-  const createNote = async (
-    title: string,
-    content: string,
-    folderId?: string
-  ) => {
+  const createNote = async (title: string, content: string, folderId?: string) => {
     const result = await window.api.note.create({
       title,
       content,
@@ -92,15 +73,13 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     refresh: loadNotes,
   };
 
-  return (
-    <NotesContext.Provider value={value}>{children}</NotesContext.Provider>
-  );
+  return <NotesContext.Provider value={value}>{children}</NotesContext.Provider>;
 }
 
 export function useNotesContext() {
   const context = useContext(NotesContext);
   if (context === undefined) {
-    throw new Error("useNotesContext must be used within a NotesProvider");
+    throw new Error('useNotesContext must be used within a NotesProvider');
   }
   return context;
 }

@@ -1,18 +1,18 @@
 // src/electron/handlers/folder-handlers.ts
-import { ipcMain } from "electron";
-import { getPrismaClient } from "../database";
+import { ipcMain } from 'electron';
+import { getPrismaClient } from '../database';
 import type {
   CreateFolderRequest,
   CreateFolderResponse,
   ListFoldersResponse,
   FolderTree,
-} from "../../types/api";
+} from '../../types/api';
 
 export function registerFolderHandlers() {
   const prisma = getPrismaClient();
 
   ipcMain.handle(
-    "FOLDER_CREATE",
+    'FOLDER_CREATE',
     async (_, data: CreateFolderRequest): Promise<CreateFolderResponse> => {
       const folder = await prisma.folder.create({
         data: {
@@ -24,7 +24,7 @@ export function registerFolderHandlers() {
     }
   );
 
-  ipcMain.handle("FOLDER_LIST", async (): Promise<ListFoldersResponse> => {
+  ipcMain.handle('FOLDER_LIST', async (): Promise<ListFoldersResponse> => {
     const allFolders = await prisma.folder.findMany({
       include: {
         children: true,
@@ -44,7 +44,7 @@ export function registerFolderHandlers() {
     return { folders };
   });
 
-  ipcMain.handle("FOLDER_DELETE", async (_, id: string) => {
+  ipcMain.handle('FOLDER_DELETE', async (_, id: string) => {
     await prisma.folder.delete({ where: { id } });
     return { success: true };
   });

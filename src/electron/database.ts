@@ -1,44 +1,44 @@
 // src/electron/database.ts
-import { app } from "electron";
-import path from "path";
-import fs from "fs";
-import { PrismaClient } from "@prisma/client";
-import os from "os";
+import { app } from 'electron';
+import path from 'path';
+import fs from 'fs';
+import { PrismaClient } from '@prisma/client';
+import os from 'os';
 
 // Electron環境かどうかを判定
-const isElectron = typeof app !== "undefined" && app.getPath;
+const isElectron = typeof app !== 'undefined' && app.getPath;
 
 // ユーザーデータディレクトリのパス
 export const getUserDataPath = () => {
   if (isElectron) {
-    return path.join(app.getPath("home"), "Notly");
+    return path.join(app.getPath('home'), 'Notly');
   } else {
     // テスト環境用（ホームディレクトリ/Notly-dev）
-    return path.join(os.homedir(), "Notly-dev");
+    return path.join(os.homedir(), 'Notly-dev');
   }
 };
 
 // データベースファイルのパス
 export const getDatabasePath = () => {
   const userDataPath = getUserDataPath();
-  console.log(path.join(userDataPath, ".metadata", "app.db"));
-  return path.join(userDataPath, ".metadata", "app.db");
+  console.log(path.join(userDataPath, '.metadata', 'app.db'));
+  return path.join(userDataPath, '.metadata', 'app.db');
 };
 
 // ノートディレクトリのパス
 export const getNotesPath = () => {
-  return path.join(getUserDataPath(), "notes");
+  return path.join(getUserDataPath(), 'notes');
 };
 
 // テンプレートディレクトリのパス
 export const getTemplatesPath = () => {
-  return path.join(getUserDataPath(), "templates");
+  return path.join(getUserDataPath(), 'templates');
 };
 
 // 必要なディレクトリを作成
 export const ensureDirectories = () => {
   const userDataPath = getUserDataPath();
-  const metadataPath = path.join(userDataPath, ".metadata");
+  const metadataPath = path.join(userDataPath, '.metadata');
   const notesPath = getNotesPath();
   const templatesPath = getTemplatesPath();
 

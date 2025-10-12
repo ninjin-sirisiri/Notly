@@ -19,19 +19,19 @@ These two processes communicate via an IPC (Inter-Process Communication) bridge 
 
 ### Frontend
 
--   **Next.js 15.5**: The primary framework for building the React-based user interface. It handles routing, rendering, and the overall frontend structure.
--   **TypeScript**: Ensures type safety and improves code quality and maintainability.
--   **Tailwind CSS**: A utility-first CSS framework for rapid UI development.
--   **shadcn/ui**: A collection of reusable UI components built on top of Tailwind CSS.
+- **Next.js 15.5**: The primary framework for building the React-based user interface. It handles routing, rendering, and the overall frontend structure.
+- **TypeScript**: Ensures type safety and improves code quality and maintainability.
+- **Tailwind CSS**: A utility-first CSS framework for rapid UI development.
+- **shadcn/ui**: A collection of reusable UI components built on top of Tailwind CSS.
 
 ### Desktop Framework
 
--   **Electron 38**: The framework used to create a cross-platform desktop application from the web-based frontend. It provides access to native functionalities.
+- **Electron 38**: The framework used to create a cross-platform desktop application from the web-based frontend. It provides access to native functionalities.
 
 ### Database
 
--   **Prisma**: A modern ORM (Object-Relational Mapper) that simplifies database access. It is used to interact with the local SQLite database.
--   **SQLite**: A self-contained, serverless SQL database engine used for local data storage. The database file is stored on the user's local file system.
+- **Prisma**: A modern ORM (Object-Relational Mapper) that simplifies database access. It is used to interact with the local SQLite database.
+- **SQLite**: A self-contained, serverless SQL database engine used for local data storage. The database file is stored on the user's local file system.
 
 ## Project Structure
 

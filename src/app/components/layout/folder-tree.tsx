@@ -1,27 +1,27 @@
-"use client";
+'use client';
 
-import { DeleteIcon } from "@/components/icon/delete-icon";
-import { Button } from "@/components/ui/button";
-import { useNotes } from "@/hooks/useNotes";
-import { Notebook } from "lucide-react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { DeleteIcon } from '@/components/icon/delete-icon';
+import { Button } from '@/components/ui/button';
+import { useNotes } from '@/hooks/useNotes';
+import { Notebook } from 'lucide-react';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export function FolderTree() {
   const { notes, createNote, deleteNote } = useNotes();
   const [isCreatingNote, setIsCreatingNote] = useState(false);
-  const [newNoteTitle, setNewNoteTitle] = useState("");
+  const [newNoteTitle, setNewNoteTitle] = useState('');
 
   const { noteId } = useParams<{ noteId: string }>();
   const router = useRouter();
 
   const handleCreateNote = async () => {
-    if (newNoteTitle.trim() === "") return;
-    const { note } = await createNote(newNoteTitle, "");
+    if (newNoteTitle.trim() === '') return;
+    const { note } = await createNote(newNoteTitle, '');
     router.push(`/note/${note.id}`);
     setIsCreatingNote(false);
-    setNewNoteTitle("");
+    setNewNoteTitle('');
   };
 
   return (
@@ -39,17 +39,17 @@ export function FolderTree() {
               value={newNoteTitle}
               onChange={(e) => setNewNoteTitle(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === 'Enter') {
                   handleCreateNote();
                 }
-                if (e.key === "Escape") {
+                if (e.key === 'Escape') {
                   setIsCreatingNote(false);
-                  setNewNoteTitle("");
+                  setNewNoteTitle('');
                 }
               }}
               onBlur={() => {
                 setIsCreatingNote(false);
-                setNewNoteTitle("");
+                setNewNoteTitle('');
               }}
               autoFocus
               className="w-full"
@@ -65,7 +65,7 @@ export function FolderTree() {
               variant="ghost"
               onClick={() => {
                 deleteNote(note.id);
-                if (noteId === note.id) router.push("/");
+                if (noteId === note.id) router.push('/');
               }}
             >
               <DeleteIcon />

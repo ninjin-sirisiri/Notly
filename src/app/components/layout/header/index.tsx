@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Logo } from "./logo";
-import { SettingButton } from "./setting-button";
-import { Streak } from "./streak";
+import { Logo } from './logo';
+import { SettingButton } from './setting-button';
+import { Streak } from './streak';
 
 export function Header() {
   return (

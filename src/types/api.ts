@@ -1,5 +1,5 @@
 // src/types/api.ts
-import type { Note, Folder, Tag } from "./database";
+import type { Note, Folder, Tag } from './database';
 
 // ノート作成
 export interface CreateNoteRequest {
@@ -129,11 +129,11 @@ export interface StatsResponse {
 export interface SettingsResponse {
   notificationEnabled: boolean;
   notificationTimes: string[];
-  theme: "light" | "dark" | "system";
+  theme: 'light' | 'dark' | 'system';
 }
 
 export interface UpdateSettingsRequest {
   notificationEnabled?: boolean;
   notificationTimes?: string[];
-  theme?: "light" | "dark" | "system";
+  theme?: 'light' | 'dark' | 'system';
 }

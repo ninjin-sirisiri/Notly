@@ -1,30 +1,30 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import Markdown from "react-markdown";
-import SyntaxHighlighter from "react-syntax-highlighter";
-import remarkBreaks from "remark-breaks";
-import remarkGfm from "remark-gfm";
+import { useEffect, useState } from 'react';
+import Markdown from 'react-markdown';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import remarkBreaks from 'remark-breaks';
+import remarkGfm from 'remark-gfm';
 
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNotes } from "@/hooks/useNotes";
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNotes } from '@/hooks/useNotes';
 
-import MarkdownEditor from "./markdown-editor";
+import MarkdownEditor from './markdown-editor';
 
 export function Editor({ noteId }: { noteId: string }) {
   const { notes, updateNote } = useNotes();
   const note = notes.find((note) => note.id === noteId);
 
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
 
   useEffect(() => {
     if (note) {
-      setTitle(note.title ?? "");
-      setContent(note.content ?? "");
+      setTitle(note.title ?? '');
+      setContent(note.content ?? '');
     }
   }, [note]);
 
@@ -62,11 +62,9 @@ export function Editor({ noteId }: { noteId: string }) {
               components={{
                 code(props) {
                   const { children, className } = props;
-                  const match = /language-(\w+)/.exec(className || "");
+                  const match = /language-(\w+)/.exec(className || '');
                   return match ? (
-                    <SyntaxHighlighter language={match[1]}>
-                      {children as string}
-                    </SyntaxHighlighter>
+                    <SyntaxHighlighter language={match[1]}>{children as string}</SyntaxHighlighter>
                   ) : (
                     <code className={className}>{children}</code>
                   );

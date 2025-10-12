@@ -1,12 +1,12 @@
 // src/electron/handlers/stats-handlers.ts
-import { ipcMain } from "electron";
-import { getPrismaClient } from "../database";
-import type { StatsResponse } from "../../types/api";
+import { ipcMain } from 'electron';
+import { getPrismaClient } from '../database';
+import type { StatsResponse } from '../../types/api';
 
 export function registerStatsHandlers() {
   const prisma = getPrismaClient();
 
-  ipcMain.handle("STATS_GET", async (): Promise<StatsResponse> => {
+  ipcMain.handle('STATS_GET', async (): Promise<StatsResponse> => {
     const totalNotes = await prisma.note.count();
 
     const thirtyDaysAgo = new Date();
@@ -18,7 +18,7 @@ export function registerStatsHandlers() {
           gte: thirtyDaysAgo,
         },
       },
-      orderBy: { date: "asc" },
+      orderBy: { date: 'asc' },
     });
 
     const today = new Date();
@@ -29,7 +29,7 @@ export function registerStatsHandlers() {
     let tempStreak = 0;
 
     const allStats = await prisma.stat.findMany({
-      orderBy: { date: "desc" },
+      orderBy: { date: 'desc' },
     });
 
     for (let i = 0; i < allStats.length; i++) {
@@ -38,10 +38,7 @@ export function registerStatsHandlers() {
       expectedDate.setDate(today.getDate() - i);
       expectedDate.setHours(0, 0, 0, 0);
 
-      if (
-        stat.date.getTime() === expectedDate.getTime() &&
-        stat.noteCount > 0
-      ) {
+      if (stat.date.getTime() === expectedDate.getTime() && stat.noteCount > 0) {
         if (i === 0 || currentStreak > 0) {
           currentStreak++;
         }

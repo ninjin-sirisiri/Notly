@@ -1,4 +1,4 @@
-import { useRef, Dispatch, SetStateAction } from "react";
+import { useRef, Dispatch, SetStateAction } from 'react';
 import {
   Bold,
   Italic,
@@ -10,7 +10,7 @@ import {
   Heading2,
   Strikethrough,
   Quote,
-} from "lucide-react";
+} from 'lucide-react';
 
 export default function MarkdownEditor({
   content,
@@ -24,7 +24,7 @@ export default function MarkdownEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // テキストの選択範囲を取得して、マークダウン記法を適用
-  const insertMarkdown = (before: string, after: string = "") => {
+  const insertMarkdown = (before: string, after: string = '') => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
@@ -42,10 +42,10 @@ export default function MarkdownEditor({
       // テキストが選択されている場合
       newText = beforeText + before + selectedText + after + afterText;
       newCursorPos = start + before.length + selectedText.length + after.length;
-      placeholderText = "";
+      placeholderText = '';
     } else {
       // テキストが選択されていない場合
-      placeholderText = before === "\n```\n" ? "code" : "text";
+      placeholderText = before === '\n```\n' ? 'code' : 'text';
       newText = beforeText + before + placeholderText + after + afterText;
       newCursorPos = start + before.length;
     }
@@ -64,13 +64,13 @@ export default function MarkdownEditor({
 
   // 見出しの挿入
   const insertHeading = (level: number) => {
-    const prefix = "#".repeat(level) + " ";
+    const prefix = '#'.repeat(level) + ' ';
     insertMarkdown(prefix);
   };
 
   // リストの挿入
   const insertList = (ordered: boolean = false) => {
-    const prefix = ordered ? "1. " : "- ";
+    const prefix = ordered ? '1. ' : '- ';
     insertMarkdown(prefix);
   };
 
@@ -84,25 +84,25 @@ export default function MarkdownEditor({
     const selectedText = content.substring(start, end);
 
     if (selectedText) {
-      insertMarkdown("[", "](url)");
+      insertMarkdown('[', '](url)');
     } else {
-      insertMarkdown("[link text](url)");
+      insertMarkdown('[link text](url)');
     }
   };
 
   // 画像の挿入
   const insertImage = () => {
-    insertMarkdown("![alt text](image-url)");
+    insertMarkdown('![alt text](image-url)');
   };
 
   // コードブロックの挿入
   const insertCodeBlock = () => {
-    insertMarkdown("\n```\n", "\n```\n");
+    insertMarkdown('\n```\n', '\n```\n');
   };
 
   // 引用の挿入
   const insertQuote = () => {
-    insertMarkdown("> ");
+    insertMarkdown('> ');
   };
 
   return (
@@ -125,21 +125,21 @@ export default function MarkdownEditor({
         </button>
         <div className="w-px bg-gray-300 mx-1"></div>
         <button
-          onClick={() => insertMarkdown("**", "**")}
+          onClick={() => insertMarkdown('**', '**')}
           className="p-2 hover:bg-gray-200 rounded transition-colors"
           title="太字"
         >
           <Bold size={20} />
         </button>
         <button
-          onClick={() => insertMarkdown("*", "*")}
+          onClick={() => insertMarkdown('*', '*')}
           className="p-2 hover:bg-gray-200 rounded transition-colors"
           title="斜体"
         >
           <Italic size={20} />
         </button>
         <button
-          onClick={() => insertMarkdown("~~", "~~")}
+          onClick={() => insertMarkdown('~~', '~~')}
           className="p-2 hover:bg-gray-200 rounded transition-colors"
           title="取り消し線"
         >
@@ -187,10 +187,10 @@ export default function MarkdownEditor({
           className="p-2 hover:bg-gray-200 rounded transition-colors font-mono text-sm"
           title="コードブロック"
         >
-          {"</>"}
+          {'</>'}
         </button>
         <button
-          onClick={() => insertMarkdown("`", "`")}
+          onClick={() => insertMarkdown('`', '`')}
           className="p-2 hover:bg-gray-200 rounded transition-colors font-mono text-xs"
           title="インラインコード"
         >

@@ -25,10 +25,10 @@ Thank you for your interest in contributing to Notly! We welcome all contributio
 
 To ensure code quality and consistency, please adhere to the following guidelines:
 
--   **TypeScript**: Always use TypeScript and provide type definitions for new code. Avoid using `any` where possible.
--   **Code Style**: Follow the existing code style. Run the linter and formatter to ensure your code is consistent.
--   **Commit Messages**: Write clear, concise, and descriptive commit messages. We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
--   **Documentation**: Add appropriate documentation for any new features or significant changes. This includes updating the `README.md` and any relevant files in the `/docs` folder.
+- **TypeScript**: Always use TypeScript and provide type definitions for new code. Avoid using `any` where possible.
+- **Code Style**: Follow the existing code style. Run the linter and formatter to ensure your code is consistent.
+- **Commit Messages**: Write clear, concise, and descriptive commit messages. We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+- **Documentation**: Add appropriate documentation for any new features or significant changes. This includes updating the `README.md` and any relevant files in the `/docs` folder.
 
 ## Available Scripts
 
@@ -81,5 +81,5 @@ pnpm run db:studio
 
 If you have questions or need help, feel free to:
 
--   Open an issue on the [Issue Tracker](https://github.com/ninjin-sirisiri/Notly/issues).
--   Start a discussion on the [Discussions](https://github.com/ninjin-sirisiri/Notly/discussions) page.
+- Open an issue on the [Issue Tracker](https://github.com/ninjin-sirisiri/Notly/issues).
+- Start a discussion on the [Discussions](https://github.com/ninjin-sirisiri/Notly/discussions) page.

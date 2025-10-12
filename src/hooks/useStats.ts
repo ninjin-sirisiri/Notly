@@ -1,6 +1,6 @@
 // src/hooks/useStats.ts
-import { useState, useEffect } from "react";
-import type { StatsResponse } from "../types/api";
+import { useState, useEffect } from 'react';
+import type { StatsResponse } from '../types/api';
 
 export function useStats() {
   const [stats, setStats] = useState<StatsResponse | null>(null);

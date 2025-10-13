@@ -1,12 +1,13 @@
 'use client';
 
-import { DeleteIcon } from '@/components/icon/delete-icon';
-import { Button } from '@/components/ui/button';
-import { useNotes } from '@/hooks/useNotes';
 import { Notebook } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+
+import { DeleteIcon } from '@/components/icon/delete-icon';
+import { Button } from '@/components/ui/button';
+import { useNotes } from '@/hooks/useNotes';
 
 export function FolderTree() {
   const { notes, createNote, deleteNote } = useNotes();

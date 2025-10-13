@@ -10,6 +10,7 @@ async function testDatabase() {
     const folder = await prisma.folder.create({
       data: {
         name: 'テストフォルダ',
+        folderPath: 'テストフォルダ',
       },
     });
     console.log('✓ フォルダ作成成功:', folder);

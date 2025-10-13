@@ -87,6 +87,16 @@ export interface FolderTree extends Folder {
   children: FolderTree[];
 }
 
+// フォルダ更新
+export interface UpdateFolderRequest {
+  id: string;
+  name: string;
+}
+
+export interface UpdateFolderResponse {
+  folder: Folder;
+}
+
 // タグ作成
 export interface CreateTagRequest {
   name: string;

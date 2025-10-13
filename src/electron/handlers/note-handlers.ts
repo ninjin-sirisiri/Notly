@@ -23,7 +23,6 @@ export function registerNoteHandlers() {
   // ノート作成
   ipcMain.handle('NOTE_CREATE', async (_, data: CreateNoteRequest): Promise<CreateNoteResponse> => {
     const notesPath = getNotesPath();
-    const noteId = crypto.randomUUID();
     const fileName = `${data.title}.md`;
 
     // フォルダ内のパスを決定
@@ -36,14 +35,15 @@ export function registerNoteHandlers() {
       });
       if (!folder) throw new Error('Folder not found');
 
-      const folderPath = path.join(notesPath, folder.name);
-      await fs.mkdir(folderPath, { recursive: true });
-      filePath = path.join(folderPath, fileName);
-      relativePath = path.join(folder.name, fileName);
+      const folderPath = path.join(notesPath, folder.folderPath);
+      filePath = path.join(folderPath, folder.name, fileName);
+      relativePath = path.join(folder.folderPath, folder.name);
+      console.log(JSON.stringify(folder, null, 2));
     } else {
       filePath = path.join(notesPath, fileName);
-      relativePath = fileName;
+      relativePath = '';
     }
+    console.log(filePath, relativePath);
 
     // Markdownファイルを作成
     await fs.writeFile(filePath, data.content, 'utf-8');
@@ -51,7 +51,6 @@ export function registerNoteHandlers() {
     // データベースに記録
     const note = await prisma.note.create({
       data: {
-        id: noteId,
         title: data.title,
         content: data.content,
         filePath: relativePath,
@@ -123,13 +122,14 @@ export function registerNoteHandlers() {
     if (!note) throw new Error('Note not found');
 
     // 新しいファイルパスを決定
-    const newFilePath = data.title !== undefined ? `${data.title}.md` : note.filePath;
+    const newFileTitle = data.title !== undefined ? `${data.title}.md` : `${note.title}.md`;
+    const newFileFullPath = path.join(note.filePath, newFileTitle);
 
-    const oldFullPath = path.join(notesPath, note.filePath);
-    const newFullPath = path.join(notesPath, newFilePath);
+    const oldFullPath = path.join(notesPath, note.filePath, `${note.title}.md`);
+    const newFullPath = path.join(notesPath, newFileFullPath);
 
     // タイトルが変更された場合、ファイル名を変更
-    if (data.title !== undefined && note.filePath !== newFilePath) {
+    if (data.title !== undefined && note.filePath !== newFileTitle) {
       await fs.rename(oldFullPath, newFullPath);
     }
 
@@ -145,7 +145,6 @@ export function registerNoteHandlers() {
         ...(data.title !== undefined && { title: data.title }),
         ...(data.content !== undefined && { content: data.content }),
         ...(data.folderId !== undefined && { folderId: data.folderId }),
-        ...(data.title !== undefined && { filePath: newFilePath }),
       },
       include: {
         folder: true,
@@ -183,7 +182,7 @@ export function registerNoteHandlers() {
     if (!note) throw new Error('Note not found');
 
     // ファイルを削除
-    const fullPath = path.join(notesPath, note.filePath);
+    const fullPath = path.join(notesPath, note.filePath, `${note.title}.md`);
     try {
       await fs.unlink(fullPath);
     } catch (error) {

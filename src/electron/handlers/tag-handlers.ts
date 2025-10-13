@@ -1,4 +1,3 @@
-// src/electron/handlers/tag-handlers.ts
 import { ipcMain } from 'electron';
 import { getPrismaClient } from '../database';
 import type { CreateTagRequest, CreateTagResponse } from '../../types/api';

@@ -1,4 +1,3 @@
-// src/electron/preload.ts
 import { contextBridge, ipcRenderer } from 'electron';
 
 import type {

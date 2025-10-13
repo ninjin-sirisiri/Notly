@@ -1,4 +1,3 @@
-// src/lib/error-handler.ts
 export class NotlyError extends Error {
   constructor(
     message: string,

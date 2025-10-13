@@ -1,4 +1,3 @@
-// src/electron/handlers/index.ts
 import { registerNoteHandlers } from './note-handlers';
 import { registerFolderHandlers } from './folder-handlers';
 import { registerTagHandlers } from './tag-handlers';

@@ -1,4 +1,3 @@
-// src/electron/test-db.ts
 import { getPrismaClient } from './database';
 
 async function testDatabase() {

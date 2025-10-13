@@ -1,4 +1,3 @@
-// src/hooks/useStats.ts
 import { useState, useEffect } from 'react';
 import type { StatsResponse } from '../types/api';
 

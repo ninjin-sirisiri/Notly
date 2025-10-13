@@ -1,5 +1,3 @@
-// src/types/ipc.ts
-
 export const IPC_CHANNELS = {
   // ノート操作
   NOTE_CREATE: 'note:create',

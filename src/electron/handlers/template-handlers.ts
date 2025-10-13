@@ -1,4 +1,3 @@
-// src/electron/handlers/template-handlers.ts
 import { ipcMain } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';

@@ -1,4 +1,3 @@
-// src/electron/handlers/stats-handlers.ts
 import { ipcMain } from 'electron';
 import { getPrismaClient } from '../database';
 import type { StatsResponse } from '../../types/api';

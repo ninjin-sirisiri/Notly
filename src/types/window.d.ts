@@ -1,4 +1,3 @@
-// src/types/window.d.ts
 import type { ElectronAPI } from '../electron/preload';
 
 declare global {

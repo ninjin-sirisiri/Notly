@@ -1,4 +1,3 @@
-// src/electron/handlers/settings-handlers.ts
 import { ipcMain } from 'electron';
 import { getPrismaClient } from '../database';
 import type { SettingsResponse, UpdateSettingsRequest } from '../../types/api';

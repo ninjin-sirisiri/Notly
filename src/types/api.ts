@@ -1,4 +1,3 @@
-// src/types/api.ts
 import type { Note, Folder, Tag } from './database';
 
 // ノート作成

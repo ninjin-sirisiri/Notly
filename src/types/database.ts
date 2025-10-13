@@ -1,4 +1,3 @@
-// src/types/database.ts
 import { Prisma } from '@prisma/client';
 
 // 各モデルの型定義

@@ -3,9 +3,12 @@ import Link from 'next/link';
 import type { NoteItemProps } from './types';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useParams, useRouter } from 'next/navigation';
 
 export function NoteItem({ note, isSelected, level, onDeleteNote }: NoteItemProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const { noteId } = useParams<{ noteId?: string }>();
+  const router = useRouter();
 
   const paddingLeft = `${level * 16}px`;
 
@@ -30,6 +33,9 @@ export function NoteItem({ note, isSelected, level, onDeleteNote }: NoteItemProp
           onClick={(e) => {
             e.stopPropagation();
             onDeleteNote(note.id);
+            if (note.id === noteId) {
+              router.push('/');
+            }
           }}
           title="Delete folder"
         >

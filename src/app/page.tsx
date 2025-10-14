@@ -1,5 +1,7 @@
 'use client';
 
+import { Editor } from '@/app/note/[noteId]/components/editor';
+
 export default function Home() {
-  return <div>Hello</div>;
+  return <Editor noteId={undefined} />;
 }

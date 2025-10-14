@@ -5,6 +5,7 @@ import Markdown from 'react-markdown';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
+import { useRouter } from 'next/navigation'; // useRouterをインポート
 
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -13,26 +14,49 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNotes } from '@/hooks/useNotes';
 
 import MarkdownEditor from './markdown-editor';
+// FolderSelectorDialogをインポート
+import { FolderSelectorDialog } from './folder-selector-dialog';
 
-export function Editor({ noteId }: { noteId: string }) {
-  const { notes, updateNote } = useNotes();
+export function Editor({ noteId }: { noteId: string | undefined }) {
+  const { notes, updateNote, createNote, selectedFolderId } = useNotes();
+  const router = useRouter(); // useRouterを初期化
   const note = notes.find((note) => note.id === noteId);
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  // フォルダ選択ダイアログの状態
+  const [isFolderSelectorOpen, setIsFolderSelectorOpen] = useState(false);
 
   useEffect(() => {
-    if (note) {
+    if (noteId && note) {
       setTitle(note.title ?? '');
       setContent(note.content ?? '');
+    } else {
+      setTitle('');
+      setContent('');
     }
-  }, [note]);
+  }, [noteId, note]);
 
+  const handleSave = async () => {
+    // 新規ノートの場合のみフォルダ選択ダイアログを開く
+    if (!noteId) {
+      setIsFolderSelectorOpen(true);
+    } else {
+      // 既存ノートの場合は明示的な保存ボタンクリック時にもupdateNoteを呼び出す
+      await updateNote(noteId, title, content);
+    }
+  };
+
+  const handleFolderSelectAndCreateNote = async (folderId: string | undefined) => {
+    const newNote = await createNote(title, content, folderId);
+    router.push(`/note/${newNote.note.id}`);
+    setIsFolderSelectorOpen(false); // ダイアログを閉じる
+  };
   return (
     <div className="w-[calc(100vw-288px)]">
       <div className="flex items-center justify-between h-12 text-center text-gray-400 p-3">
         <div>{note?.createdAt.toLocaleDateString()}</div>
-        <Button onClick={() => updateNote(noteId, title, content)}>保存</Button>
+        <Button onClick={handleSave}>保存</Button>
       </div>
       <Separator />
       <input
@@ -40,7 +64,7 @@ export function Editor({ noteId }: { noteId: string }) {
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        onBlur={() => updateNote(noteId, title, content)}
+        onBlur={() => noteId && updateNote(noteId, title, content)} // 既存ノートのみ自動保存
       />
       <Separator />
       <Tabs defaultValue="editor">
@@ -52,7 +76,7 @@ export function Editor({ noteId }: { noteId: string }) {
           <MarkdownEditor
             content={content}
             setContent={setContent}
-            onBlur={() => updateNote(noteId, title, content)}
+            onBlur={() => noteId && updateNote(noteId, title, content)} // 既存ノートのみ自動保存
           />
         </TabsContent>
         <TabsContent value="preview" className="prose">
@@ -76,6 +100,14 @@ export function Editor({ noteId }: { noteId: string }) {
           </ScrollArea>
         </TabsContent>
       </Tabs>
+
+      {/* フォルダ選択ダイアログ */}
+      <FolderSelectorDialog
+        isOpen={isFolderSelectorOpen}
+        onClose={() => setIsFolderSelectorOpen(false)}
+        onSelectFolder={handleFolderSelectAndCreateNote}
+        currentSelectedFolderId={selectedFolderId}
+      />
     </div>
   );
 }

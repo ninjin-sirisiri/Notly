@@ -121,11 +121,11 @@ export function registerFolderHandlers() {
     // 2. DB更新
     try {
       const allFolders = await prisma.folder.findMany();
-      const descendants: any[] = [];
+      const descendants: FolderTree[] = [];
       const findDescendantsRecursively = (parentId: string) => {
         const children = allFolders.filter((f) => f.parentId === parentId);
         for (const child of children) {
-          descendants.push(child);
+          descendants.push({ ...child, children: [] });
           findDescendantsRecursively(child.id);
         }
       };

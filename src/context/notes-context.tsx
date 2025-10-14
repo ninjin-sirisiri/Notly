@@ -63,7 +63,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
 
   const deleteNote = async (id: string) => {
     await window.api.note.delete({ id });
-    await loadNotes();
+    loadNotes();
   };
 
   const value = {

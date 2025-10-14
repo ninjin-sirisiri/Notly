@@ -103,7 +103,9 @@ export function FolderTree() {
   // フォルダ削除
   const handleDeleteFolder = async (folderIdToDelete: string) => {
     setDialogTitle('フォルダの削除');
-    setDialogDescription('本当にこのフォルダと、その中のすべてのノートを削除しますか？この操作は元に戻せません。');
+    setDialogDescription(
+      '本当にこのフォルダと、その中のすべてのノートを削除しますか？この操作は元に戻せません。'
+    );
     setOnConfirmAction(() => async () => {
       await deleteFolder(folderIdToDelete);
       setIsConfirmDialogOpen(false);

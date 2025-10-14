@@ -23,7 +23,7 @@ export function NoteItem({ note, isSelected, level, onDeleteNote }: NoteItemProp
     >
       <Link href={`/note/${note.id}`} className="flex items-center gap-2 flex-1 text-sm">
         <Notebook className="h-3 w-3 text-gray-500" />
-        {note.title || 'Untitled'}
+        {note.title || '無題'}
       </Link>
       {isHovered && (
         <Button
@@ -37,7 +37,7 @@ export function NoteItem({ note, isSelected, level, onDeleteNote }: NoteItemProp
               router.push('/');
             }
           }}
-          title="Delete folder"
+          title="ノートを削除"
         >
           <Trash2 className="h-3 w-3 text-red-500" />
         </Button>

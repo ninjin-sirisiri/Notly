@@ -11,7 +11,7 @@ import { FolderItem } from './folder-item';
 import { NoteItem } from './note-item';
 
 export function FolderTree() {
-  const { folders, createFolder, deleteFolder } = useFolders();
+  const { folders, createFolder, deleteFolder, updateFolderName } = useFolders();
   const { notes: allNotes, createNote, deleteNote } = useNotesContext();
 
   // フォルダ作成の状態
@@ -146,6 +146,7 @@ export function FolderTree() {
             onDeleteNote={handleDeleteNote}
             onDeleteFolder={handleDeleteFolder}
             onCreateSubfolder={handleCreateSubfolder}
+            updateFolderName={updateFolderName}
             selectedNoteId={noteId}
             allNotes={allNotes}
           />

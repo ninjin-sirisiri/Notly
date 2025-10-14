@@ -34,12 +34,18 @@ export function useFolders() {
     await loadFolders();
   };
 
+  const updateFolderName = async (id: string, name: string) => {
+    await window.api.folder.updateFolderName({ id, name });
+    await loadFolders();
+  };
+
   return {
     folders,
     loading,
     error,
     createFolder,
     deleteFolder,
+    updateFolderName,
     refresh: loadFolders,
   };
 }

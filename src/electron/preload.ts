@@ -16,6 +16,7 @@ import type {
   CreateFolderRequest,
   CreateFolderResponse,
   ListFoldersResponse,
+  UpdateFolderRequest,
   CreateTagRequest,
   CreateTagResponse,
   CreateTemplateRequest,
@@ -57,6 +58,9 @@ const api = {
     list: (): Promise<ListFoldersResponse> => ipcRenderer.invoke('FOLDER_LIST'),
 
     delete: (id: string): Promise<{ success: boolean }> => ipcRenderer.invoke('FOLDER_DELETE', id),
+
+    updateFolderName: (data: UpdateFolderRequest): Promise<void> =>
+      ipcRenderer.invoke('FOLDER_UPDATE_FOLDER_NAME', data),
   },
 
   // タグ操作

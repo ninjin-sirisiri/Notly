@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Folder, Trash2 } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  Folder,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NoteItem } from './note-item';
 import type { FolderItemProps } from './types';
@@ -13,10 +19,13 @@ export function FolderItem({
   onDeleteNote,
   onDeleteFolder,
   onCreateSubfolder,
+  updateFolderName,
   selectedNoteId,
   allNotes,
 }: FolderItemProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newFolderName, setNewFolderName] = useState(folder.name);
   const { selectedFolderId, setSelectedFolderId } = useNotesContext();
 
   const folderNotes = allNotes.filter((note) => note.folderId === folder.id);
@@ -24,6 +33,13 @@ export function FolderItem({
 
   const handleFolderClick = () => {
     setSelectedFolderId(folder.id);
+  };
+
+  const handleUpdateFolderName = async () => {
+    if (newFolderName.trim() && newFolderName !== folder.name) {
+      await updateFolderName(folder.id, newFolderName.trim());
+    }
+    setIsEditing(false);
   };
 
   return (
@@ -40,7 +56,9 @@ export function FolderItem({
         <div
           className="flex items-center gap-1 flex-1 cursor-pointer"
           onClick={() => {
-            setIsExpanded(!isExpanded);
+            if (!isEditing) {
+              setIsExpanded(!isExpanded);
+            }
           }}
         >
           <div className="h-6 w-6 flex items-center justify-center">
@@ -51,11 +69,44 @@ export function FolderItem({
             )}
           </div>
           <Folder className="h-4 w-4 text-gray-600" />
-          <span className="text-sm">{folder.name}</span>
+          {isEditing ? (
+            <input
+              type="text"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              onBlur={handleUpdateFolderName}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleUpdateFolderName();
+                }
+                if (e.key === 'Escape') {
+                  setIsEditing(false);
+                  setNewFolderName(folder.name);
+                }
+              }}
+              className="text-sm bg-transparent border border-gray-400 rounded px-1"
+              autoFocus
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <span className="text-sm">{folder.name}</span>
+          )}
         </div>
 
         {/* アクションボタン */}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditing(true);
+            }}
+            title="Rename folder"
+          >
+            <Pencil className="h-3 w-3" />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -95,6 +146,7 @@ export function FolderItem({
               onDeleteNote={onDeleteNote}
               onDeleteFolder={onDeleteFolder}
               onCreateSubfolder={onCreateSubfolder}
+              updateFolderName={updateFolderName}
               selectedNoteId={selectedNoteId}
               allNotes={allNotes}
             />

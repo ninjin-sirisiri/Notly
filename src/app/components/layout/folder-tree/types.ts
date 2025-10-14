@@ -8,6 +8,7 @@ export interface FolderItemProps {
   onDeleteNote: (noteId: string) => void;
   onDeleteFolder: (folderId: string) => void;
   onCreateSubfolder: (parentId: string) => void;
+  updateFolderName: (id: string, name: string) => Promise<void>;
   selectedNoteId?: string;
   allNotes: Note[];
 }

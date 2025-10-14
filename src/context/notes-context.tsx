@@ -8,6 +8,8 @@ interface NotesContextType {
   notes: Note[];
   loading: boolean;
   error: Error | null;
+  selectedFolderId: string | null;
+  setSelectedFolderId: (id: string | null) => void;
   createNote: (title: string, content: string, folderId?: string) => Promise<CreateNoteResponse>;
   updateNote: (id: string, title?: string, content?: string) => Promise<UpdateNoteResponse>;
   deleteNote: (id: string) => Promise<void>;
@@ -20,6 +22,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
 
   const loadNotes = useCallback(async () => {
     try {
@@ -67,6 +70,8 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     notes,
     loading,
     error,
+    selectedFolderId,
+    setSelectedFolderId,
     createNote,
     updateNote,
     deleteNote,

@@ -34,6 +34,6 @@ export interface CreateNoteInputProps {
 }
 
 export interface FolderTreeHeaderProps {
-  onCreateNote: () => void;
-  onCreateFolder: () => void;
+  onCreateNote: (folderId?: string) => void;
+  onCreateFolder: (folderId?: string) => void;
 }

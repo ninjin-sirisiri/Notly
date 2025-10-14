@@ -89,8 +89,14 @@ export function FolderTree() {
     <div className="bg-gray-50 w-64 h-screen overflow-y-auto border-r border-gray-200 flex flex-col">
       {/* ヘッダー */}
       <FolderTreeHeader
-        onCreateNote={() => setIsCreatingNote(true)}
-        onCreateFolder={() => setIsCreatingFolder(true)}
+        onCreateNote={(folderId) => {
+          setFolderIdForNewNote(folderId);
+          setIsCreatingNote(true);
+        }}
+        onCreateFolder={(folderId) => {
+          setParentFolderIdForNew(folderId);
+          setIsCreatingFolder(true);
+        }}
       />
 
       {/* コンテンツ */}

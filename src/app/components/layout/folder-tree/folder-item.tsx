@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Folder, FolderPlus, Notebook, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Folder, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NoteItem } from './note-item';
 import type { FolderItemProps } from './types';
+import { useNotesContext } from '@/context/notes-context';
+import { cn } from '@/lib/utils';
 
 export function FolderItem({
   folder,
@@ -15,23 +17,31 @@ export function FolderItem({
   allNotes,
 }: FolderItemProps) {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [isHovered, setIsHovered] = useState(false);
+  const { selectedFolderId, setSelectedFolderId } = useNotesContext();
 
   const folderNotes = allNotes.filter((note) => note.folderId === folder.id);
   const paddingLeft = `${level * 16}px`;
+
+  const handleFolderClick = () => {
+    setSelectedFolderId(folder.id);
+  };
 
   return (
     <div>
       {/* フォルダヘッダー */}
       <div
-        className="flex items-center justify-between group hover:bg-gray-200 rounded px-2 py-1"
+        className={cn(
+          'flex items-center justify-between group hover:bg-gray-200 rounded px-2 py-1',
+          selectedFolderId === folder.id && 'bg-gray-200',
+        )}
         style={{ paddingLeft }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleFolderClick}
       >
         <div
           className="flex items-center gap-1 flex-1 cursor-pointer"
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => {
+            setIsExpanded(!isExpanded);
+          }}
         >
           <div className="h-6 w-6 flex items-center justify-center">
             {isExpanded ? (
@@ -45,46 +55,20 @@ export function FolderItem({
         </div>
 
         {/* アクションボタン */}
-        {isHovered && (
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                onCreateNote(folder.id);
-              }}
-              title="Create note in this folder"
-            >
-              <Notebook className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                onCreateSubfolder(folder.id);
-              }}
-              title="Create subfolder"
-            >
-              <FolderPlus className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDeleteFolder(folder.id);
-              }}
-              title="Delete folder"
-            >
-              <Trash2 className="h-3 w-3 text-red-500" />
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteFolder(folder.id);
+            }}
+            title="Delete folder"
+          >
+            <Trash2 className="h-3 w-3 text-red-500" />
+          </Button>
+        </div>
       </div>
 
       {/* 展開時の内容 */}

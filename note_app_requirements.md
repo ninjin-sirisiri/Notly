@@ -29,7 +29,7 @@
 ### 2.1 フロントエンド
 
 - **Framework**: Next.js (App Router)
-- **Desktop**: Electron (nextronでの統合)
+- **Desktop**: Electron
 - **UI Library**: TailwindCSS + shadcn/ui
 - **Markdown Editor**: @uiw/react-md-editor または novel
 

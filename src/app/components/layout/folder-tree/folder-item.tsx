@@ -1,11 +1,5 @@
 import { useState } from 'react';
-import {
-  ChevronDown,
-  ChevronRight,
-  Folder,
-  Pencil,
-  Trash2,
-} from 'lucide-react';
+import { ChevronDown, ChevronRight, Folder, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NoteItem } from './note-item';
 import type { FolderItemProps } from './types';
@@ -48,7 +42,7 @@ export function FolderItem({
       <div
         className={cn(
           'flex items-center justify-between group hover:bg-gray-200 rounded px-2 py-1',
-          selectedFolderId === folder.id && 'bg-gray-200',
+          selectedFolderId === folder.id && 'bg-gray-200'
         )}
         style={{ paddingLeft }}
         onClick={handleFolderClick}

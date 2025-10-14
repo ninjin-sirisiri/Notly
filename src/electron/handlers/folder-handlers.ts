@@ -82,8 +82,8 @@ export function registerFolderHandlers() {
 
     const folder = await prisma.folder.findUnique({ where: { id } });
 
-    const folderPath = path.join(notesPath, folder?.folderPath!);
-    const newFolderPath = path.join(notesPath, folder?.name!);
+    const folderPath = path.join(notesPath, folder?.folderPath || '');
+    const newFolderPath = path.join(notesPath, folder?.name || '');
 
     fs.rename(folderPath, newFolderPath);
 
@@ -102,7 +102,7 @@ export function registerFolderHandlers() {
     const notesPath = getNotesPath();
 
     const folder = await prisma.folder.findUnique({ where: { id } });
-    const folderPath = path.join(notesPath, folder?.folderPath!, folder?.name!);
+    const folderPath = path.join(notesPath, folder?.folderPath || '', folder?.name || '');
 
     fs.rmdir(folderPath || '', { recursive: true });
     await prisma.folder.delete({ where: { id } });

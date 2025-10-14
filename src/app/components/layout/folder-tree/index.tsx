@@ -9,6 +9,15 @@ import { CreateFolderInput } from './create-folder-input';
 import { CreateNoteInput } from './create-note-input';
 import { FolderItem } from './folder-item';
 import { NoteItem } from './note-item';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 export function FolderTree() {
   const { folders, createFolder, deleteFolder, updateFolderName } = useFolders();
@@ -23,6 +32,12 @@ export function FolderTree() {
   const [isCreatingNote, setIsCreatingNote] = useState(false);
   const [newNoteTitle, setNewNoteTitle] = useState('');
   const [folderIdForNewNote, setFolderIdForNewNote] = useState<string | undefined>();
+
+  // Confirmation Dialog states
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState('');
+  const [dialogDescription, setDialogDescription] = useState('');
+  const [onConfirmAction, setOnConfirmAction] = useState<(() => Promise<void>) | null>(null);
 
   const { noteId } = useParams<{ noteId: string }>();
   const router = useRouter();
@@ -54,10 +69,17 @@ export function FolderTree() {
   };
 
   //ノートを削除
-  const handleDeleteNote = async (noteId: string) => {
-    if (confirm('ノートを削除しますか?')) {
-      await deleteNote(noteId);
-    }
+  const handleDeleteNote = async (noteIdToDelete: string) => {
+    setDialogTitle('ノートの削除');
+    setDialogDescription('本当にこのノートを削除しますか？この操作は元に戻せません。');
+    setOnConfirmAction(() => async () => {
+      await deleteNote(noteIdToDelete);
+      setIsConfirmDialogOpen(false);
+      if (noteIdToDelete === noteId) {
+        router.push('/');
+      }
+    });
+    setIsConfirmDialogOpen(true);
   };
 
   const resetNoteCreation = () => {
@@ -79,10 +101,14 @@ export function FolderTree() {
   };
 
   // フォルダ削除
-  const handleDeleteFolder = async (folderId: string) => {
-    if (confirm('フォルダを削除しますか?')) {
-      await deleteFolder(folderId);
-    }
+  const handleDeleteFolder = async (folderIdToDelete: string) => {
+    setDialogTitle('フォルダの削除');
+    setDialogDescription('本当にこのフォルダと、その中のすべてのノートを削除しますか？この操作は元に戻せません。');
+    setOnConfirmAction(() => async () => {
+      await deleteFolder(folderIdToDelete);
+      setIsConfirmDialogOpen(false);
+    });
+    setIsConfirmDialogOpen(true);
   };
 
   return (
@@ -152,6 +178,29 @@ export function FolderTree() {
           />
         ))}
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{dialogTitle}</DialogTitle>
+            <DialogDescription>{dialogDescription}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsConfirmDialogOpen(false)}>
+              キャンセル
+            </Button>
+            <Button
+              onClick={() => {
+                onConfirmAction?.();
+                setIsConfirmDialogOpen(false);
+              }}
+            >
+              削除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

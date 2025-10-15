@@ -53,7 +53,7 @@ export function Editor({ noteId }: { noteId: string | undefined }) {
     setIsFolderSelectorOpen(false); // ダイアログを閉じる
   };
   return (
-    <div className="w-[calc(100vw-288px)]">
+    <div className="w-[calc(100vw-252px)]">
       <div className="flex items-center justify-between h-12 text-center text-gray-400 p-3">
         <div>{note?.createdAt.toLocaleDateString()}</div>
         <Button onClick={handleSave}>保存</Button>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Folder, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { NoteItem } from './note-item';
 import type { FolderItemProps } from './types';
 import { useNotesContext } from '@/context/notes-context';
@@ -89,30 +90,42 @@ export function FolderItem({
 
         {/* アクションボタン */}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsEditing(true);
-            }}
-            title="Rename folder"
-          >
-            <Pencil className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDeleteFolder(folder.id);
-            }}
-            title="Delete folder"
-          >
-            <Trash2 className="h-3 w-3 text-red-500" />
-          </Button>
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditing(true);
+                }}
+              >
+                <Pencil className="h-3 w-3" />
+              </Button>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-auto px-2 py-1">
+              <span className="text-xs">フォルダ名を変更</span>
+            </HoverCardContent>
+          </HoverCard>
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteFolder(folder.id);
+                }}
+              >
+                <Trash2 className="h-3 w-3 text-red-500" />
+              </Button>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-auto px-2 py-1 bg-red-100">
+              <span className="text-xs text-red-700">フォルダを削除</span>
+            </HoverCardContent>
+          </HoverCard>
         </div>
       </div>
 

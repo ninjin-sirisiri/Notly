@@ -11,6 +11,7 @@ import {
   Strikethrough,
   Quote,
 } from 'lucide-react';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 
 export default function MarkdownEditor({
   content,
@@ -109,93 +110,165 @@ export default function MarkdownEditor({
     <div className="flex flex-col h-[calc(100vh-222px)] bg-white">
       {/* ツールバー */}
       <div className="border-b border-gray-200 flex flex-wrap gap-1 bg-gray-50">
-        <button
-          onClick={() => insertHeading(1)}
-          className="p-2 hover:bg-gray-200 rounded transition-colors"
-          title="見出し1"
-        >
-          <Heading1 size={20} />
-        </button>
-        <button
-          onClick={() => insertHeading(2)}
-          className="p-2 hover:bg-gray-200 rounded transition-colors"
-          title="見出し2"
-        >
-          <Heading2 size={20} />
-        </button>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button
+              onClick={() => insertHeading(1)}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+            >
+              <Heading1 size={20} />
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-2 py-1">
+            <span className="text-xs">見出し1</span>
+          </HoverCardContent>
+        </HoverCard>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button
+              onClick={() => insertHeading(2)}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+            >
+              <Heading2 size={20} />
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-2 py-1">
+            <span className="text-xs">見出し2</span>
+          </HoverCardContent>
+        </HoverCard>
         <div className="w-px bg-gray-300 mx-1"></div>
-        <button
-          onClick={() => insertMarkdown('**', '**')}
-          className="p-2 hover:bg-gray-200 rounded transition-colors"
-          title="太字"
-        >
-          <Bold size={20} />
-        </button>
-        <button
-          onClick={() => insertMarkdown('*', '*')}
-          className="p-2 hover:bg-gray-200 rounded transition-colors"
-          title="斜体"
-        >
-          <Italic size={20} />
-        </button>
-        <button
-          onClick={() => insertMarkdown('~~', '~~')}
-          className="p-2 hover:bg-gray-200 rounded transition-colors"
-          title="取り消し線"
-        >
-          <Strikethrough size={20} />
-        </button>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button
+              onClick={() => insertMarkdown('**', '**')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+            >
+              <Bold size={20} />
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-2 py-1">
+            <span className="text-xs">太字</span>
+          </HoverCardContent>
+        </HoverCard>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button
+              onClick={() => insertMarkdown('*', '*')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+            >
+              <Italic size={20} />
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-2 py-1">
+            <span className="text-xs">斜体</span>
+          </HoverCardContent>
+        </HoverCard>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button
+              onClick={() => insertMarkdown('~~', '~~')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+            >
+              <Strikethrough size={20} />
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-2 py-1">
+            <span className="text-xs">取り消し線</span>
+          </HoverCardContent>
+        </HoverCard>
         <div className="w-px bg-gray-300 mx-1"></div>
-        <button
-          onClick={() => insertList(false)}
-          className="p-2 hover:bg-gray-200 rounded transition-colors"
-          title="箇条書きリスト"
-        >
-          <List size={20} />
-        </button>
-        <button
-          onClick={() => insertList(true)}
-          className="p-2 hover:bg-gray-200 rounded transition-colors"
-          title="番号付きリスト"
-        >
-          <ListOrdered size={20} />
-        </button>
-        <button
-          onClick={insertQuote}
-          className="p-2 hover:bg-gray-200 rounded transition-colors"
-          title="引用"
-        >
-          <Quote size={20} />
-        </button>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button
+              onClick={() => insertList(false)}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+            >
+              <List size={20} />
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-2 py-1">
+            <span className="text-xs">箇条書きリスト</span>
+          </HoverCardContent>
+        </HoverCard>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button
+              onClick={() => insertList(true)}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+            >
+              <ListOrdered size={20} />
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-2 py-1">
+            <span className="text-xs">番号付きリスト</span>
+          </HoverCardContent>
+        </HoverCard>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button
+              onClick={insertQuote}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+            >
+              <Quote size={20} />
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-2 py-1">
+            <span className="text-xs">引用</span>
+          </HoverCardContent>
+        </HoverCard>
         <div className="w-px bg-gray-300 mx-1"></div>
-        <button
-          onClick={insertLink}
-          className="p-2 hover:bg-gray-200 rounded transition-colors"
-          title="リンク"
-        >
-          <Link2 size={20} />
-        </button>
-        <button
-          onClick={insertImage}
-          className="p-2 hover:bg-gray-200 rounded transition-colors"
-          title="画像"
-        >
-          <ImageIcon size={20} />
-        </button>
-        <button
-          onClick={insertCodeBlock}
-          className="p-2 hover:bg-gray-200 rounded transition-colors font-mono text-sm"
-          title="コードブロック"
-        >
-          {'</>'}
-        </button>
-        <button
-          onClick={() => insertMarkdown('`', '`')}
-          className="p-2 hover:bg-gray-200 rounded transition-colors font-mono text-xs"
-          title="インラインコード"
-        >
-          code
-        </button>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button
+              onClick={insertLink}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+            >
+              <Link2 size={20} />
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-2 py-1">
+            <span className="text-xs">リンク</span>
+          </HoverCardContent>
+        </HoverCard>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button
+              onClick={insertImage}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+            >
+              <ImageIcon size={20} />
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-2 py-1">
+            <span className="text-xs">画像</span>
+          </HoverCardContent>
+        </HoverCard>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button
+              onClick={insertCodeBlock}
+              className="p-2 hover:bg-gray-200 rounded transition-colors font-mono text-sm"
+            >
+              {'</>'}
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-2 py-1">
+            <span className="text-xs">コードブロック</span>
+          </HoverCardContent>
+        </HoverCard>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button
+              onClick={() => insertMarkdown('`', '`')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors font-mono text-xs"
+            >
+              code
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-2 py-1">
+            <span className="text-xs">インラインコード</span>
+          </HoverCardContent>
+        </HoverCard>
       </div>
 
       <textarea

@@ -12,6 +12,7 @@ import {
   Quote,
 } from 'lucide-react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Button } from '@/components/ui/button';
 
 export default function MarkdownEditor({
   content,
@@ -107,17 +108,19 @@ export default function MarkdownEditor({
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-222px)] bg-white">
+    <div className="flex flex-col h-[calc(100vh-222px)] bg-card">
       {/* ツールバー */}
-      <div className="border-b border-gray-200 flex flex-wrap gap-1 bg-gray-50">
+      <div className="border-b border-border flex flex-wrap gap-1 bg-muted">
         <HoverCard>
           <HoverCardTrigger asChild>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => insertHeading(1)}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              className="h-auto w-auto p-2"
             >
               <Heading1 size={20} />
-            </button>
+            </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-2 py-1">
             <span className="text-xs">見出し1</span>
@@ -125,26 +128,30 @@ export default function MarkdownEditor({
         </HoverCard>
         <HoverCard>
           <HoverCardTrigger asChild>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => insertHeading(2)}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              className="h-auto w-auto p-2"
             >
               <Heading2 size={20} />
-            </button>
+            </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-2 py-1">
             <span className="text-xs">見出し2</span>
           </HoverCardContent>
         </HoverCard>
-        <div className="w-px bg-gray-300 mx-1"></div>
+        <div className="w-px bg-border mx-1"></div>
         <HoverCard>
           <HoverCardTrigger asChild>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => insertMarkdown('**', '**')}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              className="h-auto w-auto p-2"
             >
               <Bold size={20} />
-            </button>
+            </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-2 py-1">
             <span className="text-xs">太字</span>
@@ -152,12 +159,14 @@ export default function MarkdownEditor({
         </HoverCard>
         <HoverCard>
           <HoverCardTrigger asChild>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => insertMarkdown('*', '*')}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              className="h-auto w-auto p-2"
             >
               <Italic size={20} />
-            </button>
+            </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-2 py-1">
             <span className="text-xs">斜体</span>
@@ -165,26 +174,30 @@ export default function MarkdownEditor({
         </HoverCard>
         <HoverCard>
           <HoverCardTrigger asChild>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => insertMarkdown('~~', '~~')}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              className="h-auto w-auto p-2"
             >
               <Strikethrough size={20} />
-            </button>
+            </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-2 py-1">
             <span className="text-xs">取り消し線</span>
           </HoverCardContent>
         </HoverCard>
-        <div className="w-px bg-gray-300 mx-1"></div>
+        <div className="w-px bg-border mx-1"></div>
         <HoverCard>
           <HoverCardTrigger asChild>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => insertList(false)}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              className="h-auto w-auto p-2"
             >
               <List size={20} />
-            </button>
+            </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-2 py-1">
             <span className="text-xs">箇条書きリスト</span>
@@ -192,12 +205,14 @@ export default function MarkdownEditor({
         </HoverCard>
         <HoverCard>
           <HoverCardTrigger asChild>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => insertList(true)}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              className="h-auto w-auto p-2"
             >
               <ListOrdered size={20} />
-            </button>
+            </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-2 py-1">
             <span className="text-xs">番号付きリスト</span>
@@ -205,26 +220,20 @@ export default function MarkdownEditor({
         </HoverCard>
         <HoverCard>
           <HoverCardTrigger asChild>
-            <button
-              onClick={insertQuote}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
-            >
+            <Button variant="ghost" size="icon" onClick={insertQuote} className="h-auto w-auto p-2">
               <Quote size={20} />
-            </button>
+            </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-2 py-1">
             <span className="text-xs">引用</span>
           </HoverCardContent>
         </HoverCard>
-        <div className="w-px bg-gray-300 mx-1"></div>
+        <div className="w-px bg-border mx-1"></div>
         <HoverCard>
           <HoverCardTrigger asChild>
-            <button
-              onClick={insertLink}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
-            >
+            <Button variant="ghost" size="icon" onClick={insertLink} className="h-auto w-auto p-2">
               <Link2 size={20} />
-            </button>
+            </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-2 py-1">
             <span className="text-xs">リンク</span>
@@ -232,12 +241,9 @@ export default function MarkdownEditor({
         </HoverCard>
         <HoverCard>
           <HoverCardTrigger asChild>
-            <button
-              onClick={insertImage}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
-            >
+            <Button variant="ghost" size="icon" onClick={insertImage} className="h-auto w-auto p-2">
               <ImageIcon size={20} />
-            </button>
+            </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-2 py-1">
             <span className="text-xs">画像</span>
@@ -245,12 +251,14 @@ export default function MarkdownEditor({
         </HoverCard>
         <HoverCard>
           <HoverCardTrigger asChild>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={insertCodeBlock}
-              className="p-2 hover:bg-gray-200 rounded transition-colors font-mono text-sm"
+              className="h-auto w-auto p-2 font-mono text-sm"
             >
               {'</>'}
-            </button>
+            </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-2 py-1">
             <span className="text-xs">コードブロック</span>
@@ -258,12 +266,14 @@ export default function MarkdownEditor({
         </HoverCard>
         <HoverCard>
           <HoverCardTrigger asChild>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => insertMarkdown('`', '`')}
-              className="p-2 hover:bg-gray-200 rounded transition-colors font-mono text-xs"
+              className="h-auto w-auto p-2 font-mono text-xs"
             >
               code
-            </button>
+            </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-2 py-1">
             <span className="text-xs">インラインコード</span>
@@ -277,7 +287,7 @@ export default function MarkdownEditor({
         spellCheck={false}
         onChange={(e) => setContent(e.target.value)}
         onBlur={onBlur}
-        className="flex-1 w-full p-0.5 font-mono text-sm resize-none focus:outline-none border-none"
+        className="flex-1 w-full p-0.5 font-mono text-sm resize-none focus:outline-none border-none bg-transparent placeholder:text-muted-foreground"
         placeholder="マークダウンを入力してください..."
       />
     </div>

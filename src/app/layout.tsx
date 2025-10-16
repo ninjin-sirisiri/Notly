@@ -4,6 +4,7 @@ import './globals.css';
 import { WindowLayout } from './components/layout';
 import { NotesProvider } from '@/context/notes-context';
 import { StatsProvider } from '@/context/stats-context';
+import { ThemeProvider } from '@/components/theme/theme-provider';
 
 const biz_udpgothic = BIZ_UDPGothic({
   weight: '400',
@@ -22,13 +23,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${biz_udpgothic.variable} antialiased`}>
-        <NotesProvider>
-          <StatsProvider>
-            <WindowLayout>{children}</WindowLayout>
-          </StatsProvider>
-        </NotesProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <NotesProvider>
+            <StatsProvider>
+              <WindowLayout>{children}</WindowLayout>
+            </StatsProvider>
+          </NotesProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

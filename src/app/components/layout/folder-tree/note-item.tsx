@@ -14,15 +14,15 @@ export function NoteItem({ note, isSelected, level, onDeleteNote }: NoteItemProp
 
   return (
     <div
-      className={`flex items-center justify-between hover:bg-gray-200 rounded px-2 py-1 ${
-        isSelected ? 'bg-blue-100' : ''
+      className={`flex items-center justify-between hover:bg-sidebar-accent rounded px-2 py-1 ${
+        isSelected ? 'bg-sidebar-primary' : ''
       }`}
       style={{ paddingLeft }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link href={`/note/${note.id}`} className="flex items-center gap-2 flex-1 text-sm">
-        <Notebook className="h-3 w-3 text-gray-500" />
+        <Notebook className="h-3 w-3 text-sidebar-foreground" />
         {note.title || '無題'}
       </Link>
       {isHovered && (

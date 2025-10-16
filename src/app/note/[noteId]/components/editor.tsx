@@ -53,14 +53,14 @@ export function Editor({ noteId }: { noteId: string | undefined }) {
     setIsFolderSelectorOpen(false); // ダイアログを閉じる
   };
   return (
-    <div className="w-[calc(100vw-252px)]">
-      <div className="flex items-center justify-between h-12 text-center text-gray-400 p-3">
+    <div className="w-[calc(100vw-252px)] bg-background">
+      <div className="flex items-center justify-between h-12 text-center text-muted-foreground p-3">
         <div>{note?.createdAt.toLocaleDateString()}</div>
         <Button onClick={handleSave}>保存</Button>
       </div>
       <Separator />
       <input
-        className="h-12 text-center font-bold text-3xl p-1 w-full "
+        className="h-12 text-center font-bold text-3xl p-1 w-full bg-transparent focus:outline-none"
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -79,7 +79,7 @@ export function Editor({ noteId }: { noteId: string | undefined }) {
             onBlur={() => noteId && updateNote(noteId, title, content)} // 既存ノートのみ自動保存
           />
         </TabsContent>
-        <TabsContent value="preview" className="prose">
+        <TabsContent value="preview" className="prose dark:prose-invert">
           <ScrollArea className="h-[calc(100vh-222px)] w-[calc(100vw-288px)] p-0.5">
             <Markdown
               remarkPlugins={[remarkGfm, remarkBreaks]}

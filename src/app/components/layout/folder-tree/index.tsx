@@ -114,7 +114,7 @@ export function FolderTree() {
   };
 
   return (
-    <div className="bg-gray-50 w-64 overflow-y-auto border-r border-gray-200 flex flex-col">
+    <div className="bg-sidebar w-64 overflow-y-auto border-r border-sidebar-border flex flex-col">
       {/* ヘッダー */}
       <FolderTreeHeader
         onCreateNote={(folderId) => {

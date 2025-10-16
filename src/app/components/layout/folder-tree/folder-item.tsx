@@ -42,8 +42,8 @@ export function FolderItem({
       {/* フォルダヘッダー */}
       <div
         className={cn(
-          'flex items-center justify-between group hover:bg-gray-200 rounded px-2 py-1',
-          selectedFolderId === folder.id && 'bg-gray-200'
+          'flex items-center justify-between group hover:bg-sidebar-accent rounded px-2 py-1',
+          selectedFolderId === folder.id && 'bg-sidebar-accent'
         )}
         style={{ paddingLeft }}
         onClick={handleFolderClick}
@@ -63,7 +63,7 @@ export function FolderItem({
               <ChevronRight className="h-4 w-4" />
             )}
           </div>
-          <Folder className="h-4 w-4 text-gray-600" />
+          <Folder className="h-4 w-4 text-sidebar-foreground" />
           {isEditing ? (
             <input
               type="text"
@@ -79,7 +79,7 @@ export function FolderItem({
                   setNewFolderName(folder.name);
                 }
               }}
-              className="text-sm bg-transparent border border-gray-400 rounded px-1"
+              className="text-sm bg-transparent border border-sidebar-ring rounded px-1"
               autoFocus
               onClick={(e) => e.stopPropagation()}
             />

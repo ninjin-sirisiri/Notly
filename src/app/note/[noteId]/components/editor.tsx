@@ -6,6 +6,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
 import { useRouter } from 'next/navigation'; // useRouterをインポート
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -38,12 +39,17 @@ export function Editor({ noteId }: { noteId: string | undefined }) {
   }, [noteId, note]);
 
   const handleSave = async () => {
+    if (!title) {
+      toast.error('タイトルを入力してください');
+      return;
+    }
     // 新規ノートの場合のみフォルダ選択ダイアログを開く
     if (!noteId) {
       setIsFolderSelectorOpen(true);
     } else {
       // 既存ノートの場合は明示的な保存ボタンクリック時にもupdateNoteを呼び出す
       await updateNote(noteId, title, content);
+      toast.success('ノートを保存しました');
     }
   };
 
@@ -51,6 +57,7 @@ export function Editor({ noteId }: { noteId: string | undefined }) {
     const newNote = await createNote(title, content, folderId);
     router.push(`/note/${newNote.note.id}`);
     setIsFolderSelectorOpen(false); // ダイアログを閉じる
+    toast.success('ノートを作成しました');
   };
   return (
     <div className="w-[calc(100vw-252px)] bg-background">

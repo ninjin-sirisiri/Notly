@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { BIZ_UDPGothic } from 'next/font/google';
 import './globals.css';
+import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 
 const biz_udpgothic = BIZ_UDPGothic({
@@ -29,6 +30,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

@@ -27,11 +27,11 @@ export function FolderTreeHeader({ onCreateNote, onCreateFolder }: FolderTreeHea
       <div className="flex gap-2">
         <Button variant="outline" size="sm" onClick={handleCreateNote} className="flex-1">
           <Notebook className="h-4 w-4 mr-1" />
-          新しいノート
+          ノート
         </Button>
         <Button variant="outline" size="sm" onClick={handleCreateFolder} className="flex-1">
           <FolderPlus className="h-4 w-4 mr-1" />
-          新しいフォルダ
+          フォルダ
         </Button>
       </div>
     </div>

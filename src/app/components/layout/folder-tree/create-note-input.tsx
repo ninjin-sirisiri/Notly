@@ -1,10 +1,18 @@
 import { Input } from '@/components/ui/input';
+import { useEffect, useRef } from 'react';
 import type { CreateNoteInputProps } from './types';
 
 export function CreateNoteInput({ value, onChange, onSubmit, onCancel }: CreateNoteInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   return (
     <div className="mb-2 px-2">
       <Input
+        ref={inputRef}
         type="text"
         placeholder="Note title..."
         value={value}
@@ -17,7 +25,7 @@ export function CreateNoteInput({ value, onChange, onSubmit, onCancel }: CreateN
             onCancel();
           }
         }}
-        autoFocus
+        onBlur={onCancel}
         className="text-sm"
       />
     </div>

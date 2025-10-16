@@ -1,9 +1,6 @@
 import type { Metadata } from 'next';
 import { BIZ_UDPGothic } from 'next/font/google';
 import './globals.css';
-import { WindowLayout } from './components/layout';
-import { NotesProvider } from '@/context/notes-context';
-import { StatsProvider } from '@/context/stats-context';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 
 const biz_udpgothic = BIZ_UDPGothic({
@@ -31,11 +28,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NotesProvider>
-            <StatsProvider>
-              <WindowLayout>{children}</WindowLayout>
-            </StatsProvider>
-          </NotesProvider>
+          {children}
         </ThemeProvider>
       </body>
     </html>

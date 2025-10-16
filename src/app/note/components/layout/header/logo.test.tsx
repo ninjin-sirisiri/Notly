@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { Logo } from '@/app/components/layout/header/logo';
+import { Logo } from '@/app/note/components/layout/header/logo';
 import type { ComponentProps } from 'react';
 
 // Mock next/image

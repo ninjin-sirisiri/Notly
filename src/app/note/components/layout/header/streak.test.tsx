@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Streak } from '@/app/components/layout/header/streak';
+import { Streak } from '@/app/note/components/layout/header/streak';
 import { StatsResponse } from '@/types/api';
 
 // Mock useStats hook

@@ -15,7 +15,7 @@ export function NoteItem({ note, isSelected, level, onDeleteNote }: NoteItemProp
   return (
     <div
       className={`flex items-center justify-between hover:bg-sidebar-accent rounded px-2 py-1 ${
-        isSelected ? 'bg-sidebar-primary' : ''
+        isSelected ? 'bg-sidebar-primary-foreground' : ''
       }`}
       style={{ paddingLeft }}
       onMouseEnter={() => setIsHovered(true)}

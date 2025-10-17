@@ -60,7 +60,7 @@ export function Editor({ noteId }: { noteId: string | undefined }) {
     toast.success('ノートを作成しました');
   };
   return (
-    <div className="w-[calc(100vw-252px)] bg-background">
+    <div className="w-full bg-background md:w-[calc(100vw-256px)]">
       <div className="flex items-center justify-between h-12 text-center text-muted-foreground p-3">
         <div>{note?.createdAt.toLocaleDateString()}</div>
         <Button onClick={handleSave}>保存</Button>
@@ -87,7 +87,7 @@ export function Editor({ noteId }: { noteId: string | undefined }) {
           />
         </TabsContent>
         <TabsContent value="preview" className="prose dark:prose-invert">
-          <ScrollArea className="h-[calc(100vh-222px)] w-[calc(100vw-288px)] p-0.5">
+          <ScrollArea className="h-[calc(100vh-222px)] w-full md:w-[calc(100vw-288px)] p-0.5">
             <Markdown
               remarkPlugins={[remarkGfm, remarkBreaks]}
               components={{

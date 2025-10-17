@@ -1,11 +1,13 @@
+'use client';
+
 import { FolderTree } from './folder-tree';
 import { Header } from './header';
 
 export function WindowLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="flex flex-col max-h-screen">
+    <div className="h-screen flex flex-col">
       <Header />
-      <div className="flex h-[100vh-80px]">
+      <div className="flex flex-1 overflow-hidden">
         <FolderTree />
         {children}
       </div>

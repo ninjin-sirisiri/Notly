@@ -18,8 +18,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { useLayoutContext } from '@/context/layout-context';
 
 export function FolderTree() {
+  const { isFolderTreeOpen } = useLayoutContext();
   const { folders, createFolder, deleteFolder, updateFolderName } = useFolders();
   const { notes: allNotes, createNote, deleteNote } = useNotesContext();
 
@@ -114,7 +116,11 @@ export function FolderTree() {
   };
 
   return (
-    <div className="bg-sidebar w-64 overflow-y-auto border-r border-sidebar-border flex flex-col">
+    <div
+      className={`bg-sidebar w-64 overflow-y-auto border-r border-sidebar-border flex flex-col absolute h-full z-10 md:relative md:h-auto md:z-auto ${
+        isFolderTreeOpen ? 'flex' : 'hidden'
+      } md:flex`}
+    >
       {/* ヘッダー */}
       <FolderTreeHeader
         onCreateNote={(folderId) => {

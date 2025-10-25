@@ -1,0 +1,48 @@
+{
+  "name": "notly",
+  "description": "ノートをつけることを習慣化するためのアプリ",
+  "author": {
+    "name": "Ubsa",
+    "email": "ubsa17@gmail.com"
+  },
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "format:front": "prettier --write .",
+    "lint:front": "eslint .",
+    "lint:font:fix": "eslint . --fix",
+    "check:front": "bun format && bun lint",
+    "check:front:fix": "bun format && bun lint:fix",
+    "format:back": "cd src-tauri && cargo fmt && cd ..",
+    "lint:back": "cd src-tauri && cargo clippy && cd ..",
+    "check:back": "cd src-tauri && cargo check && cd ..",
+    "format": "bun format:front && bun format:back",
+    "lint": "bun lint:front && bun lint:back",
+    "check": "bun check:front && bun check:back"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.16",
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-opener": "^2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.16"
+  },
+  "devDependencies": {
+    "@eslint-react/eslint-plugin": "^2.2.3",
+    "@tauri-apps/cli": "^2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "eslint": "^9.38.0",
+    "prettier": "^3.6.2",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.46.2",
+    "vite": "^7.0.4"
+  }
+}

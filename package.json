@@ -15,7 +15,7 @@
     "tauri": "tauri",
     "format:front": "prettier --write .",
     "lint:front": "eslint .",
-    "lint:font:fix": "eslint . --fix",
+    "lint:front:fix": "eslint . --fix",
     "check:front": "bun format && bun lint",
     "check:front:fix": "bun format && bun lint:fix",
     "format:back": "cd src-tauri && cargo fmt && cd ..",

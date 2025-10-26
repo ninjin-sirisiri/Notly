@@ -72,7 +72,6 @@ jobs:
       - name: install frontend dependencies
         run: bun install
 
-      # ✅ ここを追加
       - name: build frontend
         run: bun run build
 

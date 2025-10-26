@@ -72,6 +72,10 @@ jobs:
       - name: install frontend dependencies
         run: bun install
 
+      # ✅ ここを追加
+      - name: build frontend
+        run: bun run build
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

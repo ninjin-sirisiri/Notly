@@ -1,4 +1,4 @@
 node_nodules
 .next
 out
-src-tauri
+src-tauri/target

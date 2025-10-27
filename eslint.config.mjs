@@ -5,14 +5,7 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   {
-    ignores: [
-      'node_modules/**',
-      '.next/**',
-      'out/**',
-      'src-tauri/**',
-      'next-env.d.ts',
-      'next.config.ts'
-    ]
+    ignores: ['node_modules/**', 'dist/**', 'src-tauri/**']
   },
   {
     files: ['**/*.ts', '**/*.tsx'],

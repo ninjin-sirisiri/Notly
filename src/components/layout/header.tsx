@@ -12,7 +12,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
         </button>
         <div className="size-5 md:size-6 text-primary dark:text-white">
           <img
-            src="public/logo.png"
+            src="logo.png"
             alt="logo"
           />
         </div>

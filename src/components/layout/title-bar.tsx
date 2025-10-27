@@ -11,7 +11,7 @@ export function TitleBar() {
     >
       <div>
         <img
-          src="public/logo.png"
+          src="logo.png"
           alt="logo"
           width={20}
         />

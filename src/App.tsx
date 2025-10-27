@@ -11,7 +11,7 @@ export default function App() {
   return (
     <div className="flex h-screen w-full flex-col font-sans text-[#1A1A1A] dark:text-[#F8F8F8]">
       <TitleBar />
-      <div>
+      <div className="flex flex-col flex-1 overflow-hidden">
         <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar

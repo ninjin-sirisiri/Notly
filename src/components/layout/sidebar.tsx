@@ -1,12 +1,6 @@
-import {
-  X,
-  Search,
-  FileText,
-  FolderPlus,
-  Folder,
-  Edit2,
-  Trash2
-} from 'lucide-react';
+import { X, Search, FileText, FolderPlus } from 'lucide-react';
+import { FolderItem } from '../sidebar/FolderItem';
+import { NoteItem } from '../sidebar/NoteItem';
 
 export function Sidebar({
   isOpen,
@@ -65,106 +59,20 @@ export function Sidebar({
           </div>
           <div className="overflow-y-auto">
             <div className="space-y-0.5 pt-2">
-              <a
-                className="flex items-center gap-2 pl-2 pr-2 py-1.5 rounded bg-gray-200 dark:bg-gray-700 text-primary dark:text-white group relative"
-                href="#"
+              <FolderItem
+                name="仕事"
+                isActive
               >
-                <Folder className="h-4 w-4" />
-                <p className="text-sm font-medium">仕事</p>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                    <Edit2 className="h-3.5 w-3.5" />
-                  </button>
-                  <button className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </a>
-              <div className="pl-4 relative">
-                <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-200 dark:bg-gray-700"></div>
-                <div className="space-y-0.5 relative">
-                  <a
-                    className="flex items-center gap-2 pl-6 pr-2 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700/50 text-primary dark:text-white group relative"
-                    href="#"
-                  >
-                    <FileText className="h-4 w-4" />
-                    <p className="text-sm font-medium truncate">
-                      プロジェクトAの議事録
-                    </p>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </button>
-                      <button className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </a>
-                  <a
-                    className="flex items-center gap-2 pl-6 pr-2 py-1.5 rounded bg-gray-300/50 dark:bg-gray-600/50 text-primary dark:text-white group relative"
-                    href="#"
-                  >
-                    <p className="text-sm font-medium truncate">
-                      新しいUIデザインの草案
-                    </p>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1 rounded hover:bg-gray-400/50 dark:hover:bg-gray-500/50">
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </button>
-                      <button className="p-1 rounded hover:bg-gray-400/50 dark:hover:bg-gray-500/50">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </a>
-                  <a
-                    className="flex items-center gap-2 pl-6 pr-2 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700/50 text-primary dark:text-white group relative"
-                    href="#"
-                  >
-                    <FileText className="h-4 w-4" />
-                    <p className="text-sm font-medium truncate">
-                      クライアントへのメール下書き
-                    </p>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </button>
-                      <button className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </a>
-                </div>
-              </div>
-              <a
-                className="flex items-center gap-2 pl-2 pr-2 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700/50 text-primary dark:text-white group relative"
-                href="#"
-              >
-                <Folder className="h-4 w-4" />
-                <p className="text-sm font-medium">プライベート</p>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                    <Edit2 className="h-3.5 w-3.5" />
-                  </button>
-                  <button className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </a>
-              <a
-                className="flex items-center gap-2 pl-2 pr-2 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700/50 text-primary dark:text-white group relative"
-                href="#"
-              >
-                <Folder className="h-4 w-4" />
-                <p className="text-sm font-medium">アイデア</p>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                    <Edit2 className="h-3.5 w-3.5" />
-                  </button>
-                  <button className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </a>
+                <NoteItem name="プロジェクトAの議事録" />
+                <NoteItem
+                  name="新しいUIデザインの草案"
+                  isActive
+                  hasIcon={false}
+                />
+                <NoteItem name="クライアントへのメール下書き" />
+              </FolderItem>
+              <FolderItem name="プライベート" />
+              <FolderItem name="アイデア" />
             </div>
           </div>
         </div>

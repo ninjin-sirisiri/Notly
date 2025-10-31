@@ -1,4 +1,4 @@
-use crate::db::models::Note;
+use crate::db::models::{Note, NoteWithContent};
 use rusqlite::{params, Result as SqlResult};
 use std::{path::PathBuf, sync::Arc};
 
@@ -22,7 +22,7 @@ impl NoteService {
     content: &str,
     parent_id: Option<i64>,
     folder_path: Option<&str>,
-  ) -> Result<Note, String> {
+  ) -> Result<NoteWithContent, String> {
     let conn = self.db.conn.lock().unwrap();
 
     conn
@@ -46,7 +46,7 @@ impl NoteService {
   }
 
   // ノートをidで取得
-  pub fn get_note_by_id(&self, id: i64) -> Result<Note, String> {
+  pub fn get_note_by_id(&self, id: i64) -> Result<NoteWithContent, String> {
     let conn = self.db.conn.lock().unwrap();
 
     let note = conn
@@ -66,7 +66,20 @@ impl NoteService {
       )
       .map_err(|e| format!("ノートの読み込みに失敗しました: {}", e))?;
 
-    Ok(note)
+    let content = fs::read_to_string(note.file_path.clone())
+      .map_err(|e| format!("ノートの読み込みに失敗しました: {}", e))?;
+
+    let note_with_content = NoteWithContent {
+      id: note.id,
+      file_path: note.file_path,
+      title: note.title,
+      created_at: note.created_at,
+      updated_at: note.updated_at,
+      parent_id: note.parent_id,
+      content,
+    };
+
+    Ok(note_with_content)
   }
 
   // 全てのノートを取得
@@ -104,7 +117,7 @@ impl NoteService {
     id: i64,
     title: Option<&str>,
     content: Option<&str>,
-  ) -> Result<Note, String> {
+  ) -> Result<NoteWithContent, String> {
     let conn = self.db.conn.lock().unwrap();
 
     let before_title = self.get_note_by_id(id)?.title;

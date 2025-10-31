@@ -11,7 +11,7 @@ pub fn create_note<R: tauri::Runtime>(
   input: CreateNoteInput,
   state: State<'_, AppState>,
   app: tauri::AppHandle<R>,
-) -> Result<Note, String> {
+) -> Result<NoteWithContent, String> {
   let notes_dir = app
     .path()
     .app_data_dir()
@@ -53,7 +53,7 @@ pub fn get_note_by_id<R: tauri::Runtime>(
   id: i64,
   state: State<'_, AppState>,
   app: tauri::AppHandle<R>,
-) -> Result<Note, String> {
+) -> Result<NoteWithContent, String> {
   let notes_dir = app
     .path()
     .app_data_dir()
@@ -73,7 +73,7 @@ pub fn update_note<R: tauri::Runtime>(
   input: UpdateNoteInput,
   state: State<'_, AppState>,
   app: tauri::AppHandle<R>,
-) -> Result<Note, String> {
+) -> Result<NoteWithContent, String> {
   let notes_dir = app
     .path()
     .app_data_dir()

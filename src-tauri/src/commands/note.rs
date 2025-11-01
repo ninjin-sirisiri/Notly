@@ -31,9 +31,9 @@ pub fn create_note<R: tauri::Runtime>(
 }
 
 #[tauri::command]
-pub fn get_all_notes<R: tauri::Runtime>(
+pub fn get_all_notes(
   state: State<'_, AppState>,
-  app: tauri::AppHandle<R>,
+  app: tauri::AppHandle,
 ) -> Result<Vec<Note>, String> {
   let notes_dir = app
     .path()
@@ -49,10 +49,10 @@ pub fn get_all_notes<R: tauri::Runtime>(
 }
 
 #[tauri::command]
-pub fn get_note_by_id<R: tauri::Runtime>(
+pub fn get_note_by_id(
   id: i64,
   state: State<'_, AppState>,
-  app: tauri::AppHandle<R>,
+  app: tauri::AppHandle,
 ) -> Result<NoteWithContent, String> {
   let notes_dir = app
     .path()
@@ -68,11 +68,10 @@ pub fn get_note_by_id<R: tauri::Runtime>(
 }
 
 #[tauri::command]
-pub fn update_note<R: tauri::Runtime>(
-  id: i64,
+pub fn update_note(
   input: UpdateNoteInput,
   state: State<'_, AppState>,
-  app: tauri::AppHandle<R>,
+  app: tauri::AppHandle,
 ) -> Result<NoteWithContent, String> {
   let notes_dir = app
     .path()
@@ -82,16 +81,16 @@ pub fn update_note<R: tauri::Runtime>(
 
   let note_service = NoteService::new(Arc::clone(&state.db), notes_dir);
 
-  let note = note_service.update_note(id, input.title, input.content)?;
+  let note = note_service.update_note(input.id, input.title, input.content)?;
 
   Ok(note)
 }
 
 #[tauri::command]
-pub fn delete_note<R: tauri::Runtime>(
+pub fn delete_note(
   id: i64,
   state: State<'_, AppState>,
-  app: tauri::AppHandle<R>,
+  app: tauri::AppHandle,
 ) -> Result<(), String> {
   let notes_dir = app
     .path()

@@ -31,6 +31,7 @@ pub struct CreateNoteInput<'a> {
 
 #[derive(Debug, Deserialize)]
 pub struct UpdateNoteInput<'a> {
+  pub id: i64,
   pub title: Option<&'a str>,
   pub content: Option<&'a str>,
 }

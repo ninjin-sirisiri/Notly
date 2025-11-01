@@ -4,27 +4,27 @@ import { safeInvoke } from '../tauri';
 export async function createNote(
   title: string,
   content: string,
-  folder_path: string,
-  parent_id: string | null = null
+  folderPath: string,
+  parentId: number | null = null
 ): Promise<NoteWithContent> {
   return safeInvoke<NoteWithContent>('create_note', {
     title,
     content,
-    folder_path,
-    parent_id
+    folder_path: folderPath,
+    parent_id: parentId
   });
 }
 
-export async function getAllNotes(): Promise<Note[]> {
+export async function loadNotes(): Promise<Note[]> {
   return safeInvoke<Note[]>('get_all_notes');
 }
 
-export async function getNoteById(id: string): Promise<Note | null> {
-  return safeInvoke<NoteWithContent | null>('get_note_by_id', { id });
+export async function loadNote(id: number): Promise<NoteWithContent> {
+  return safeInvoke<NoteWithContent>('get_note_by_id', { id });
 }
 
 export async function updateNote(
-  id: string,
+  id: number,
   title: string,
   content: string
 ): Promise<NoteWithContent> {
@@ -35,6 +35,6 @@ export async function updateNote(
   });
 }
 
-export async function deleteNote(id: string): Promise<void> {
+export async function deleteNote(id: number): Promise<void> {
   return safeInvoke<void>('delete_note', { id });
 }

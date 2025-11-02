@@ -18,24 +18,34 @@ impl NoteService {
   // ノートの作成
   pub fn create_note(
     &self,
-    title: &str,
-    content: &str,
+    title: String,
+    content: String,
     parent_id: Option<i64>,
-    folder_path: Option<&str>,
+    folder_path: Option<String>,
   ) -> Result<NoteWithContent, String> {
     let conn = self.db.conn.lock().unwrap();
+
+    let file_path = format!(
+      "{}/{}.md",
+      folder_path.clone().unwrap_or_default(),
+      title.clone()
+    );
 
     conn
       .execute(
         "
-		    INSERT INTO notes (title, content, parent_id)
+		    INSERT INTO notes (title, parent_id, file_path)
 		    VALUES (?, ?, ?)
 		    ",
-        params![title, content, parent_id],
+        params![title, parent_id, file_path],
       )
       .map_err(|e| format!("ノートの作成に失敗しました: {}", e))?;
 
-    let full_path = self.base_path.join(folder_path.unwrap_or("")).join(title);
+    let full_path = self
+      .base_path
+      .join(folder_path.clone().unwrap_or_default())
+      .join(format!("{}.md", title.clone()));
+
     fs::write(full_path, content).map_err(|e| format!("ノートの作成に失敗しました: {}", e))?;
 
     let note_id = conn.last_insert_rowid();
@@ -51,7 +61,7 @@ impl NoteService {
 
     let note = conn
       .query_row(
-        "SELECT content, created_at, updated_at, parent_id FROM notes WHERE id = ?",
+        "SELECT created_at, updated_at, parent_id FROM notes WHERE id = ?",
         params![id],
         |row| {
           Ok(Note {
@@ -115,8 +125,8 @@ impl NoteService {
   pub fn update_note(
     &self,
     id: i64,
-    title: Option<&str>,
-    content: Option<&str>,
+    title: Option<String>,
+    content: Option<String>,
   ) -> Result<NoteWithContent, String> {
     let conn = self.db.conn.lock().unwrap();
 
@@ -124,13 +134,13 @@ impl NoteService {
 
     conn
       .execute(
-        "UPDATE notes SET title = ?, content = ? WHERE id = ?",
-        params![title, content, id],
+        "UPDATE notes SET title = ?, WHERE id = ?",
+        params![title, id],
       )
       .map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
 
     if content.is_some() {
-      let full_path = self.base_path.join(title.unwrap_or(&before_title));
+      let full_path = self.base_path.join(title.unwrap_or(before_title));
       fs::write(full_path, content.unwrap())
         .map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
     }

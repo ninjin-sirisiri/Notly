@@ -22,16 +22,16 @@ pub struct NoteWithContent {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct CreateNoteInput<'a> {
+pub struct CreateNoteInput {
   pub title: String,
   pub content: String,
-  pub folder_path: Option<&'a str>,
   pub parent_id: Option<i64>,
+  pub folder_path: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct UpdateNoteInput<'a> {
+pub struct UpdateNoteInput {
   pub id: i64,
-  pub title: Option<&'a str>,
-  pub content: Option<&'a str>,
+  pub title: Option<String>,
+  pub content: Option<String>,
 }

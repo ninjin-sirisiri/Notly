@@ -48,7 +48,12 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const newNote = await createNote(title, content, folderPath, parentId);
-      set({ notes: [...get().notes, newNote], isLoading: false });
+      set({
+        notes: [...get().notes, newNote],
+        currentNote: newNote,
+        currentContent: newNote.content,
+        isLoading: false
+      });
       return newNote;
     } catch (error) {
       set({ error: String(error), isLoading: false });

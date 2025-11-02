@@ -1,6 +1,8 @@
-import { X, Search, FileText, FolderPlus } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 import { FolderItem } from '../sidebar/FolderItem';
 import { NoteItem } from '../sidebar/NoteItem';
+import { CreateNoteButton } from './CreateNoteButton';
+import { CreateFolderButton } from './CreateFolderButton';
 
 export function Sidebar({
   isOpen,
@@ -48,14 +50,8 @@ export function Sidebar({
             </div>
           </div>
           <div className="px-2 flex items-center gap-2">
-            <button className="flex-1 flex items-center justify-center gap-1.5 rounded-md h-8 bg-gray-200 dark:bg-gray-700 text-primary dark:text-white text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600">
-              <FileText className="h-4 w-4" />
-              ノート
-            </button>
-            <button className="flex-1 flex items-center justify-center gap-1.5 rounded-md h-8 bg-gray-200 dark:bg-gray-700 text-primary dark:text-white text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600">
-              <FolderPlus className="h-4 w-4" />
-              フォルダ
-            </button>
+            <CreateNoteButton />
+            <CreateFolderButton />
           </div>
           <div className="overflow-y-auto">
             <div className="space-y-0.5 pt-2">

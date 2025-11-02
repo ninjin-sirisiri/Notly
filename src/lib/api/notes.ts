@@ -4,14 +4,16 @@ import { safeInvoke } from '../tauri';
 export async function createNote(
   title: string,
   content: string,
-  folderPath: string,
+  folderPath: string = '',
   parentId: number | null = null
 ): Promise<NoteWithContent> {
   return safeInvoke<NoteWithContent>('create_note', {
-    title,
-    content,
-    folder_path: folderPath,
-    parent_id: parentId
+    input: {
+      title,
+      content,
+      folder_path: folderPath,
+      parent_id: parentId
+    }
   });
 }
 

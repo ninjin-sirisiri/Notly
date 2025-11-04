@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import { useNoteStore } from '@/stores/note';
+import { useEffect } from 'react';
 
 export function useNotes() {
   const { notes, isLoading, error, loadNotes } = useNoteStore();
@@ -8,7 +8,7 @@ export function useNotes() {
     loadNotes();
   }, [loadNotes]);
 
-  return { notes, isLoading, error };
+  return { notes, loadNotes, isLoading, error };
 }
 
 export function useCurrentNote() {

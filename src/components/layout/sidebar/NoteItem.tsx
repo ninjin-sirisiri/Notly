@@ -1,5 +1,5 @@
-import { FileText, Edit2, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { FileText, Edit2, Trash2 } from 'lucide-react';
 
 type NoteItemProps = {
   name: string;
@@ -9,14 +9,13 @@ type NoteItemProps = {
 
 export function NoteItem({ name, isActive, hasIcon = true }: NoteItemProps) {
   return (
-    <a
+    <div
       className={cn(
         'flex items-center gap-2 pl-6 pr-2 py-1.5 rounded text-primary dark:text-white group relative',
         isActive
           ? 'bg-gray-300/50 dark:bg-gray-600/50'
           : 'hover:bg-gray-200 dark:hover:bg-gray-700/50'
       )}
-      href="#"
     >
       {hasIcon && <FileText className="h-4 w-4" />}
       <p className="text-sm font-medium truncate">{name}</p>
@@ -42,6 +41,6 @@ export function NoteItem({ name, isActive, hasIcon = true }: NoteItemProps) {
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
-    </a>
+    </div>
   );
 }

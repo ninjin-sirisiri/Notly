@@ -1,5 +1,5 @@
-import { Folder, Edit2, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Folder, Edit2, Trash2 } from 'lucide-react';
 import React from 'react';
 
 type FolderItemProps = {

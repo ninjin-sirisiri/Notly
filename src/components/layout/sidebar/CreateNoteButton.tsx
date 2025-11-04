@@ -1,25 +1,29 @@
-import { useCreateNote } from '@/hooks/useNote';
+import { Button } from '@/components/ui/button';
+import { useCreateNote, useNotes } from '@/hooks/useNote';
 import { FileText } from 'lucide-react';
 
 export function CreateNoteButton() {
+	const { loadNotes } = useNotes();
   const { createNote, isLoading } = useCreateNote();
 
   const handleCreateNote = async () => {
     try {
       await createNote('Untitled', '', '');
+      console.log('Note created successfully');
+			loadNotes();
     } catch (error) {
       console.error('Failed to create note:', error);
     }
   };
 
   return (
-    <button
+    <Button
+      variant="secondary"
       onClick={handleCreateNote}
       disabled={isLoading}
-      className="flex-1 flex items-center justify-center gap-1.5 rounded-md h-8 bg-gray-200 dark:bg-gray-700 text-primary dark:text-white text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600"
     >
       <FileText className="h-4 w-4" />
       ノート
-    </button>
+    </Button>
   );
 }

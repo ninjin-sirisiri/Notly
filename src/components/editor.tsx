@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Button } from './ui/button';
 import {
   Heading1,
   Heading2,
@@ -13,6 +13,7 @@ import {
   Code,
   Save
 } from 'lucide-react';
+import { useState } from 'react';
 
 export function Editor() {
   const [content, setContent] = useState('');
@@ -30,53 +31,53 @@ export function Editor() {
         </div>
       </div>
       <div className="flex flex-col flex-1">
-        <label className="flex flex-col h-full flex-1">
+        <div className="flex flex-col h-full flex-1">
           <div className="flex w-full flex-1 items-stretch rounded-lg flex-col">
             <div className="flex flex-1 flex-col">
               <div className="flex items-center border border-b-0 border-[#EAEAEA] dark:border-[#333333] bg-background-light dark:bg-[#1A1A1A] px-2 py-1.5 rounded-t-lg overflow-x-auto">
                 <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
-                  <button className="flex items-center justify-center p-1 md:p-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#333333]">
+                  <Button variant="ghost">
                     <Heading1 className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
-                  </button>
-                  <button className="flex items-center justify-center p-1 md:p-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#333333]">
+                  </Button>
+                  <Button variant="ghost">
                     <Heading2 className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
-                  </button>
-                  <button className="flex items-center justify-center p-1 md:p-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#333333]">
+                  </Button>
+                  <Button variant="ghost">
                     <Heading3 className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
-                  </button>
+                  </Button>
                   <div className="h-5 w-px bg-[#EAEAEA] dark:bg-[#333333] mx-0.5 md:mx-1"></div>
-                  <button className="flex items-center justify-center p-1 md:p-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#333333]">
+                  <Button variant="ghost">
                     <Bold className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
-                  </button>
-                  <button className="flex items-center justify-center p-1 md:p-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#333333]">
+                  </Button>
+                  <Button variant="ghost">
                     <Italic className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
-                  </button>
-                  <button className="flex items-center justify-center p-1 md:p-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#333333]">
+                  </Button>
+                  <Button variant="ghost">
                     <Strikethrough className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
-                  </button>
+                  </Button>
                   <div className="h-5 w-px bg-[#EAEAEA] dark:bg-[#333333] mx-0.5 md:mx-1"></div>
-                  <button className="flex items-center justify-center p-1 md:p-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#333333]">
+                  <Button variant="ghost">
                     <List className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
-                  </button>
-                  <button className="flex items-center justify-center p-1 md:p-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#333333]">
+                  </Button>
+                  <Button variant="ghost">
                     <ListOrdered className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
-                  </button>
+                  </Button>
                   <div className="h-5 w-px bg-[#EAEAEA] dark:bg-[#333333] mx-0.5 md:mx-1"></div>
-                  <button className="flex items-center justify-center p-1 md:p-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#333333]">
+                  <Button variant="ghost">
                     <Link className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
-                  </button>
-                  <button className="flex items-center justify-center p-1 md:p-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#333333]">
+                  </Button>
+                  <Button variant="ghost">
                     <ImageIcon className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
-                  </button>
-                  <button className="flex items-center justify-center p-1 md:p-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#333333]">
+                  </Button>
+                  <Button variant="ghost">
                     <Code className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
-                  </button>
+                  </Button>
                 </div>
                 <div className="ml-auto pl-2 shrink-0">
-                  <button className="flex items-center justify-center rounded-md bg-primary dark:bg-gray-700 text-white dark:text-gray-200 px-2 md:px-3 py-1 text-xs md:text-sm font-medium gap-1 md:gap-1.5 hover:bg-opacity-90 dark:hover:bg-gray-600">
+                  <Button>
                     <Save className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     <span className="hidden sm:inline">保存</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
               <textarea
@@ -87,7 +88,7 @@ export function Editor() {
               />
             </div>
           </div>
-        </label>
+        </div>
       </div>
     </main>
   );

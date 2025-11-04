@@ -1,5 +1,5 @@
-import { Note, NoteWithContent } from '@/types/notes';
 import { safeInvoke } from '../tauri';
+import { Note, NoteWithContent } from '@/types/notes';
 
 export async function createNote(
   title: string,

@@ -4,7 +4,8 @@ const config: Config = {
   trailingComma: 'none',
   singleQuote: true,
   arrowParens: 'avoid',
-  singleAttributePerLine: true
+  singleAttributePerLine: true,
+  plugins: ['@trivago/prettier-plugin-sort-imports']
 };
 
 export default config;

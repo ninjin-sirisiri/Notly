@@ -23,23 +23,26 @@ impl NoteService {
     parent_id: Option<i64>,
     folder_path: Option<String>,
   ) -> Result<NoteWithContent, String> {
-    let conn = self.db.conn.lock().unwrap();
+    let note_id = {
+      let conn = self.db.conn.lock().unwrap();
 
-    let file_path = format!(
-      "{}/{}.md",
-      folder_path.clone().unwrap_or_default(),
-      title.clone()
-    );
+      let file_path = format!(
+        "{}/{}.md",
+        folder_path.clone().unwrap_or_default(),
+        title.clone()
+      );
 
-    conn
-      .execute(
-        "
+      conn
+        .execute(
+          "
 		    INSERT INTO notes (title, parent_id, file_path)
 		    VALUES (?, ?, ?)
 		    ",
-        params![title, parent_id, file_path],
-      )
-      .map_err(|e| format!("ノートの作成に失敗しました: {}", e))?;
+          params![title, parent_id, file_path],
+        )
+        .map_err(|e| format!("ノートの作成に失敗しました: {}", e))?;
+      conn.last_insert_rowid()
+    };
 
     let full_path = self
       .base_path
@@ -47,8 +50,6 @@ impl NoteService {
       .join(format!("{}.md", title.clone()));
 
     fs::write(full_path, content).map_err(|e| format!("ノートの作成に失敗しました: {}", e))?;
-
-    let note_id = conn.last_insert_rowid();
 
     let note = self.get_note_by_id(note_id)?;
 
@@ -61,7 +62,7 @@ impl NoteService {
 
     let note = conn
       .query_row(
-        "SELECT title, created_at, updated_at, parent_id, file_path FROM notes WHERE id = ?",
+        "SELECT id, title, created_at, updated_at, parent_id, file_path FROM notes WHERE id = ?",
         params![id],
         |row| {
           Ok(Note {
@@ -69,8 +70,8 @@ impl NoteService {
             title: row.get(1)?,
             created_at: row.get(2)?,
             updated_at: row.get(3)?,
-            file_path: row.get(4)?,
-            parent_id: row.get(5)?,
+            parent_id: row.get(4)?,
+            file_path: row.get(5)?,
           })
         },
       )

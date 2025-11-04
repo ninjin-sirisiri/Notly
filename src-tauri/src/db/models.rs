@@ -21,7 +21,7 @@ pub struct NoteWithContent {
   pub content: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateNoteInput {
   pub title: String,
   pub content: String,
@@ -29,9 +29,9 @@ pub struct CreateNoteInput {
   pub folder_path: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpdateNoteInput {
   pub id: i64,
-  pub title: Option<String>,
-  pub content: Option<String>,
+  pub title: String,
+  pub content: String,
 }

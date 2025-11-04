@@ -61,15 +61,15 @@ impl NoteService {
 
     let note = conn
       .query_row(
-        "SELECT created_at, updated_at, parent_id FROM notes WHERE id = ?",
+        "SELECT title, created_at, updated_at, parent_id, file_path FROM notes WHERE id = ?",
         params![id],
         |row| {
           Ok(Note {
             id: row.get(0)?,
-            file_path: row.get(1)?,
-            title: row.get(2)?,
-            created_at: row.get(3)?,
-            updated_at: row.get(4)?,
+            title: row.get(1)?,
+            created_at: row.get(2)?,
+            updated_at: row.get(3)?,
+            file_path: row.get(4)?,
             parent_id: row.get(5)?,
           })
         },
@@ -98,7 +98,7 @@ impl NoteService {
 
     let mut stmt = conn
       .prepare(
-        "SELECT id, file_path, title, created_at, updated_at, parent_id
+        "SELECT id, title, created_at, updated_at, parent_id, file_path
         FROM notes ORDER BY updated_at DESC",
       )
       .map_err(|e| format!("Failed to prepare statement: {}", e))?;
@@ -107,11 +107,11 @@ impl NoteService {
       .query_map([], |row| {
         Ok(Note {
           id: row.get(0)?,
-          file_path: row.get(1)?,
-          title: row.get(2)?,
-          created_at: row.get(3)?,
-          updated_at: row.get(4)?,
-          parent_id: row.get(5)?,
+          title: row.get(1)?,
+          created_at: row.get(2)?,
+          updated_at: row.get(3)?,
+          parent_id: row.get(4)?,
+          file_path: row.get(5)?,
         })
       })
       .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
@@ -125,12 +125,10 @@ impl NoteService {
   pub fn update_note(
     &self,
     id: i64,
-    title: Option<String>,
-    content: Option<String>,
+    title: String,
+    content: String,
   ) -> Result<NoteWithContent, String> {
     let conn = self.db.conn.lock().unwrap();
-
-    let before_title = self.get_note_by_id(id)?.title;
 
     conn
       .execute(
@@ -139,11 +137,8 @@ impl NoteService {
       )
       .map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
 
-    if content.is_some() {
-      let full_path = self.base_path.join(title.unwrap_or(before_title));
-      fs::write(full_path, content.unwrap())
-        .map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
-    }
+    let full_path = self.base_path.join(title);
+    fs::write(full_path, content).map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
 
     self.get_note_by_id(id)
   }

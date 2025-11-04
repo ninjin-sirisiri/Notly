@@ -23,14 +23,19 @@ impl NoteService {
     parent_id: Option<i64>,
     folder_path: Option<String>,
   ) -> Result<NoteWithContent, String> {
+    let full_path = self
+      .base_path
+      .join(folder_path.clone().unwrap_or_default())
+      .join(format!("{}.md", title.clone()));
+
+    if let Some(parent) = full_path.parent() {
+      fs::create_dir_all(parent)
+        .map_err(|e| format!("ノートディレクトリの作成に失敗しました: {}", e))?;
+    }
+
     let note_id = {
       let conn = self.db.conn.lock().unwrap();
-
-      let file_path = format!(
-        "{}/{}.md",
-        folder_path.clone().unwrap_or_default(),
-        title.clone()
-      );
+      let file_path_str = full_path.to_str().unwrap_or_default().to_string();
 
       conn
         .execute(
@@ -38,18 +43,14 @@ impl NoteService {
 		    INSERT INTO notes (title, parent_id, file_path)
 		    VALUES (?, ?, ?)
 		    ",
-          params![title, parent_id, file_path],
+          params![title, parent_id, file_path_str],
         )
         .map_err(|e| format!("ノートの作成に失敗しました: {}", e))?;
       conn.last_insert_rowid()
     };
 
-    let full_path = self
-      .base_path
-      .join(folder_path.clone().unwrap_or_default())
-      .join(format!("{}.md", title.clone()));
-
-    fs::write(full_path, content).map_err(|e| format!("ノートの作成に失敗しました: {}", e))?;
+    fs::write(&full_path, content.clone())
+      .map_err(|e| format!("ノートの作成に失敗しました: {}", e))?;
 
     let note = self.get_note_by_id(note_id)?;
 
@@ -131,15 +132,45 @@ impl NoteService {
   ) -> Result<NoteWithContent, String> {
     let conn = self.db.conn.lock().unwrap();
 
+    let old_note: Note = conn
+      .query_row(
+        "SELECT id, title, created_at, updated_at, parent_id, file_path FROM notes WHERE id = ?",
+        params![id],
+        |row| {
+          Ok(Note {
+            id: row.get(0)?,
+            title: row.get(1)?,
+            created_at: row.get(2)?,
+            updated_at: row.get(3)?,
+            parent_id: row.get(4)?,
+            file_path: row.get(5)?,
+          })
+        },
+      )
+      .map_err(|e| format!("ノートの読み込みに失敗しました: {}", e))?;
+
+    let old_path = PathBuf::from(old_note.file_path);
+    let new_path = if let Some(parent) = old_path.parent() {
+      parent.join(format!("{}.md", title))
+    } else {
+      PathBuf::from(format!("{}.md", title))
+    };
+
+    if old_path != new_path {
+      fs::rename(&old_path, &new_path)
+        .map_err(|e| format!("ノートファイルのリネームに失敗しました: {}", e))?;
+    }
+
+    let new_path_str = new_path.to_str().unwrap_or_default().to_string();
+
     conn
       .execute(
-        "UPDATE notes SET title = ?, WHERE id = ?",
-        params![title, id],
+        "UPDATE notes SET title = ?, file_path = ? WHERE id = ?",
+        params![title, new_path_str, id],
       )
       .map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
 
-    let full_path = self.base_path.join(title);
-    fs::write(full_path, content).map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
+    fs::write(new_path, content).map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
 
     self.get_note_by_id(id)
   }

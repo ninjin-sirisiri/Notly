@@ -10,9 +10,9 @@ import { create } from 'zustand';
 
 type NoteStore = {
   notes: Note[];
-  currentNote: NoteWithContent | null;
+  currentNote: Note | null;
   currentContent: string | null;
-  setCurrentNote: (note: NoteWithContent | null) => void;
+  setCurrentNote: (note: Note | null) => void;
   setCurrentContent: (content: string | null) => void;
   isLoading: boolean;
   error: string | null;
@@ -33,7 +33,7 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
   notes: [],
   currentNote: null,
   currentContent: null,
-  setCurrentNote: (note: NoteWithContent | null) => set({ currentNote: note }),
+  setCurrentNote: (note: Note | null) => set({ currentNote: note }),
   setCurrentContent: (content: string | null) =>
     set({ currentContent: content }),
   isLoading: false,

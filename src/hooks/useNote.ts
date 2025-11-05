@@ -18,6 +18,7 @@ export function useCurrentNote() {
     isLoading,
     error,
     loadNote,
+    setCurrentNote,
     setCurrentContent,
     updateNote
   } = useNoteStore();
@@ -28,6 +29,7 @@ export function useCurrentNote() {
     isLoading,
     error,
     loadNote,
+    setCurrentNote,
     setCurrentContent,
     updateNote
   };

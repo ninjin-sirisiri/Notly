@@ -43,7 +43,7 @@ export function Sidebar({
             {notes.map(note => (
               <NoteItem
                 key={note.id}
-                name={note.title}
+                note={note}
               />
             ))}
           </div>

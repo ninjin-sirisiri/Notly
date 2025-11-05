@@ -9,8 +9,13 @@ export function CreateNoteButton() {
 
   const handleCreateNote = async () => {
     try {
-      const untitledNotes = notes.filter(note => note.title.startsWith('Untitled'));
-      const newTitle = untitledNotes.length > 0 ? `Untitled ${untitledNotes.length + 1}` : 'Untitled';
+      const untitledNotes = notes.filter(note =>
+        note.title.startsWith('Untitled')
+      );
+      const newTitle =
+        untitledNotes.length > 0
+          ? `Untitled ${untitledNotes.length + 1}`
+          : 'Untitled';
       await createNote(newTitle, '', '');
       console.log('Note created successfully');
     } catch (error) {

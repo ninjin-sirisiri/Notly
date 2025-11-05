@@ -47,7 +47,6 @@ pub fn run() {
       commands::note::update_note,
       commands::note::delete_note,
     ])
-    .plugin(tauri_plugin_opener::init())
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

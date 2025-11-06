@@ -200,6 +200,17 @@ impl NoteService {
   pub fn delete_note(&self, id: i64) -> Result<(), String> {
     let conn = self.db.conn.lock().unwrap();
 
+    let file_path: String = conn
+      .query_row(
+        "SELECT file_path FROM notes WHERE id = ?",
+        params![id],
+        |row| row.get(0),
+      )
+      .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?;
+
+    fs::remove_file(&file_path)
+      .map_err(|e| format!("ノートファイルの削除に失敗しました: {}", e))?;
+
     conn
       .execute("DELETE FROM notes WHERE id = ?", params![id])
       .map_err(|e| format!("ノートの削除に失敗しました: {}", e))?;

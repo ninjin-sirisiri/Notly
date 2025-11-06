@@ -21,7 +21,8 @@ export default defineConfig([
       }
     },
     rules: {
-      '@eslint-react/no-missing-key': 'warn'
+      '@eslint-react/no-missing-key': 'warn',
+      '@eslint-react/hooks-extra/no-direct-set-state-in-use-effect': 'off'
     }
   }
 ]);

@@ -107,9 +107,14 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await deleteNote(id);
-      set({
-        notes: get().notes.filter(note => note.id !== id),
-        isLoading: false
+      set(state => {
+        const isDeletingCurrentNote = state.currentNote?.id === id;
+        return {
+          notes: state.notes.filter(note => note.id !== id),
+          currentNote: isDeletingCurrentNote ? null : state.currentNote,
+          currentContent: isDeletingCurrentNote ? null : state.currentContent,
+          isLoading: false
+        };
       });
     } catch (error) {
       set({ error: String(error), isLoading: false });

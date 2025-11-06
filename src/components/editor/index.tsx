@@ -15,6 +15,9 @@ export function Editor() {
     if (currentNote) {
       setTitle(currentNote.title);
       setContent(currentContent || '');
+    } else {
+      setTitle('');
+      setContent('');
     }
   }, [currentNote, currentContent]);
 

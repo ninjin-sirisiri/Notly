@@ -1,4 +1,4 @@
-import { useCurrentNote, useNotes } from '@/hooks/useNote';
+import { useCurrentNote, useDeleteNote, useNotes } from '@/hooks/useNote';
 import { cn } from '@/lib/utils';
 import { Note } from '@/types/notes';
 import { FileText, Edit2, Trash2 } from 'lucide-react';
@@ -11,6 +11,7 @@ type NoteItemProps = {
 export function NoteItem({ note }: NoteItemProps) {
   const { loadNote } = useNotes();
   const { currentNote, currentContent, updateNote } = useCurrentNote();
+  const { deleteNote } = useDeleteNote();
 
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(note.title);
@@ -19,7 +20,7 @@ export function NoteItem({ note }: NoteItemProps) {
     setTitle(note.title);
   }, [note]);
 
-  function saveNoteTitle() {
+  function handleSave() {
     if (title.trim() === '') {
       setIsEditing(false);
       setTitle('');
@@ -30,6 +31,11 @@ export function NoteItem({ note }: NoteItemProps) {
       setIsEditing(false);
       setTitle('');
     }
+  }
+
+  function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {
+    e.stopPropagation();
+    deleteNote(note.id);
   }
 
   return (
@@ -43,7 +49,7 @@ export function NoteItem({ note }: NoteItemProps) {
             onChange={e => setTitle(e.target.value)}
             onKeyDown={e => {
               if (e.key === 'Enter') {
-                saveNoteTitle();
+                handleSave();
               }
             }}
           />
@@ -76,6 +82,7 @@ export function NoteItem({ note }: NoteItemProps) {
             <button
               className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
               title="削除"
+              onClick={handleDelete}
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>

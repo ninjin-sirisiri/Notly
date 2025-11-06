@@ -130,26 +130,27 @@ impl NoteService {
     title: String,
     content: String,
   ) -> Result<NoteWithContent, String> {
-    let conn = self.db.conn.lock().unwrap();
+    let old_note: Note = {
+      let conn = self.db.conn.lock().unwrap();
+      conn
+        .query_row(
+          "SELECT id, title, created_at, updated_at, parent_id, file_path FROM notes WHERE id = ?",
+          params![id],
+          |row| {
+            Ok(Note {
+              id: row.get(0)?,
+              title: row.get(1)?,
+              created_at: row.get(2)?,
+              updated_at: row.get(3)?,
+              parent_id: row.get(4)?,
+              file_path: row.get(5)?,
+            })
+          },
+        )
+        .map_err(|e| format!("ノートの読み込みに失敗しました: {}", e))?
+    };
 
-    let old_note: Note = conn
-      .query_row(
-        "SELECT id, title, created_at, updated_at, parent_id, file_path FROM notes WHERE id = ?",
-        params![id],
-        |row| {
-          Ok(Note {
-            id: row.get(0)?,
-            title: row.get(1)?,
-            created_at: row.get(2)?,
-            updated_at: row.get(3)?,
-            parent_id: row.get(4)?,
-            file_path: row.get(5)?,
-          })
-        },
-      )
-      .map_err(|e| format!("ノートの読み込みに失敗しました: {}", e))?;
-
-    let old_path = PathBuf::from(old_note.file_path);
+    let old_path = PathBuf::from(&old_note.file_path);
     let new_path = if let Some(parent) = old_path.parent() {
       parent.join(format!("{}.md", title))
     } else {
@@ -163,16 +164,36 @@ impl NoteService {
 
     let new_path_str = new_path.to_str().unwrap_or_default().to_string();
 
-    conn
-      .execute(
-        "UPDATE notes SET title = ?, file_path = ? WHERE id = ?",
-        params![title, new_path_str, id],
-      )
+    let updated_at = {
+      let conn = self.db.conn.lock().unwrap();
+      conn
+        .execute(
+          "UPDATE notes SET title = ?, file_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+          params![title, new_path_str, id],
+        )
+        .map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
+
+      conn
+        .query_row(
+          "SELECT updated_at FROM notes WHERE id = ?",
+          params![id],
+          |row| row.get(0),
+        )
+        .map_err(|e| format!("更新日時の取得に失敗しました: {}", e))?
+    };
+
+    fs::write(new_path, content.clone())
       .map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
 
-    fs::write(new_path, content).map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
-
-    self.get_note_by_id(id)
+    Ok(NoteWithContent {
+      id: old_note.id,
+      title,
+      created_at: old_note.created_at,
+      updated_at,
+      parent_id: old_note.parent_id,
+      file_path: new_path_str.to_string(),
+      content,
+    })
   }
 
   // ノートの削除

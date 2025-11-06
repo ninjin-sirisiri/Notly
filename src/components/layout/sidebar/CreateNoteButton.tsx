@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useCreateNote } from '@/hooks/useNote';
-import { useNoteStore } from '@/stores/note';
+import { useNoteStore } from '@/stores/notes';
 import { FileText } from 'lucide-react';
 
 export function CreateNoteButton() {

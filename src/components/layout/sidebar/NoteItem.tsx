@@ -1,4 +1,4 @@
-import { useCurrentNote } from '@/hooks/useNote';
+import { useCurrentNote, useNotes } from '@/hooks/useNote';
 import { cn } from '@/lib/utils';
 import { Note } from '@/types/notes';
 import { FileText, Edit2, Trash2 } from 'lucide-react';
@@ -8,7 +8,8 @@ type NoteItemProps = {
 };
 
 export function NoteItem({ note }: NoteItemProps) {
-  const { currentNote, setCurrentNote } = useCurrentNote();
+  const { loadNote } = useNotes();
+  const { currentNote } = useCurrentNote();
 
   return (
     <div
@@ -18,7 +19,9 @@ export function NoteItem({ note }: NoteItemProps) {
           ? 'bg-gray-300/50 dark:bg-gray-600/50'
           : 'hover:bg-gray-200 dark:hover:bg-gray-700/50'
       )}
-      onClick={() => setCurrentNote(note)}
+      onClick={() => {
+        loadNote(note.id);
+      }}
     >
       <FileText className="h-4 w-4" />
       <p className="text-sm font-medium truncate">{note.title}</p>

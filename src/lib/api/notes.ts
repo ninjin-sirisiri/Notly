@@ -30,10 +30,12 @@ export async function updateNote(
   title: string,
   content: string
 ): Promise<NoteWithContent> {
-  return safeInvoke<NoteWithContent>('update_note', {
-    id,
-    title,
-    content
+  return await safeInvoke<NoteWithContent>('update_note', {
+    input: {
+      id,
+      title,
+      content
+    }
   });
 }
 

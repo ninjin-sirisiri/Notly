@@ -93,6 +93,8 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
       const updatedNote = await updateNote(id, title, content);
       set({
         notes: get().notes.map(note => (note.id === id ? updatedNote : note)),
+        currentNote: updatedNote,
+        currentContent: updatedNote.content,
         isLoading: false
       });
     } catch (error) {

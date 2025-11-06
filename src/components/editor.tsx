@@ -1,4 +1,5 @@
 import { Button } from './ui/button';
+import { useCurrentNote } from '@/hooks/useNote';
 import {
   Heading1,
   Heading2,
@@ -13,20 +14,39 @@ import {
   Code,
   Save
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function Editor() {
-  const [content, setContent] = useState('');
+  const { currentNote, currentContent, updateNote, isLoading } =
+    useCurrentNote();
+
+  const [title, setTitle] = useState(currentNote?.title || '');
+  const [content, setContent] = useState(currentContent || '');
+
+  useEffect(() => {
+    if (currentNote) {
+      setTitle(currentNote.title);
+      setContent(currentContent || '');
+    }
+  }, [currentNote, currentContent]);
+
+  const handleSave = () => {
+    console.log(JSON.stringify(currentNote, null, 2));
+    if (!currentNote?.id) return;
+    updateNote(currentNote?.id, title, content);
+  };
 
   return (
     <main className="flex-1 flex flex-col p-3 md:p-6 overflow-y-auto">
       <div className="shrink-0 mb-4">
-        <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
-          <p className="text-2xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-primary dark:text-white">
-            新しいUIデザインの草案
-          </p>
+        <div className="flex sm:items-baseline sm:justify-between gap-2">
+          <input
+            className="w-full text-2xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-primary dark:text-white p-0.5"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+          />
           <span className="text-xs text-gray-400 dark:text-gray-500">
-            2023年10月27日 14:32
+            {currentNote?.created_at.toLocaleString()}
           </span>
         </div>
       </div>
@@ -74,7 +94,10 @@ export function Editor() {
                   </Button>
                 </div>
                 <div className="ml-auto pl-2 shrink-0">
-                  <Button>
+                  <Button
+                    onClick={handleSave}
+                    disabled={isLoading}
+                  >
                     <Save className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     <span className="hidden sm:inline">保存</span>
                   </Button>

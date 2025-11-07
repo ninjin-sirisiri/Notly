@@ -20,7 +20,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
           Notly
         </h1>
       </div>
-      <div className="flex items-center gap-2 md:gap-4">
+      <div className="flex items-center justify-between gap-2 md:gap-4">
         <div className="flex items-center gap-1 md:gap-1.5 rounded-full bg-orange-100 dark:bg-orange-900/50 px-2 md:px-3 py-1">
           <Flame className="h-4 w-4 text-orange-500 dark:text-orange-400" />
           <p className="hidden sm:block text-sm font-medium text-orange-600 dark:text-orange-300">

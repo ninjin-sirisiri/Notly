@@ -1,4 +1,3 @@
-import { Button } from '../ui/button';
 import {
   Bold,
   Code,
@@ -13,6 +12,8 @@ import {
   Save,
   Strikethrough
 } from 'lucide-react';
+
+import { Button } from '../ui/button';
 
 type Props = {
   handleSave: () => void;
@@ -32,7 +33,6 @@ export function Tooltip({ handleSave, isLoading }: Props) {
         <Button variant="ghost">
           <Heading3 className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
         </Button>
-        <div className="h-5 w-px bg-[#EAEAEA] dark:bg-[#333333] mx-0.5 md:mx-1"></div>
         <Button variant="ghost">
           <Bold className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
         </Button>
@@ -42,14 +42,12 @@ export function Tooltip({ handleSave, isLoading }: Props) {
         <Button variant="ghost">
           <Strikethrough className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
         </Button>
-        <div className="h-5 w-px bg-[#EAEAEA] dark:bg-[#333333] mx-0.5 md:mx-1"></div>
         <Button variant="ghost">
           <List className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
         </Button>
         <Button variant="ghost">
           <ListOrdered className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
         </Button>
-        <div className="h-5 w-px bg-[#EAEAEA] dark:bg-[#333333] mx-0.5 md:mx-1"></div>
         <Button variant="ghost">
           <Link className="h-4 w-4 md:h-5 md:w-5 text-[#666666]" />
         </Button>
@@ -63,8 +61,7 @@ export function Tooltip({ handleSave, isLoading }: Props) {
       <div className="ml-auto pl-2 shrink-0">
         <Button
           onClick={handleSave}
-          disabled={isLoading}
-        >
+          disabled={isLoading}>
           <Save className="h-3.5 w-3.5 md:h-4 md:w-4" />
           <span className="hidden sm:inline">保存</span>
         </Button>

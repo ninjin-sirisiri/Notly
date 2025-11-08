@@ -1,12 +1,14 @@
-import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
+import oxlintPlugin from 'vite-plugin-oxlint';
+
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
 
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig(async () => ({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), oxlintPlugin()],
   clearScreen: false,
   resolve: {
     alias: {

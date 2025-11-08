@@ -5,12 +5,7 @@ type Props = {
   created_at: Date;
 };
 
-export function EditorHeader({
-  title,
-  setTitle,
-  handleSave,
-  created_at
-}: Props) {
+export function EditorHeader({ title, setTitle, handleSave, created_at }: Props) {
   return (
     <div className="shrink-0 mb-4">
       <div className="flex sm:items-baseline sm:justify-between gap-2">

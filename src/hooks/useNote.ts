@@ -1,5 +1,6 @@
-import { useNoteStore } from '@/stores/notes';
 import { useEffect } from 'react';
+
+import { useNoteStore } from '@/stores/notes';
 
 export function useNotes() {
   const { notes, isLoading, error, loadNote, loadNotes } = useNoteStore();
@@ -8,7 +9,13 @@ export function useNotes() {
     loadNotes();
   }, [loadNotes]);
 
-  return { notes, loadNote, loadNotes, isLoading, error };
+  return {
+    error,
+    isLoading,
+    loadNote,
+    loadNotes,
+    notes
+  };
 }
 
 export function useCurrentNote() {
@@ -24,13 +31,13 @@ export function useCurrentNote() {
   } = useNoteStore();
 
   return {
-    currentNote,
     currentContent,
-    isLoading,
+    currentNote,
     error,
+    isLoading,
     loadNote,
-    setCurrentNote,
     setCurrentContent,
+    setCurrentNote,
     updateNote
   };
 }
@@ -40,8 +47,8 @@ export function useCreateNote() {
 
   return {
     createNote,
-    isLoading,
-    error
+    error,
+    isLoading
   };
 }
 
@@ -50,7 +57,7 @@ export function useDeleteNote() {
 
   return {
     deleteNote,
-    isLoading,
-    error
+    error,
+    isLoading
   };
 }

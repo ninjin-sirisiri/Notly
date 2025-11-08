@@ -1,5 +1,6 @@
+import { Minus, Square, X } from 'lucide-react';
+
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { X, Minus, Square } from 'lucide-react';
 
 export function TitleBar() {
   const appWindow = getCurrentWindow();
@@ -7,8 +8,7 @@ export function TitleBar() {
   return (
     <div
       className="flex items-center justify-between bg-gray-900 text-white h-8 px-2 select-none"
-      data-tauri-drag-region
-    >
+      data-tauri-drag-region>
       <div>
         <img
           src="logo.png"
@@ -19,8 +19,7 @@ export function TitleBar() {
       <div className="flex space-x-2">
         <button
           className="hover:bg-accent/50 p-2 rounded"
-          onClick={() => appWindow.minimize()}
-        >
+          onClick={() => appWindow.minimize()}>
           <Minus size={14} />
         </button>
         <button
@@ -28,14 +27,12 @@ export function TitleBar() {
           onClick={() => {
             appWindow.toggleMaximize();
             console.log('Maximize toggled');
-          }}
-        >
+          }}>
           <Square size={12} />
         </button>
         <button
           className="hover:bg-red-500 p-2 rounded"
-          onClick={() => appWindow.close()}
-        >
+          onClick={() => appWindow.close()}>
           <X size={14} />
         </button>
       </div>

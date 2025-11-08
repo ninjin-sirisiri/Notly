@@ -1,12 +1,13 @@
+import { useEffect, useState } from 'react';
+
+import { useCurrentNote } from '@/hooks/useNote';
+
 import { ContentArea } from './ContentArea';
 import { EditorHeader } from './EditorHeader';
 import { Tooltip } from './Tooltip';
-import { useCurrentNote } from '@/hooks/useNote';
-import { useEffect, useState } from 'react';
 
 export function Editor() {
-  const { currentNote, currentContent, updateNote, isLoading } =
-    useCurrentNote();
+  const { currentNote, currentContent, updateNote, isLoading } = useCurrentNote();
 
   const [title, setTitle] = useState(currentNote?.title || '');
   const [content, setContent] = useState(currentContent || '');
@@ -21,11 +22,10 @@ export function Editor() {
     }
   }, [currentNote, currentContent]);
 
-  const handleSave = () => {
-    console.log(JSON.stringify(currentNote, null, 2));
+  function handleSave() {
     if (!currentNote?.id) return;
     updateNote(currentNote?.id, title, content);
-  };
+  }
 
   return (
     <main className="flex-1 flex flex-col p-3 md:p-6 overflow-y-auto">

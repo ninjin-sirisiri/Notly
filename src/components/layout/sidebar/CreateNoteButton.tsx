@@ -1,5 +1,6 @@
-import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
 
 export function CreateNoteButton({
   onClick,
@@ -12,8 +13,7 @@ export function CreateNoteButton({
     <Button
       variant="secondary"
       onClick={onClick}
-      disabled={disabled}
-    >
+      disabled={disabled}>
       <FileText className="h-4 w-4" />
       ノート
     </Button>

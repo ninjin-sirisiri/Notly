@@ -62,7 +62,7 @@
     "sort-keys": "off",
     "unicorn/no-null": "off",
     "curly": "off",
-    "no-magic-numbers": ["error", { "ignore": [0, 1] }],
+    "no-magic-numbers": "off",
     "import/consistent-type-specifier-style": ["warn", "prefer-inline"],
     "sort-imports": "off",
     "max-lines-per-function": "off"

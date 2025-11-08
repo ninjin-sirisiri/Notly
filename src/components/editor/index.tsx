@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useCurrentNote } from '@/hooks/useNote';
 
@@ -11,6 +11,8 @@ export function Editor() {
 
   const [title, setTitle] = useState(currentNote?.title || '');
   const [content, setContent] = useState(currentContent || '');
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (currentNote) {
@@ -42,11 +44,14 @@ export function Editor() {
               <Tooltip
                 handleSave={handleSave}
                 isLoading={isLoading}
+                textareaRef={textareaRef}
+                setContent={setContent}
               />
               <ContentArea
                 content={content}
                 setContent={setContent}
                 handleSave={handleSave}
+                textareaRef={textareaRef}
               />
             </div>
           </div>

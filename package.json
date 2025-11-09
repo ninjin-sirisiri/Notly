@@ -37,6 +37,7 @@
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.16",
+    "wysimark-lite": "^0.17.2",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

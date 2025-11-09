@@ -1,18 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useCurrentNote } from '@/hooks/useNote';
 
-import { ContentArea } from './ContentArea';
 import { EditorHeader } from './EditorHeader';
-import { Tooltip } from './Tooltip';
+import { MarkdownEditor } from './MarkdownEditor';
 
 export function Editor() {
   const { currentNote, currentContent, updateNote, isLoading } = useCurrentNote();
 
   const [title, setTitle] = useState(currentNote?.title || '');
   const [content, setContent] = useState(currentContent || '');
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (currentNote) {
@@ -30,33 +27,18 @@ export function Editor() {
   }
 
   return (
-    <main className="flex-1 flex flex-col p-3 md:p-6 overflow-y-auto">
+    <main className="flex-1 flex flex-col p-3 md:p-6">
       <EditorHeader
         title={title}
         setTitle={setTitle}
         handleSave={handleSave}
         created_at={currentNote?.created_at || new Date()}
+        isLoading={isLoading}
       />
-      <div className="flex flex-col flex-1">
-        <div className="flex flex-col h-full flex-1">
-          <div className="flex w-full flex-1 items-stretch rounded-lg flex-col">
-            <div className="flex flex-1 flex-col">
-              <Tooltip
-                handleSave={handleSave}
-                isLoading={isLoading}
-                textareaRef={textareaRef}
-                setContent={setContent}
-              />
-              <ContentArea
-                content={content}
-                setContent={setContent}
-                handleSave={handleSave}
-                textareaRef={textareaRef}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      <MarkdownEditor
+        content={content}
+        setContent={setContent}
+      />
     </main>
   );
 }

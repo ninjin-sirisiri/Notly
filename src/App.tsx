@@ -1,9 +1,11 @@
-import './App.css';
 import { useState } from 'react';
+
+import { Editor } from '@/components/editor';
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
-import { Editor } from '@/components/editor';
-import { TitleBar } from './components/layout/title-bar';
+import { TitleBar } from '@/components/layout/title-bar';
+
+import './App.css';
 
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

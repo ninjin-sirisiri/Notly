@@ -1,12 +1,16 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
+
+html {
+  overscroll-behavior: none;
+}
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: 'Roboto', sans-serif;
-  --font-mono: 'Fira Code', monospace;
-  --font-serif: 'Merriweather', serif;
+  --font-sans: "Roboto", sans-serif;
+  --font-mono: "Fira Code", monospace;
+  --font-serif: "Merriweather", serif;
   --radius: 0.3rem;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
@@ -102,9 +106,9 @@
   --sidebar-border: oklch(0.9079 0 0);
   --sidebar-ring: oklch(0.5547 0 0);
   --destructive-foreground: oklch(0.9848 0 0);
-  --font-sans: 'Roboto', sans-serif;
-  --font-serif: 'Merriweather', serif;
-  --font-mono: 'Fira Code', monospace;
+  --font-sans: "Roboto", sans-serif;
+  --font-serif: "Merriweather", serif;
+  --font-mono: "Fira Code", monospace;
   --shadow-color: hsl(0, 0%, 0%);
   --shadow-opacity: 0.05;
   --shadow-blur: 10px;
@@ -163,9 +167,9 @@
   --sidebar-ring: oklch(0.683 0 0);
   --destructive-foreground: oklch(0.9848 0 0);
   --radius: 0.3rem;
-  --font-sans: 'Roboto', sans-serif;
-  --font-serif: 'Merriweather', serif;
-  --font-mono: 'Fira Code', monospace;
+  --font-sans: "Roboto", sans-serif;
+  --font-serif: "Merriweather", serif;
+  --font-mono: "Fira Code", monospace;
   --shadow-color: hsl(0, 0%, 0%);
   --shadow-opacity: 0.3;
   --shadow-blur: 10px;

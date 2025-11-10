@@ -12,6 +12,7 @@ import { type Folder } from '@/types/folders';
 type FolderStore = {
   folders: Folder[];
   currentFolder: Folder | null;
+  setCurrentFolder: (folder: Folder | null) => void;
   isLoading: boolean;
   error: string | null;
 
@@ -25,6 +26,7 @@ type FolderStore = {
 export const useFolderStore = create<FolderStore>()((set, get) => ({
   folders: [],
   currentFolder: null,
+  setCurrentFolder: (folder: Folder | null) => set({ currentFolder: folder }),
   isLoading: false,
   error: null,
 

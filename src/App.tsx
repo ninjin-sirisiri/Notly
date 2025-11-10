@@ -6,6 +6,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { TitleBar } from '@/components/layout/title-bar';
 
 import './App.css';
+import { Toaster } from './components/ui/sonner';
 
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -23,6 +24,7 @@ export default function App() {
           <Editor />
         </div>
       </div>
+      <Toaster />
     </div>
   );
 }

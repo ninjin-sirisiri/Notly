@@ -1,4 +1,5 @@
 import { Minus, Square, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
@@ -26,7 +27,7 @@ export function TitleBar() {
           className="hover:bg-accent/50 p-2 rounded"
           onClick={() => {
             appWindow.toggleMaximize();
-            console.log('Maximize toggled');
+            toast.info('Maximize toggled');
           }}>
           <Square size={12} />
         </button>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 import { Input } from '@/components/ui/input';
 import { useCreateNote, useNotes } from '@/hooks/useNote';
@@ -33,7 +34,9 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
       }
       await createNote(newTitle, '', '');
     } catch (error) {
-      console.error('Failed to create note:', error);
+      toast.error('Failed to create note:', {
+        description: error as string
+      });
     } finally {
       setIsCreating(false);
       setTitle('');

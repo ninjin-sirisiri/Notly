@@ -1,8 +1,8 @@
 export type Folder = {
-  id: string;
+  id: number;
   name: string;
   created_at: Date;
   updated_at: Date;
-  parent_id?: string;
+  parent_id?: number;
   folder_path: string;
 };

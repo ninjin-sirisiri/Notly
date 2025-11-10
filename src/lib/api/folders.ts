@@ -4,14 +4,14 @@ import { safeInvoke } from '../tauri';
 
 export function createFolder(
   name: string,
-  parent_path = '',
-  parent_id: number | null = null
+  parentPath = '',
+  parentId: number | null = null
 ): Promise<Folder> {
   return safeInvoke<Folder>('create_folder', {
     input: {
       name,
-      parent_path,
-      parent_id
+      parent_path: parentPath,
+      parent_id: parentId
     }
   });
 }
@@ -29,15 +29,15 @@ export function loadFolder(id: number): Promise<Folder> {
 export function updateFolder(
   id: number,
   name: string,
-  parent_path = '',
-  parent_id: number | null = null
+  parentPath = '',
+  parentId: number | null = null
 ): Promise<Folder> {
   return safeInvoke<Folder>('update_folder', {
     input: {
       id,
       name,
-      parent_path,
-      parent_id
+      parent_path: parentPath,
+      parent_id: parentId
     }
   });
 }

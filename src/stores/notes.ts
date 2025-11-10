@@ -25,6 +25,20 @@ type NoteStore = {
 };
 
 export const useNoteStore = create<NoteStore>()((set, get) => ({
+  notes: [],
+  currentNote: null,
+  currentContent: null,
+  setCurrentContent: (content: string | null) =>
+    set({
+      currentContent: content
+    }),
+  setCurrentNote: (note: Note | null) =>
+    set({
+      currentNote: note
+    }),
+  isLoading: false,
+  error: null,
+
   createNote: async (title: string, content: string, folderPath = '', parentId?: number) => {
     set({
       isLoading: true,
@@ -47,8 +61,70 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
       throw error;
     }
   },
-  currentContent: null,
-  currentNote: null,
+
+  loadNote: async (id: number) => {
+    set({
+      isLoading: true,
+      error: null
+    });
+    try {
+      const note = await loadNote(id);
+      set({
+        currentNote: note,
+        currentContent: note.content,
+        isLoading: false
+      });
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: String(error)
+      });
+      throw error;
+    }
+  },
+
+  loadNotes: async () => {
+    set({
+      isLoading: true,
+      error: null
+    });
+    try {
+      const notes = await loadNotes();
+      set({
+        notes,
+        isLoading: false
+      });
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: String(error)
+      });
+      throw error;
+    }
+  },
+
+  updateNote: async (id: number, title: string, content: string) => {
+    set({
+      isLoading: true,
+      error: null
+    });
+    try {
+      const updatedNote = await updateNote(id, title, content);
+      set({
+        notes: get().notes.map(note => (note.id === id ? updatedNote : note)),
+        currentNote: updatedNote,
+        currentContent: updatedNote.content,
+        isLoading: false
+      });
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: String(error)
+      });
+      throw error;
+    }
+  },
+
   deleteNote: async (id: number) => {
     set({
       isLoading: true,
@@ -67,79 +143,8 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
       });
     } catch (error) {
       set({
-        error: String(error),
-        isLoading: false
-      });
-      throw error;
-    }
-  },
-  error: null,
-  isLoading: false,
-  loadNote: async (id: number) => {
-    set({
-      isLoading: true,
-      error: null
-    });
-    try {
-      const note = await loadNote(id);
-      set({
-        currentNote: note,
-        currentContent: note.content,
-        isLoading: false
-      });
-    } catch (error) {
-      set({
-        error: String(error),
-        isLoading: false
-      });
-      throw error;
-    }
-  },
-  loadNotes: async () => {
-    set({
-      isLoading: true,
-      error: null
-    });
-    try {
-      const notes = await loadNotes();
-      set({
-        notes,
-        isLoading: false
-      });
-    } catch (error) {
-      set({
-        error: String(error),
-        isLoading: false
-      });
-      throw error;
-    }
-  },
-  notes: [],
-  setCurrentContent: (content: string | null) =>
-    set({
-      currentContent: content
-    }),
-  setCurrentNote: (note: Note | null) =>
-    set({
-      currentNote: note
-    }),
-  updateNote: async (id: number, title: string, content: string) => {
-    set({
-      isLoading: true,
-      error: null
-    });
-    try {
-      const updatedNote = await updateNote(id, title, content);
-      set({
-        notes: get().notes.map(note => (note.id === id ? updatedNote : note)),
-        currentNote: updatedNote,
-        currentContent: updatedNote.content,
-        isLoading: false
-      });
-    } catch (error) {
-      set({
-        error: String(error),
-        isLoading: false
+        isLoading: false,
+        error: String(error)
       });
       throw error;
     }

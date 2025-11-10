@@ -1,5 +1,5 @@
 use crate::db::models::{Note, NoteWithContent};
-use rusqlite::{params, Result as SqlResult};
+use rusqlite::{Result as SqlResult, params};
 use std::{path::PathBuf, sync::Arc};
 
 use crate::db::Database;

@@ -4,7 +4,7 @@ mod services;
 
 use std::sync::Arc;
 
-use db::{migrate, Database};
+use db::{Database, migrate};
 use tauri::Manager;
 
 pub struct AppState {

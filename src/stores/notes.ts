@@ -3,6 +3,8 @@ import { create } from 'zustand';
 import { createNote, deleteNote, loadNote, loadNotes, updateNote } from '@/lib/api/notes';
 import { type Note, type NoteWithContent } from '@/types/notes';
 
+import { useFileStore } from './files';
+
 type NoteStore = {
   notes: Note[];
   currentNote: Note | null;
@@ -16,7 +18,7 @@ type NoteStore = {
     title: string,
     content: string,
     folderPath: string,
-    parentId?: number
+    parentId?: number | null
   ) => Promise<NoteWithContent>;
   loadNotes: () => Promise<void>;
   loadNote: (id: number) => Promise<void>;
@@ -39,7 +41,7 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
   isLoading: false,
   error: null,
 
-  createNote: async (title: string, content: string, folderPath = '', parentId?: number) => {
+  createNote: async (title: string, content: string, folderPath = '', parentId?: number | null) => {
     set({
       isLoading: true,
       error: null
@@ -52,6 +54,7 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         currentContent: newNote.content,
         isLoading: false
       });
+      useFileStore.getState().loadFiles();
       return newNote;
     } catch (error) {
       set({
@@ -116,6 +119,7 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         currentContent: updatedNote.content,
         isLoading: false
       });
+      useFileStore.getState().loadFiles();
     } catch (error) {
       set({
         isLoading: false,
@@ -141,6 +145,7 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
           isLoading: false
         };
       });
+      useFileStore.getState().loadFiles();
     } catch (error) {
       set({
         isLoading: false,

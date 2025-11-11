@@ -59,3 +59,22 @@ pub struct UpdateFolderInput {
   pub name: String,
   pub parent_id: Option<i64>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum FileItem {
+  Folder(FolderWithChildren),
+  Note(Note),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FolderWithChildren {
+  pub id: i64,
+  pub name: String,
+  pub created_at: String,
+  pub updated_at: String,
+  pub parent_id: Option<i64>,
+  pub folder_path: String,
+  pub children: Vec<FileItem>,
+}

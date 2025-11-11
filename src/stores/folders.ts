@@ -7,42 +7,59 @@ import {
   loadFolders,
   updateFolder
 } from '@/lib/api/folders';
-import { type Folder } from '@/types/folders';
+import { type FolderWithChildren } from '@/types/files';
+
+import { useFileStore } from './files';
 
 type FolderStore = {
-  folders: Folder[];
-  currentFolder: Folder | null;
-  setCurrentFolder: (folder: Folder | null) => void;
+  folders: FolderWithChildren[];
+  currentFolder: FolderWithChildren | null;
+  setCurrentFolder: (folder: FolderWithChildren | null) => void;
   isLoading: boolean;
   error: string | null;
 
-  createFolder: (name: string, parentPath: string, parentId?: number) => Promise<void>;
+  createFolder: (name: string, parentPath: string, parentId?: number | null) => Promise<void>;
   loadFolders: () => Promise<void>;
   loadFolder: (id: number) => Promise<void>;
-  updateFolder: (id: number, name: string, parentPath: string, parentId?: number) => Promise<void>;
+  updateFolder: (
+    id: number,
+    name: string,
+    parentPath: string,
+    parentId?: number | null
+  ) => Promise<void>;
   deleteFolder: (id: number) => Promise<void>;
 };
 
 export const useFolderStore = create<FolderStore>()((set, get) => ({
   folders: [],
   currentFolder: null,
-  setCurrentFolder: (folder: Folder | null) => set({ currentFolder: folder }),
+  setCurrentFolder: (folder: FolderWithChildren | null) => set({ currentFolder: folder }),
   isLoading: false,
   error: null,
 
-  createFolder: async (name: string, parentPath = '', parentId?: number) => {
+  createFolder: async (name: string, parentPath = '', parentId?: number | null) => {
     set({
       isLoading: true,
       error: null
     });
     try {
       const newFolder = await createFolder(name, parentPath, parentId);
-      set({
-        folders: [...get().folders, newFolder],
-        currentFolder: newFolder,
+      const newFolderWithChildren: FolderWithChildren = {
+        id: newFolder.id,
+        name: newFolder.name,
+        createdAt: newFolder.created_at as unknown as string,
+        updatedAt: newFolder.updated_at as unknown as string,
+        parentId: newFolder.parent_id ?? null,
+        folderPath: newFolder.folder_path,
+        children: []
+      };
+      set(state => ({
+        folders: [...state.folders, newFolderWithChildren],
+        currentFolder: newFolderWithChildren,
         isLoading: false,
         error: null
-      });
+      }));
+      useFileStore.getState().loadFiles();
     } catch (error) {
       set({
         isLoading: false,
@@ -55,8 +72,17 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
     set({ isLoading: false, error: null });
     try {
       const folders = await loadFolders();
+      const foldersWithChildren: FolderWithChildren[] = folders.map(folder => ({
+        id: folder.id,
+        name: folder.name,
+        createdAt: folder.created_at as unknown as string,
+        updatedAt: folder.updated_at as unknown as string,
+        parentId: folder.parent_id ?? null,
+        folderPath: folder.folder_path,
+        children: []
+      }));
       set({
-        folders,
+        folders: foldersWithChildren,
         isLoading: false,
         error: null
       });
@@ -72,8 +98,17 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const folder = await loadFolder(id);
+      const folderWithChildren: FolderWithChildren = {
+        id: folder.id,
+        name: folder.name,
+        createdAt: folder.created_at as unknown as string,
+        updatedAt: folder.updated_at as unknown as string,
+        parentId: folder.parent_id ?? null,
+        folderPath: folder.folder_path,
+        children: []
+      };
       set({
-        currentFolder: folder,
+        currentFolder: folderWithChildren,
         isLoading: false,
         error: null
       });
@@ -85,19 +120,31 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
     }
   },
 
-  updateFolder: async (id: number, name: string, parentPath = '', parentId?: number) => {
+  updateFolder: async (id: number, name: string, parentPath = '', parentId?: number | null) => {
     set({
       isLoading: true,
       error: null
     });
     try {
       const updatedFolder = await updateFolder(id, name, parentPath, parentId);
-      set({
-        folders: get().folders.map(folder => (folder.id === id ? updatedFolder : folder)),
-        currentFolder: updatedFolder,
+      const updatedFolderWithChildren: FolderWithChildren = {
+        id: updatedFolder.id,
+        name: updatedFolder.name,
+        createdAt: updatedFolder.created_at as unknown as string,
+        updatedAt: updatedFolder.updated_at as unknown as string,
+        parentId: updatedFolder.parent_id ?? null,
+        folderPath: updatedFolder.folder_path,
+        children: []
+      };
+      set(state => ({
+        folders: state.folders.map(folder =>
+          folder.id === id ? updatedFolderWithChildren : folder
+        ),
+        currentFolder: updatedFolderWithChildren,
         isLoading: false,
         error: null
-      });
+      }));
+      useFileStore.getState().loadFiles();
     } catch (error) {
       set({
         isLoading: false,
@@ -119,6 +166,7 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
         isLoading: false,
         error: null
       });
+      useFileStore.getState().loadFiles();
     } catch (error) {
       set({
         isLoading: false,

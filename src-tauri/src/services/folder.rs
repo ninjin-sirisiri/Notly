@@ -29,10 +29,8 @@ impl FolderService {
       .join(parent_path.clone().unwrap_or_default())
       .join(name.clone());
 
-    if let Some(parent) = full_path.parent() {
-      fs::create_dir_all(parent)
-        .map_err(|e| format!("親ディレクトリの作成に失敗しました: {}", e))?;
-    }
+    fs::create_dir_all(&full_path)
+      .map_err(|e| format!("ディレクトリの作成に失敗しました: {}", e))?;
 
     let folder_id = {
       let conn = self.db.conn.lock().unwrap();
@@ -41,7 +39,7 @@ impl FolderService {
       conn
         .execute(
           "
-    INSERT INTO folders (name, path, parent_id) VALUES (?, ?, ?)
+    INSERT INTO folders (name, folder_path, parent_id) VALUES (?, ?, ?)
     ",
           params![name, folder_path_str, parent_id],
         )

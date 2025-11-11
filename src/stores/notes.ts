@@ -4,6 +4,7 @@ import { createNote, deleteNote, loadNote, loadNotes, updateNote } from '@/lib/a
 import { type Note, type NoteWithContent } from '@/types/notes';
 
 import { useFileStore } from './files';
+import { useFolderStore } from './folders';
 
 type NoteStore = {
   notes: Note[];
@@ -55,6 +56,9 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         isLoading: false
       });
       useFileStore.getState().loadFiles();
+      if (newNote.parent_id) {
+        useFolderStore.getState().toggleFolder(newNote.parent_id);
+      }
       return newNote;
     } catch (error) {
       set({

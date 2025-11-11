@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useDeleteFolder, useUpdateFolder } from '@/hooks/useFolder';
 import { cn } from '@/lib/utils';
+import { useFolderStore } from '@/stores/folders';
 import { type FileItem as FileItemType, type FolderWithChildren } from '@/types/files';
 
 type FolderItemProps = {
@@ -13,7 +14,8 @@ type FolderItemProps = {
 };
 
 export function FolderItem({ folder, isActive, FileItemComponent, onClick }: FolderItemProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { openFolderIds, toggleFolder } = useFolderStore();
+  const isOpen = openFolderIds.includes(folder.id);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(folder.name);
   const { updateFolder } = useUpdateFolder();
@@ -24,7 +26,7 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
   }, [folder]);
 
   function handleClick() {
-    setIsOpen(!isOpen);
+    toggleFolder(folder.id);
     onClick();
   }
 

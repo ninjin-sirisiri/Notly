@@ -17,6 +17,8 @@ type FolderStore = {
   setCurrentFolder: (folder: FolderWithChildren | null) => void;
   isLoading: boolean;
   error: string | null;
+  openFolderIds: number[];
+  toggleFolder: (folderId: number) => void;
 
   createFolder: (name: string, parentPath: string, parentId?: number | null) => Promise<void>;
   loadFolders: () => Promise<void>;
@@ -36,6 +38,13 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
   setCurrentFolder: (folder: FolderWithChildren | null) => set({ currentFolder: folder }),
   isLoading: false,
   error: null,
+  openFolderIds: [],
+  toggleFolder: (folderId: number) =>
+    set(state => ({
+      openFolderIds: state.openFolderIds.includes(folderId)
+        ? state.openFolderIds.filter(id => id !== folderId)
+        : [...state.openFolderIds, folderId]
+    })),
 
   createFolder: async (name: string, parentPath = '', parentId?: number | null) => {
     set({
@@ -53,12 +62,22 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
         folderPath: newFolder.folder_path,
         children: []
       };
-      set(state => ({
-        folders: [...state.folders, newFolderWithChildren],
-        currentFolder: newFolderWithChildren,
-        isLoading: false,
-        error: null
-      }));
+      set(state => {
+        const newOpenFolderIds = [...state.openFolderIds, newFolderWithChildren.id];
+        if (
+          newFolderWithChildren.parentId &&
+          !newOpenFolderIds.includes(newFolderWithChildren.parentId)
+        ) {
+          newOpenFolderIds.push(newFolderWithChildren.parentId);
+        }
+        return {
+          folders: [...state.folders, newFolderWithChildren],
+          currentFolder: newFolderWithChildren,
+          isLoading: false,
+          error: null,
+          openFolderIds: newOpenFolderIds
+        };
+      });
       useFileStore.getState().loadFiles();
     } catch (error) {
       set({

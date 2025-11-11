@@ -57,7 +57,10 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
       });
       useFileStore.getState().loadFiles();
       if (newNote.parent_id) {
-        useFolderStore.getState().toggleFolder(newNote.parent_id);
+        const { openFolderIds, toggleFolder } = useFolderStore.getState();
+        if (!openFolderIds.includes(newNote.parent_id)) {
+          toggleFolder(newNote.parent_id);
+        }
       }
       return newNote;
     } catch (error) {

@@ -10,6 +10,7 @@ import {
 import { type FolderWithChildren } from '@/types/files';
 
 import { useFileStore } from './files';
+import { useNoteStore } from './notes';
 
 type FolderStore = {
   folders: FolderWithChildren[];
@@ -179,12 +180,23 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
     });
     try {
       await deleteFolder(id);
-      set({
-        folders: get().folders.filter(folder => folder.id !== id),
-        currentFolder: null,
+      const { currentNote, setCurrentNote } = useNoteStore.getState();
+      const deletedFolder = get().folders.find(folder => folder.id === id);
+
+      if (
+        currentNote &&
+        deletedFolder &&
+        currentNote.file_path.startsWith(deletedFolder.folderPath)
+      ) {
+        setCurrentNote(null);
+      }
+
+      set(state => ({
+        folders: state.folders.filter(folder => folder.id !== id),
+        currentFolder: state.currentFolder?.id === id ? null : state.currentFolder,
         isLoading: false,
         error: null
-      });
+      }));
       useFileStore.getState().loadFiles();
     } catch (error) {
       set({

@@ -109,95 +109,155 @@ impl FolderService {
     name: String,
     parent_id: Option<i64>,
   ) -> Result<Folder, String> {
-    let old_folder: Folder = {
-      let conn = self.db.conn.lock().unwrap();
-      conn.query_row(
-		    "SELECT id, name, created_at, updated_at, parent_id, folder_path FROM folders WHERE id = ?",
-		    params![folder_id],
-		    |row| {
-		      Ok(Folder {
-	      	  id: row.get(0)?,
-	      	  name: row.get(1)?,
-	      	  created_at: row.get(2)?,
-	      	  updated_at: row.get(3)?,
-	      	  parent_id: row.get(4)?,
-	      	  folder_path: row.get(5)?,
-	      		})
-	    	},
-		  )
-		  .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?
-    };
+    let conn = self.db.conn.lock().unwrap();
+
+    let old_folder: Folder = conn
+      .query_row(
+        "SELECT id, name, created_at, updated_at, parent_id, folder_path FROM folders WHERE id = ?",
+        params![folder_id],
+        |row| {
+          Ok(Folder {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            created_at: row.get(2)?,
+            updated_at: row.get(3)?,
+            parent_id: row.get(4)?,
+            folder_path: row.get(5)?,
+          })
+        },
+      )
+      .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?;
 
     let old_path = PathBuf::from(&old_folder.folder_path);
     let new_path = if let Some(parent) = old_path.parent() {
-      parent.join(name.clone())
+      parent.join(&name)
     } else {
-      PathBuf::from(name.clone())
+      PathBuf::from(&name)
     };
+    let new_path_str = new_path.to_str().unwrap_or_default();
 
     if old_path != new_path {
       fs::rename(&old_path, &new_path)
-        .map_err(|e| format!("フォルダの移動に失敗しました: {}", e))?;
+        .map_err(|e| format!("フォルダ名の変更に失敗しました: {}", e))?;
     }
 
-    let new_path_str = new_path.to_str().unwrap_or_default().to_string();
+    let old_path_str = old_path.to_str().unwrap_or_default();
 
-    let updated_at = {
-      let conn = self.db.conn.lock().unwrap();
-      conn
-        .execute(
-          "UPDATE folders SET name = ?, parent_id = ?, folder_path = ? WHERE id = ?",
-          params![name, parent_id, new_path_str, folder_id,],
-        )
-        .map_err(|e| format!("フォルダの更新に失敗しました: {}", e))?;
-
-      conn
-        .query_row(
-          "SELECT updated_at FROM notes WHERE id = ?",
-          params![folder_id],
-          |row| row.get(0),
-        )
-        .map_err(|e| format!("更新日時の取得に失敗しました: {}", e))?
-    };
-
-    let new_folder = Folder {
-      id: folder_id,
-      name,
-      created_at: old_folder.created_at,
-      updated_at,
-      parent_id,
-      folder_path: new_path.to_string_lossy().to_string(),
-    };
-
-    let conn = self.db.conn.lock().unwrap();
     conn
       .execute(
-        "UPDATE folders SET name = ?, updated_at = ?, parent_id = ?, folder_path = ? WHERE id = ?",
-        params![
-          new_folder.name,
-          new_folder.updated_at,
-          new_folder.parent_id,
-          new_folder.folder_path,
-          new_folder.id
-        ],
+        "UPDATE folders SET folder_path = REPLACE(folder_path, ?, ?) WHERE folder_path LIKE ?",
+        params![old_path_str, new_path_str, format!("{}%", old_path_str)],
+      )
+      .map_err(|e| format!("子フォルダのパスの更新に失敗しました: {}", e))?;
+
+    conn
+      .execute(
+        "UPDATE notes SET file_path = REPLACE(file_path, ?, ?) WHERE file_path LIKE ?",
+        params![old_path_str, new_path_str, format!("{}%", old_path_str)],
+      )
+      .map_err(|e| format!("子ノートのパスの更新に失敗しました: {}", e))?;
+
+    conn
+      .execute(
+        "UPDATE folders SET name = ?, parent_id = ? WHERE id = ?",
+        params![name.clone(), parent_id, folder_id],
       )
       .map_err(|e| format!("フォルダの更新に失敗しました: {}", e))?;
 
-    Ok(new_folder)
+    let updated_folder = conn
+      .query_row(
+        "SELECT id, name, created_at, updated_at, parent_id, folder_path FROM folders WHERE id = ?",
+        params![folder_id],
+        |row| {
+          Ok(Folder {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            created_at: row.get(2)?,
+            updated_at: row.get(3)?,
+            parent_id: row.get(4)?,
+            folder_path: row.get(5)?,
+          })
+        },
+      )
+      .map_err(|e| format!("更新されたフォルダの取得に失敗しました: {}", e))?;
+
+    Ok(updated_folder)
+  }
+
+  fn delete_folder_recursive(&self, folder_id: i64) -> Result<(), String> {
+    let (notes_to_delete, subfolders_to_delete, folder_to_delete) = {
+      let conn = self.db.conn.lock().unwrap();
+
+      let mut stmt = conn
+        .prepare("SELECT id, file_path FROM notes WHERE parent_id = ?")
+        .map_err(|e| format!("Failed to prepare statement: {}", e))?;
+      let notes = stmt
+        .query_map(params![folder_id], |row| Ok((row.get(0)?, row.get(1)?)))
+        .map_err(|e| format!("フォルダ内のノートの取得に失敗しました: {}", e))?
+        .collect::<SqlResult<Vec<(i64, String)>>>()
+        .map_err(|e| format!("フォルダ内のノートの取得に失敗しました: {}", e))?;
+
+      let mut stmt = conn
+        .prepare("SELECT id FROM folders WHERE parent_id = ?")
+        .map_err(|e| format!("Failed to prepare statement: {}", e))?;
+      let subfolders = stmt
+        .query_map(params![folder_id], |row| row.get(0))
+        .map_err(|e| format!("サブフォルダの取得に失敗しました: {}", e))?
+        .collect::<SqlResult<Vec<i64>>>()
+        .map_err(|e| format!("サブフォルダの取得に失敗しました: {}", e))?;
+
+      let folder: Folder = conn
+            .query_row(
+                "SELECT id, name, created_at, updated_at, parent_id, folder_path FROM folders WHERE id = ?",
+                params![folder_id],
+                |row| {
+                    Ok(Folder {
+                        id: row.get(0)?,
+                        name: row.get(1)?,
+                        created_at: row.get(2)?,
+                        updated_at: row.get(3)?,
+                        parent_id: row.get(4)?,
+                        folder_path: row.get(5)?,
+                    })
+                },
+            )
+            .map_err(|e| format!("削除するフォルダの取得に失敗しました: {}", e))?;
+
+      (notes, subfolders, folder)
+    };
+
+    for subfolder_id in subfolders_to_delete {
+      self.delete_folder_recursive(subfolder_id)?;
+    }
+
+    {
+      let conn = self.db.conn.lock().unwrap();
+
+      for (note_id, note_path) in notes_to_delete {
+        if PathBuf::from(&note_path).exists() {
+          fs::remove_file(&note_path)
+            .map_err(|e| format!("ノートファイルの削除に失敗しました: {}", e))?;
+        }
+        conn
+          .execute("DELETE FROM notes WHERE id = ?", params![note_id])
+          .map_err(|e| format!("ノートの削除に失敗しました: {}", e))?;
+      }
+
+      if PathBuf::from(&folder_to_delete.folder_path).exists() {
+        fs::remove_dir_all(&folder_to_delete.folder_path)
+          .map_err(|e| format!("フォルダディレクトリの削除に失敗しました: {}", e))?;
+      }
+
+      conn
+        .execute("DELETE FROM folders WHERE id = ?", params![folder_id])
+        .map_err(|e| format!("フォルダの削除に失敗しました: {}", e))?;
+    }
+
+    Ok(())
   }
 
   // フォルダの削除
   pub fn delete_folder(&self, folder_id: i64) -> Result<(), String> {
-    let conn = self.db.conn.lock().unwrap();
-
-    let mut stmt = conn
-      .prepare("DELETE FROM folders WHERE id = ?")
-      .map_err(|e| format!("Failed to prepare statement: {}", e))?;
-
-    stmt
-      .execute(params![folder_id])
-      .map_err(|e| format!("フォルダの削除に失敗しました: {}", e))?;
-
-    Ok(())
+    self.delete_folder_recursive(folder_id)
   }
 }

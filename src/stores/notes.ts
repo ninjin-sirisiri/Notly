@@ -4,6 +4,7 @@ import { createNote, deleteNote, loadNote, loadNotes, updateNote } from '@/lib/a
 import { type Note, type NoteWithContent } from '@/types/notes';
 
 import { useFileStore } from './files';
+import { useFolderStore } from './folders';
 
 type NoteStore = {
   notes: Note[];
@@ -48,6 +49,15 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
     });
     try {
       const newNote = await createNote(title, content, folderPath, parentId);
+
+      // If the note has a parent folder, ensure it's open
+      if (parentId && parentId !== null) {
+        const folderStore = useFolderStore.getState();
+        if (!folderStore.openFolderIds.includes(parentId)) {
+          useFolderStore.getState().toggleFolder(parentId);
+        }
+      }
+
       set({
         notes: [...get().notes, newNote],
         currentNote: newNote,
@@ -55,14 +65,7 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         isLoading: false
       });
       useFileStore.getState().loadFiles();
-      // Removed direct dependency on useFolderStore to break circular dependency
-      // if (newNote.parent_id) {
-      //   const { openFolderIds, toggleFolder } = useFolderStore.getState();
-      //   if (!openFolderIds.includes(newNote.parent_id)) {
-      //     toggleFolder(newNote.parent_id);
-      //   }
-      // }
-      return newNote;
+      return newNote; // Return the created note to match the function signature
     } catch (error) {
       set({
         error: String(error),

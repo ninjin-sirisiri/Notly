@@ -67,6 +67,7 @@
     "sort-imports": "off",
     "max-lines-per-function": "off",
     "jsx-a11y/click-events-have-key-events": "off",
-    "react-perf/jsx-no-new-object-as-prop": "off"
+    "react-perf/jsx-no-new-object-as-prop": "off",
+    "import/no-cycle": "off"
   }
 }

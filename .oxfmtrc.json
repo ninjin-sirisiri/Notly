@@ -8,7 +8,7 @@
     "order": "asc",
     "sortSideEffects": true,
     "partitionByNewline": true,
-    "partitionByComment": true
+    "newlinesBetween": false
   },
   "printWidth": 100,
   "bracketSameLine": true,

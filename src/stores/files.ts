@@ -84,16 +84,18 @@ export const useFileStore = create<FileStore>()((set, get) => ({
     }
   },
 
-  setSearchQuery: async (query: string) => {
+  setSearchQuery: (query: string) => {
     const { files } = get();
     const filteredFiles = filterFiles(files, query);
 
+    set({ searchQuery: query, filteredFiles });
+
     if (query.trim()) {
       const folderIds = collectFolderIds(filteredFiles);
-      const { useFolderStore } = await import('./folders');
-      useFolderStore.getState().openFolders(folderIds);
+      (async () => {
+        const { useFolderStore } = await import('./folders');
+        useFolderStore.getState().openFolders(folderIds);
+      })();
     }
-
-    set({ searchQuery: query, filteredFiles });
   }
 }));

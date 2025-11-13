@@ -47,6 +47,7 @@ pub fn run() {
       commands::note::update_note,
       commands::note::delete_note,
       commands::note::move_note,
+      commands::note::search_notes,
       commands::folder::get_all_folders,
       commands::folder::get_folder_by_id,
       commands::folder::create_folder,

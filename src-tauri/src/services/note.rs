@@ -123,6 +123,31 @@ impl NoteService {
     Ok(notes)
   }
 
+  pub fn search_notes(&self, query: &str) -> Result<Vec<Note>, String> {
+    let all_notes = self.get_all_notes()?;
+    let query_lower = query.to_lowercase();
+
+    let mut matched_notes = Vec::new();
+
+    for note in all_notes {
+      let title_matches = note.title.to_lowercase().contains(&query_lower);
+
+      let content_matches = if !title_matches {
+        fs::read_to_string(&note.file_path)
+          .map(|content| content.to_lowercase().contains(&query_lower))
+          .unwrap_or(false)
+      } else {
+        false
+      };
+
+      if title_matches || content_matches {
+        matched_notes.push(note);
+      }
+    }
+
+    Ok(matched_notes)
+  }
+
   // ノートの更新
   pub fn update_note(
     &self,

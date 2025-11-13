@@ -48,3 +48,7 @@ export function moveNote(id: number, newParentId: number | null): Promise<Note> 
     }
   });
 }
+
+export function searchNotes(query: string): Promise<Note[]> {
+  return safeInvoke<Note[]>('search_notes', { query });
+}

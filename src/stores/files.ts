@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { type FileItem } from '@/types/files';
 
 import { getAllFiles } from '@/lib/api/files';
+import { searchNotes } from '@/lib/api/notes';
 
 type FileStore = {
   files: FileItem[];
@@ -27,23 +28,23 @@ function collectFolderIds(items: FileItem[]): number[] {
   return folderIds;
 }
 
-function filterFiles(files: FileItem[], query: string): FileItem[] {
+async function filterFilesWithContent(files: FileItem[], query: string): Promise<FileItem[]> {
   if (!query.trim()) {
     return files;
   }
 
-  const lowerQuery = query.toLowerCase();
+  const matchedNotes = await searchNotes(query);
+  const matchedNoteIds = new Set(matchedNotes.map(n => n.id));
 
   function filterRecursive(items: FileItem[]): FileItem[] {
     const result: FileItem[] = [];
     for (const item of items) {
       if ('folder' in item) {
-        const titleMatches = item.folder.name.toLowerCase().includes(lowerQuery);
         const filteredChildren =
           item.folder.children && item.folder.children.length > 0
             ? filterRecursive(item.folder.children)
             : [];
-        if (titleMatches || filteredChildren.length > 0) {
+        if (filteredChildren.length > 0) {
           result.push({
             folder: {
               ...item.folder,
@@ -51,11 +52,8 @@ function filterFiles(files: FileItem[], query: string): FileItem[] {
             }
           });
         }
-      } else if ('note' in item) {
-        const titleMatches = item.note.title.toLowerCase().includes(lowerQuery);
-        if (titleMatches) {
-          result.push(item);
-        }
+      } else if ('note' in item && matchedNoteIds.has(item.note.id)) {
+        result.push(item);
       }
     }
     return result;
@@ -76,7 +74,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
     try {
       const files = await getAllFiles();
       const { searchQuery } = get();
-      const filteredFiles = filterFiles(files, searchQuery);
+      const filteredFiles = await filterFilesWithContent(files, searchQuery);
       set({ files, filteredFiles, isLoading: false });
     } catch (error) {
       set({ isLoading: false, error: String(error) });
@@ -84,9 +82,9 @@ export const useFileStore = create<FileStore>()((set, get) => ({
     }
   },
 
-  setSearchQuery: (query: string) => {
+  setSearchQuery: async (query: string) => {
     const { files } = get();
-    const filteredFiles = filterFiles(files, query);
+    const filteredFiles = await filterFilesWithContent(files, query);
 
     set({ searchQuery: query, filteredFiles });
 

@@ -3,7 +3,10 @@ import { useEffect } from 'react';
 import { useFileStore } from '@/stores/files';
 
 export function useFiles() {
-  const { files, isLoading, error, loadFiles } = useFileStore();
+  const isLoading = useFileStore(state => state.isLoading);
+  const error = useFileStore(state => state.error);
+  const loadFiles = useFileStore(state => state.loadFiles);
+  const filteredFiles = useFileStore(state => state.filteredFiles);
 
   useEffect(() => {
     loadFiles();
@@ -13,6 +16,6 @@ export function useFiles() {
     error,
     isLoading,
     loadFiles,
-    files
+    files: filteredFiles
   };
 }

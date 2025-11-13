@@ -38,7 +38,7 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
 
   useEffect(() => {
     setName(folder.name);
-  }, [folder]);
+  }, [folder.name]);
 
   function handleClick() {
     toggleFolder(folder.id);

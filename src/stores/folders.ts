@@ -21,6 +21,7 @@ type FolderStore = {
   error: string | null;
   openFolderIds: number[];
   toggleFolder: (folderId: number) => void;
+  openFolders: (folderIds: number[]) => void;
 
   createFolder: (name: string, parentPath: string, parentId?: number | null) => Promise<void>;
   loadFolders: () => Promise<void>;
@@ -47,6 +48,10 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
       openFolderIds: state.openFolderIds.includes(folderId)
         ? state.openFolderIds.filter(id => id !== folderId)
         : [...state.openFolderIds, folderId]
+    })),
+  openFolders: (folderIds: number[]) =>
+    set(state => ({
+      openFolderIds: [...new Set([...state.openFolderIds, ...folderIds])]
     })),
 
   createFolder: async (name: string, parentPath = '', parentId?: number | null) => {

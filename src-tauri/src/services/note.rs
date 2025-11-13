@@ -217,4 +217,86 @@ impl NoteService {
 
     Ok(())
   }
+
+  // ノートの移動
+  pub fn move_note(&self, id: i64, new_parent_id: Option<i64>) -> Result<Note, String> {
+    let old_note: Note = {
+      let conn = self.db.conn.lock().unwrap();
+      conn
+        .query_row(
+          "SELECT id, title, created_at, updated_at, parent_id, file_path FROM notes WHERE id = ?",
+          params![id],
+          |row| {
+            Ok(Note {
+              id: row.get(0)?,
+              title: row.get(1)?,
+              created_at: row.get(2)?,
+              updated_at: row.get(3)?,
+              parent_id: row.get(4)?,
+              file_path: row.get(5)?,
+            })
+          },
+        )
+        .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
+    };
+
+    let new_folder_path = if let Some(parent_id) = new_parent_id {
+      let conn = self.db.conn.lock().unwrap();
+      let folder_path: String = conn
+        .query_row(
+          "SELECT folder_path FROM folders WHERE id = ?",
+          params![parent_id],
+          |row| row.get(0),
+        )
+        .map_err(|e| format!("親フォルダの取得に失敗しました: {}", e))?;
+      PathBuf::from(folder_path)
+    } else {
+      self.base_path.clone()
+    };
+
+    let old_path = PathBuf::from(&old_note.file_path);
+    let file_name = old_path
+      .file_name()
+      .ok_or_else(|| "ファイル名の取得に失敗しました".to_string())?;
+    let new_path = new_folder_path.join(file_name);
+
+    if old_path != new_path {
+      if let Some(parent) = new_path.parent() {
+        fs::create_dir_all(parent)
+          .map_err(|e| format!("ディレクトリの作成に失敗しました: {}", e))?;
+      }
+
+      fs::rename(&old_path, &new_path)
+        .map_err(|e| format!("ノートファイルの移動に失敗しました: {}", e))?;
+    }
+
+    let new_path_str = new_path.to_str().unwrap_or_default().to_string();
+
+    let updated_at = {
+      let conn = self.db.conn.lock().unwrap();
+      conn
+        .execute(
+          "UPDATE notes SET parent_id = ?, file_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+          params![new_parent_id, new_path_str, id],
+        )
+        .map_err(|e| format!("ノートの移動に失敗しました: {}", e))?;
+
+      conn
+        .query_row(
+          "SELECT updated_at FROM notes WHERE id = ?",
+          params![id],
+          |row| row.get(0),
+        )
+        .map_err(|e| format!("更新日時の取得に失敗しました: {}", e))?
+    };
+
+    Ok(Note {
+      id: old_note.id,
+      title: old_note.title,
+      created_at: old_note.created_at,
+      updated_at,
+      parent_id: new_parent_id,
+      file_path: new_path_str,
+    })
+  }
 }

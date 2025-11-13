@@ -1,8 +1,10 @@
 import { Edit2, FileText, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useDraggable } from '@dnd-kit/core';
 
-import { useCurrentNote, useDeleteNote, useNotes } from '@/hooks/useNote';
+import { useCurrentNote, useDeleteNote, useMoveNote, useNotes } from '@/hooks/useNote';
 import { cn } from '@/lib/utils';
+import { useFolderStore } from '@/stores/folders';
 import { type Note } from '@/types/notes';
 
 type NoteItemProps = {
@@ -13,9 +15,18 @@ export function NoteItem({ note }: NoteItemProps) {
   const { loadNote } = useNotes();
   const { currentNote, currentContent, updateNote } = useCurrentNote();
   const { deleteNote } = useDeleteNote();
+  const { moveNote } = useMoveNote();
 
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(note.title);
+  const [showMoveMenu, setShowMoveMenu] = useState(false);
+
+  const { folders } = useFolderStore();
+
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: note.id,
+    disabled: isEditing
+  });
 
   useEffect(() => {
     setTitle(note.title);
@@ -39,8 +50,13 @@ export function NoteItem({ note }: NoteItemProps) {
     deleteNote(note.id);
   }
 
+  function handleMoveToFolder(folderId: number | null) {
+    moveNote(note.id, folderId);
+    setShowMoveMenu(false);
+  }
+
   return (
-    <div>
+    <div className="relative">
       {isEditing ? (
         <div className="flex items-center gap-2 pl-6 pr-2 py-1.5 rounded text-primary dark:text-white group relative">
           <input
@@ -57,11 +73,15 @@ export function NoteItem({ note }: NoteItemProps) {
         </div>
       ) : (
         <div
+          ref={setNodeRef}
+          {...attributes}
+          {...listeners}
           className={cn(
             'flex items-center gap-2 pl-6 pr-2 py-1.5 rounded text-primary dark:text-white group relative',
             currentNote?.id === note.id
               ? 'bg-gray-300/50 dark:bg-gray-600/50'
-              : 'hover:bg-gray-200 dark:hover:bg-gray-700/50'
+              : 'hover:bg-gray-200 dark:hover:bg-gray-700/50',
+            isDragging && 'opacity-50'
           )}
           onClick={() => {
             loadNote(note.id);
@@ -85,6 +105,29 @@ export function NoteItem({ note }: NoteItemProps) {
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
+        </div>
+      )}
+      {showMoveMenu && (
+        <div className="absolute z-10 right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg max-h-48 overflow-y-auto">
+          <button
+            className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+            onClick={e => {
+              e.stopPropagation();
+              handleMoveToFolder(null);
+            }}>
+            ルート
+          </button>
+          {folders.map(folder => (
+            <button
+              key={folder.id}
+              className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+              onClick={e => {
+                e.stopPropagation();
+                handleMoveToFolder(folder.id);
+              }}>
+              {folder.name}
+            </button>
+          ))}
         </div>
       )}
     </div>

@@ -119,3 +119,25 @@ pub async fn delete_note<R: tauri::Runtime>(
   .await
   .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
 }
+
+#[tauri::command]
+pub async fn move_note<R: tauri::Runtime>(
+  input: MoveNoteInput,
+  state: State<'_, AppState>,
+  app: tauri::AppHandle<R>,
+) -> Result<Note, String> {
+  let notes_dir = app
+    .path()
+    .app_data_dir()
+    .map_err(|e| format!("ノートディレクトリの取得に失敗しました: {}", e))?
+    .join("notes");
+
+  let db = Arc::clone(&state.db);
+
+  tauri::async_runtime::spawn_blocking(move || {
+    let note_service = NoteService::new(db, notes_dir);
+    note_service.move_note(input.id, input.new_parent_id)
+  })
+  .await
+  .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
+}

@@ -1,10 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+  type DragEndEvent
+} from '@dnd-kit/core';
 
 import { Input } from '@/components/ui/input';
 import { useFiles } from '@/hooks/useFiles';
-import { useCreateFolder } from '@/hooks/useFolder';
-import { useCreateNote } from '@/hooks/useNote';
+import { useCreateFolder, useMoveFolder } from '@/hooks/useFolder';
+import { useCreateNote, useMoveNote } from '@/hooks/useNote';
+import { cn } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
 import { useNoteStore } from '@/stores/notes';
 
@@ -13,18 +22,42 @@ import { CreateNoteButton } from './CreateNoteButton';
 import { FileItem } from './FileItem';
 import { FileSearch } from './FileSearch';
 
+function RootDroppable({ children }: { children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: 'root'
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn('overflow-y-auto h-full', isOver && 'bg-blue-50 dark:bg-blue-950/20')}>
+      {children}
+    </div>
+  );
+}
+
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { files } = useFiles();
   const allNotes = useNoteStore(state => state.notes);
   const { currentFolder } = useFolderStore();
   const { createNote, isLoading: isNoteCreating } = useCreateNote();
   const { createFolder, isLoading: isFolderCreating } = useCreateFolder();
+  const { moveNote } = useMoveNote();
+  const { moveFolder } = useMoveFolder();
   const [isCreatingNote, setIsCreatingNote] = useState(false);
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [title, setTitle] = useState('');
   const [folderName, setFolderName] = useState('');
   const noteInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8
+      }
+    })
+  );
 
   useEffect(() => {
     if (isCreatingNote && noteInputRef.current) {
@@ -100,6 +133,33 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     handleCreateFolder();
   }
 
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    const activeId = active.id;
+    const targetId = over.id;
+
+    if (typeof activeId === 'string' && activeId.startsWith('folder-')) {
+      const folderId = Number(activeId.replace('folder-', ''));
+
+      if (targetId === 'root') {
+        await moveFolder(folderId, null);
+      } else if (typeof targetId === 'number') {
+        await moveFolder(folderId, targetId);
+      }
+    } else if (typeof activeId === 'number') {
+      const noteId = activeId;
+
+      if (targetId === 'root') {
+        await moveNote(noteId, null);
+      } else if (typeof targetId === 'number') {
+        await moveNote(noteId, targetId);
+      }
+    }
+  }
+
   return (
     <>
       {isOpen && (
@@ -119,7 +179,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <div className="flex flex-col gap-4">
+        <div className="h-full flex flex-col gap-4">
           <FileSearch />
           <div className="px-2 flex items-center justify-between gap-2">
             <CreateNoteButton
@@ -131,41 +191,49 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
               disabled={isFolderCreating || isCreatingFolder}
             />
           </div>
-          <div className="overflow-y-auto">
-            {isCreatingNote && (
-              <div className="px-2 py-1">
-                <Input
-                  ref={noteInputRef}
-                  value={title}
-                  onChange={e => setTitle(e.target.value)}
-                  onKeyDown={handleNoteKeyDown}
-                  onBlur={handleNoteBlur}
-                  placeholder="Note title..."
-                  disabled={isNoteCreating}
-                  className="h-8"
-                />
-              </div>
-            )}
-            {isCreatingFolder && (
-              <div className="px-2 py-1">
-                <Input
-                  ref={folderInputRef}
-                  value={folderName}
-                  onChange={e => setFolderName(e.target.value)}
-                  onKeyDown={handleFolderKeyDown}
-                  onBlur={handleFolderBlur}
-                  placeholder="Folder name..."
-                  disabled={isFolderCreating}
-                  className="h-8"
-                />
-              </div>
-            )}
-            {files.map(item => (
-              <FileItem
-                key={'folder' in item ? `folder-${item.folder.id}` : `note-${item.note.id}`}
-                item={item}
-              />
-            ))}
+          <div className="h-full">
+            <DndContext
+              sensors={sensors}
+              onDragEnd={handleDragEnd}>
+              <RootDroppable>
+                <div className="overflow-y-auto h-full">
+                  {isCreatingNote && (
+                    <div className="px-2 py-1">
+                      <Input
+                        ref={noteInputRef}
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
+                        onKeyDown={handleNoteKeyDown}
+                        onBlur={handleNoteBlur}
+                        placeholder="Note title..."
+                        disabled={isNoteCreating}
+                        className="h-8"
+                      />
+                    </div>
+                  )}
+                  {isCreatingFolder && (
+                    <div className="px-2 py-1">
+                      <Input
+                        ref={folderInputRef}
+                        value={folderName}
+                        onChange={e => setFolderName(e.target.value)}
+                        onKeyDown={handleFolderKeyDown}
+                        onBlur={handleFolderBlur}
+                        placeholder="Folder name..."
+                        disabled={isFolderCreating}
+                        className="h-8"
+                      />
+                    </div>
+                  )}
+                  {files.map(item => (
+                    <FileItem
+                      key={'folder' in item ? `folder-${item.folder.id}` : `note-${item.note.id}`}
+                      item={item}
+                    />
+                  ))}
+                </div>
+              </RootDroppable>
+            </DndContext>
           </div>
         </div>
       </aside>

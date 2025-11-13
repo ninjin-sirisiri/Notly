@@ -39,3 +39,12 @@ export function updateNote(id: number, title: string, content: string): Promise<
 export function deleteNote(id: number): Promise<void> {
   return safeInvoke<void>('delete_note', { id });
 }
+
+export function moveNote(id: number, newParentId: number | null): Promise<Note> {
+  return safeInvoke<Note>('move_note', {
+    input: {
+      id,
+      new_parent_id: newParentId
+    }
+  });
+}

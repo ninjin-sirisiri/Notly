@@ -37,6 +37,12 @@ pub struct UpdateNoteInput {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MoveNoteInput {
+  pub id: i64,
+  pub new_parent_id: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Folder {
   pub id: i64,
   pub name: String,
@@ -58,6 +64,12 @@ pub struct UpdateFolderInput {
   pub id: i64,
   pub name: String,
   pub parent_id: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MoveFolderInput {
+  pub id: i64,
+  pub new_parent_id: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

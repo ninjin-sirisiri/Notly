@@ -5,6 +5,7 @@ import {
   deleteFolder,
   loadFolder,
   loadFolders,
+  moveFolder,
   updateFolder
 } from '@/lib/api/folders';
 import { type FolderWithChildren } from '@/types/files';
@@ -31,6 +32,7 @@ type FolderStore = {
     parentId?: number | null
   ) => Promise<void>;
   deleteFolder: (id: number) => Promise<void>;
+  moveFolder: (id: number, newParentId: number | null) => Promise<void>;
 };
 
 export const useFolderStore = create<FolderStore>()((set, get) => ({
@@ -197,6 +199,26 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
         isLoading: false,
         error: null
       }));
+      useFileStore.getState().loadFiles();
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: String(error)
+      });
+    }
+  },
+
+  moveFolder: async (id: number, newParentId: number | null) => {
+    set({
+      isLoading: true,
+      error: null
+    });
+    try {
+      await moveFolder(id, newParentId);
+      set({
+        isLoading: false,
+        error: null
+      });
       useFileStore.getState().loadFiles();
     } catch (error) {
       set({

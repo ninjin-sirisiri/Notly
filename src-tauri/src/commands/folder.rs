@@ -4,7 +4,7 @@ use tauri::{Manager, State};
 
 use crate::{
   AppState,
-  db::models::{CreateFolderInput, Folder, UpdateFolderInput},
+  db::models::{CreateFolderInput, Folder, MoveFolderInput, UpdateFolderInput},
   services::FolderService,
 };
 
@@ -112,6 +112,28 @@ pub async fn delete_folder<R: tauri::Runtime>(
   tauri::async_runtime::spawn_blocking(move || {
     let folder_service = FolderService::new(db, notes_dir.clone());
     folder_service.delete_folder(id)
+  })
+  .await
+  .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
+}
+
+#[tauri::command]
+pub async fn move_folder<R: tauri::Runtime>(
+  input: MoveFolderInput,
+  state: State<'_, AppState>,
+  app: tauri::AppHandle<R>,
+) -> Result<Folder, String> {
+  let notes_dir = app
+    .path()
+    .app_data_dir()
+    .map_err(|e| format!("ノートディレクトリの取得に失敗しました: {}", e))?
+    .join("notes");
+
+  let db = Arc::clone(&state.db);
+
+  tauri::async_runtime::spawn_blocking(move || {
+    let folder_service = FolderService::new(db, notes_dir);
+    folder_service.move_folder(input.id, input.new_parent_id)
   })
   .await
   .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?

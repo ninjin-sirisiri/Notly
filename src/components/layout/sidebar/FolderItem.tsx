@@ -1,5 +1,6 @@
 import { ChevronRight, Edit2, Folder, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
 
 import { useDeleteFolder, useUpdateFolder } from '@/hooks/useFolder';
 import { cn } from '@/lib/utils';
@@ -20,6 +21,20 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
   const [name, setName] = useState(folder.name);
   const { updateFolder } = useUpdateFolder();
   const { deleteFolder } = useDeleteFolder();
+
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: folder.id
+  });
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDraggableRef,
+    isDragging
+  } = useDraggable({
+    id: `folder-${folder.id}`,
+    disabled: isEditing
+  });
 
   useEffect(() => {
     setName(folder.name);
@@ -72,11 +87,19 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
         </div>
       ) : (
         <div
+          ref={node => {
+            setDroppableRef(node);
+            setDraggableRef(node);
+          }}
+          {...attributes}
+          {...listeners}
           className={cn(
             'flex items-center gap-2 pl-2 pr-2 py-1.5 rounded text-primary dark:text-white group relative cursor-pointer',
             isActive
               ? 'bg-gray-200 dark:bg-gray-700'
-              : 'hover:bg-gray-200 dark:hover:bg-gray-700/50'
+              : 'hover:bg-gray-200 dark:hover:bg-gray-700/50',
+            isOver && 'bg-blue-100 dark:bg-blue-900/30',
+            isDragging && 'opacity-50'
           )}
           onClick={handleClick}>
           <ChevronRight

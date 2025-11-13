@@ -260,4 +260,110 @@ impl FolderService {
   pub fn delete_folder(&self, folder_id: i64) -> Result<(), String> {
     self.delete_folder_recursive(folder_id)
   }
+
+  // フォルダの移動
+  pub fn move_folder(&self, id: i64, new_parent_id: Option<i64>) -> Result<Folder, String> {
+    let old_folder: Folder = {
+      let conn = self.db.conn.lock().unwrap();
+      conn
+        .query_row(
+          "SELECT id, name, created_at, updated_at, parent_id, folder_path FROM folders WHERE id = ?",
+          params![id],
+          |row| {
+            Ok(Folder {
+              id: row.get(0)?,
+              name: row.get(1)?,
+              created_at: row.get(2)?,
+              updated_at: row.get(3)?,
+              parent_id: row.get(4)?,
+              folder_path: row.get(5)?,
+            })
+          },
+        )
+        .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?
+    };
+
+    if Some(id) == new_parent_id {
+      return Err("フォルダを自分自身に移動することはできません".to_string());
+    }
+
+    if let Some(new_parent) = new_parent_id {
+      let mut current_parent = Some(new_parent);
+      while let Some(parent_id) = current_parent {
+        if parent_id == id {
+          return Err("フォルダを自分の子孫に移動することはできません".to_string());
+        }
+        let conn = self.db.conn.lock().unwrap();
+        current_parent = conn
+          .query_row(
+            "SELECT parent_id FROM folders WHERE id = ?",
+            params![parent_id],
+            |row| row.get(0),
+          )
+          .ok();
+      }
+    }
+
+    let new_parent_path = if let Some(parent_id) = new_parent_id {
+      let conn = self.db.conn.lock().unwrap();
+      let folder_path: String = conn
+        .query_row(
+          "SELECT folder_path FROM folders WHERE id = ?",
+          params![parent_id],
+          |row| row.get(0),
+        )
+        .map_err(|e| format!("親フォルダの取得に失敗しました: {}", e))?;
+      PathBuf::from(folder_path)
+    } else {
+      self.base_path.clone()
+    };
+
+    let old_path = PathBuf::from(&old_folder.folder_path);
+    let folder_name = old_path
+      .file_name()
+      .ok_or_else(|| "フォルダ名の取得に失敗しました".to_string())?;
+    let new_path = new_parent_path.join(folder_name);
+
+    if old_path != new_path {
+      if let Some(parent) = new_path.parent() {
+        fs::create_dir_all(parent)
+          .map_err(|e| format!("ディレクトリの作成に失敗しました: {}", e))?;
+      }
+
+      fs::rename(&old_path, &new_path)
+        .map_err(|e| format!("フォルダの移動に失敗しました: {}", e))?;
+    }
+
+    let old_path_str = old_path.to_str().unwrap_or_default();
+    let new_path_str = new_path.to_str().unwrap_or_default();
+
+    {
+      let conn = self.db.conn.lock().unwrap();
+
+      conn
+        .execute(
+          "UPDATE folders SET folder_path = REPLACE(folder_path, ?, ?) WHERE folder_path LIKE ?",
+          params![old_path_str, new_path_str, format!("{}%", old_path_str)],
+        )
+        .map_err(|e| format!("サブフォルダのパスの更新に失敗しました: {}", e))?;
+
+      conn
+        .execute(
+          "UPDATE notes SET file_path = REPLACE(file_path, ?, ?) WHERE file_path LIKE ?",
+          params![old_path_str, new_path_str, format!("{}%", old_path_str)],
+        )
+        .map_err(|e| format!("ノートのパスの更新に失敗しました: {}", e))?;
+
+      conn
+        .execute(
+          "UPDATE folders SET parent_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+          params![new_parent_id, id],
+        )
+        .map_err(|e| format!("フォルダの移動に失敗しました: {}", e))?;
+    }
+
+    let updated_folder = self.get_folder_by_id(id)?;
+
+    Ok(updated_folder)
+  }
 }

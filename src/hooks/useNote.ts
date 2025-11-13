@@ -61,3 +61,13 @@ export function useDeleteNote() {
     isLoading
   };
 }
+
+export function useMoveNote() {
+  const { moveNote, isLoading, error } = useNoteStore();
+
+  return {
+    error,
+    isLoading,
+    moveNote
+  };
+}

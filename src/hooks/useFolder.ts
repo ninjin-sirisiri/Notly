@@ -43,3 +43,9 @@ export function useUpdateFolder() {
 
   return { updateFolder, isLoading, error };
 }
+
+export function useMoveFolder() {
+  const { moveFolder, isLoading, error } = useFolderStore();
+
+  return { moveFolder, isLoading, error };
+}

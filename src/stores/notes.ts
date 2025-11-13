@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { createNote, deleteNote, loadNote, loadNotes, updateNote } from '@/lib/api/notes';
+import { createNote, deleteNote, loadNote, loadNotes, moveNote, updateNote } from '@/lib/api/notes';
 import { type Note, type NoteWithContent } from '@/types/notes';
 
 import { useFileStore } from './files';
@@ -25,6 +25,7 @@ type NoteStore = {
   loadNote: (id: number) => Promise<void>;
   updateNote: (id: number, title: string, content: string) => Promise<void>;
   deleteNote: (id: number) => Promise<void>;
+  moveNote: (id: number, newParentId: number | null) => Promise<void>;
 };
 
 export const useNoteStore = create<NoteStore>()((set, get) => ({
@@ -154,6 +155,28 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
           currentContent: isDeletingCurrentNote ? null : state.currentContent,
           isLoading: false
         };
+      });
+      useFileStore.getState().loadFiles();
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: String(error)
+      });
+      throw error;
+    }
+  },
+
+  moveNote: async (id: number, newParentId: number | null) => {
+    set({
+      isLoading: true,
+      error: null
+    });
+    try {
+      const movedNote = await moveNote(id, newParentId);
+      set({
+        notes: get().notes.map(note => (note.id === id ? movedNote : note)),
+        currentNote: get().currentNote?.id === id ? movedNote : get().currentNote,
+        isLoading: false
       });
       useFileStore.getState().loadFiles();
     } catch (error) {

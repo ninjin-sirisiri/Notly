@@ -47,3 +47,12 @@ export function deleteFolder(id: number): Promise<void> {
     id
   });
 }
+
+export function moveFolder(id: number, newParentId: number | null): Promise<Folder> {
+  return safeInvoke<Folder>('move_folder', {
+    input: {
+      id,
+      new_parent_id: newParentId
+    }
+  });
+}

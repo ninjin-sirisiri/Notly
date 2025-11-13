@@ -173,6 +173,14 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
     });
     try {
       const movedNote = await moveNote(id, newParentId);
+
+      if (newParentId && newParentId !== null) {
+        const folderStore = useFolderStore.getState();
+        if (!folderStore.openFolderIds.includes(newParentId)) {
+          useFolderStore.getState().toggleFolder(newParentId);
+        }
+      }
+
       set({
         notes: get().notes.map(note => (note.id === id ? movedNote : note)),
         currentNote: get().currentNote?.id === id ? movedNote : get().currentNote,

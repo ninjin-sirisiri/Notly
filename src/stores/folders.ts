@@ -215,6 +215,16 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
     });
     try {
       await moveFolder(id, newParentId);
+
+      if (newParentId && newParentId !== null) {
+        const state = get();
+        if (!state.openFolderIds.includes(newParentId)) {
+          set(prevState => ({
+            openFolderIds: [...prevState.openFolderIds, newParentId]
+          }));
+        }
+      }
+
       set({
         isLoading: false,
         error: null

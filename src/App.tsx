@@ -6,25 +6,30 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { TitleBar } from '@/components/layout/title-bar';
 
 import './App.css';
+import { ThemeProvider } from './components/theme/theme-provider';
 import { Toaster } from './components/ui/sonner';
 
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen w-full flex-col font-sans text-[#1A1A1A] dark:text-[#F8F8F8]">
-      <TitleBar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
-        <div className="flex flex-1 overflow-hidden">
-          <Sidebar
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-          />
-          <Editor />
+    <ThemeProvider
+      defaultTheme="system"
+      storageKey="vite-ui-theme">
+      <div className="flex h-screen w-full flex-col font-sans text-[#1A1A1A] dark:text-[#F8F8F8]">
+        <TitleBar />
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
+          <div className="flex flex-1 overflow-hidden">
+            <Sidebar
+              isOpen={isSidebarOpen}
+              onClose={() => setIsSidebarOpen(false)}
+            />
+            <Editor />
+          </div>
         </div>
+        <Toaster />
       </div>
-      <Toaster />
-    </div>
+    </ThemeProvider>
   );
 }

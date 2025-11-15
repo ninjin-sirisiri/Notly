@@ -1,4 +1,5 @@
 import { Flame, Menu, Settings } from 'lucide-react';
+import { ModeToggle } from '../theme/ModeToggle';
 
 export function Header({ onMenuClick }: { onMenuClick: () => void }) {
   return (
@@ -26,9 +27,12 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
           <p className="sm:hidden text-sm font-medium text-orange-600 dark:text-orange-300">35</p>
         </div>
       </div>
-      <button className="flex items-center justify-center rounded-lg h-8 w-8 md:h-10 md:w-10 text-[#666666] hover:bg-gray-200 dark:hover:bg-[#333333]">
-        <Settings className="h-5 w-5 md:h-6 md:w-6" />
-      </button>
+      <div className="flex items-center justify-between gap-2 md:gap-4">
+        <ModeToggle />
+        <button className="flex items-center justify-center rounded-lg h-8 w-8 md:h-10 md:w-10 text-[#666666] hover:bg-gray-200 dark:hover:bg-[#333333]">
+          <Settings className="h-5 w-5 md:h-6 md:w-6" />
+        </button>
+      </div>
     </header>
   );
 }

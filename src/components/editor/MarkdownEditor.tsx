@@ -1,4 +1,4 @@
-import { Bold, Italic, Strikethrough } from 'lucide-react';
+import { Bold, Heading1, Heading2, Italic, List, Strikethrough } from 'lucide-react';
 import { useEffect } from 'react';
 import { Markdown } from '@tiptap/markdown';
 import {
@@ -8,7 +8,7 @@ import {
   useEditor,
   useEditorState
 } from '@tiptap/react';
-import { BubbleMenu } from '@tiptap/react/menus';
+import { BubbleMenu, FloatingMenu } from '@tiptap/react/menus';
 import { StarterKit } from '@tiptap/starter-kit';
 
 type Props = {
@@ -71,6 +71,7 @@ export function MarkdownEditor({ content, setContent, handleSave }: Props) {
                 ? 'rounded bg-accent hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
                 : 'rounded hover:bg-gray-200 dark:hover:bg-gray-600'
             }
+            title="太字"
             type="button">
             <Bold />
           </button>
@@ -81,6 +82,7 @@ export function MarkdownEditor({ content, setContent, handleSave }: Props) {
                 ? 'rounded bg-accent hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
                 : 'rounded hover:bg-gray-200 dark:hover:bg-gray-600'
             }
+            title="斜体"
             type="button">
             <Italic />
           </button>
@@ -91,6 +93,7 @@ export function MarkdownEditor({ content, setContent, handleSave }: Props) {
                 ? 'rounded bg-accent hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
                 : 'rounded hover:bg-gray-200 dark:hover:bg-gray-600'
             }
+            title="打ち消し線"
             type="button">
             <Strikethrough />
           </button>
@@ -130,10 +133,45 @@ export function MarkdownEditor({ content, setContent, handleSave }: Props) {
               chain.run();
             }}
             type="button">
-            Toggle list type
+            リストタイプを切り替え
           </button>
         </div>
       </BubbleMenu>
+
+      <FloatingMenu editor={editor}>
+        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow flex p-0.5 gap-1">
+          <button
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            className={
+              editor.isActive('heading', { level: 1 })
+                ? 'rounded bg-accent hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
+                : 'rounded hover:bg-gray-200 dark:hover:bg-gray-600'
+            }
+            title="見出し1">
+            <Heading1 />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            className={
+              editor.isActive('heading', { level: 2 })
+                ? 'rounded bg-accent hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
+                : 'rounded hover:bg-gray-200 dark:hover:bg-gray-600'
+            }
+            title="見出し2">
+            <Heading2 />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className={
+              editor.isActive('bulletList')
+                ? 'rounded bg-accent hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
+                : 'rounded hover:bg-gray-200 dark:hover:bg-gray-600'
+            }
+            title="箇条書き">
+            <List />
+          </button>
+        </div>
+      </FloatingMenu>
 
       <EditorContent editor={editor} />
     </div>

@@ -38,6 +38,7 @@ export function Editor() {
       <MarkdownEditor
         content={content}
         setContent={setContent}
+        handleSave={handleSave}
       />
     </main>
   );

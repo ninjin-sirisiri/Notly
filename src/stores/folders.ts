@@ -198,12 +198,40 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
         setCurrentNote(null);
       }
 
-      set(state => ({
-        folders: state.folders.filter(folder => folder.id !== id),
-        currentFolder: state.currentFolder?.id === id ? null : state.currentFolder,
-        isLoading: false,
-        error: null
-      }));
+      set(state => {
+        const deletedFolder = state.folders.find(folder => folder.id === id);
+        // Check if currentFolder should be cleared
+        let shouldClearCurrentFolder = false;
+
+        if (state.currentFolder?.id === id) {
+          // Current folder is the one being deleted
+          shouldClearCurrentFolder = true;
+        } else if (state.currentFolder && deletedFolder) {
+          // Check if current folder is within the deleted folder
+          const currentPath = state.currentFolder.folderPath;
+          const deletedPath = deletedFolder.folderPath;
+
+          // Exact match
+          if (currentPath === deletedPath) {
+            shouldClearCurrentFolder = true;
+          }
+          // Check if current folder is a child of the deleted folder
+          else if (currentPath.startsWith(deletedPath)) {
+            // Make sure it's actually a subdirectory, not just a partial match
+            const remainder = currentPath.slice(deletedPath.length);
+            if (remainder.startsWith('/') || remainder.startsWith('\\')) {
+              shouldClearCurrentFolder = true;
+            }
+          }
+        }
+
+        return {
+          folders: state.folders.filter(folder => folder.id !== id),
+          currentFolder: shouldClearCurrentFolder ? null : state.currentFolder,
+          isLoading: false,
+          error: null
+        };
+      });
       useFileStore.getState().loadFiles();
     } catch (error) {
       set({

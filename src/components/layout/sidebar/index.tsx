@@ -11,7 +11,7 @@ import {
 
 import { Input } from '@/components/ui/input';
 import { useFiles } from '@/hooks/useFiles';
-import { useCreateFolder, useMoveFolder } from '@/hooks/useFolder';
+import { useCreateFolder, useCurrentFolder, useMoveFolder } from '@/hooks/useFolder';
 import { useCreateNote, useMoveNote } from '@/hooks/useNote';
 import { cn } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
@@ -50,6 +50,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
   const [folderName, setFolderName] = useState('');
   const noteInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
+  const { setCurrentFolder } = useCurrentFolder();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -196,7 +197,9 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
               sensors={sensors}
               onDragEnd={handleDragEnd}>
               <RootDroppable>
-                <div className="overflow-y-auto h-full">
+                <div
+                  className="overflow-y-auto h-full"
+                  onClick={() => setCurrentFolder(null)}>
                   {isCreatingNote && (
                     <div className="px-2 py-1">
                       <Input

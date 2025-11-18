@@ -40,7 +40,8 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
     setName(folder.name);
   }, [folder.name]);
 
-  function handleClick() {
+  function handleClick(e: React.MouseEvent<HTMLDivElement>) {
+    e.stopPropagation();
     toggleFolder(folder.id);
     onClick();
   }

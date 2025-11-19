@@ -59,6 +59,7 @@ export function Editor() {
           content={content}
           setContent={setContent}
           handleSave={handleSave}
+          isNewNote={!currentNote}
         />
       </main>
       <FolderSelectDialog

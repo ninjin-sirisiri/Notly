@@ -16,9 +16,10 @@ type Props = {
   content: string;
   setContent: React.Dispatch<React.SetStateAction<string>>;
   handleSave: () => void;
+  isNewNote: boolean;
 };
 
-export function MarkdownEditor({ content, setContent, handleSave }: Props) {
+export function MarkdownEditor({ content, setContent, handleSave, isNewNote }: Props) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -34,7 +35,11 @@ export function MarkdownEditor({ content, setContent, handleSave }: Props) {
     onUpdate: ({ editor }) => {
       setContent(editor.getMarkdown());
     },
-    onBlur: handleSave,
+    onBlur: () => {
+      if (!isNewNote) {
+        handleSave();
+      }
+    },
     editorProps: {
       attributes: {
         class:

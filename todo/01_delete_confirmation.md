@@ -1,7 +1,7 @@
 # 削除確認ダイアログの実装
 
 **優先度**: 高  
-**ステータス**: 未着手
+**ステータス**: 完了
 
 ## 概要
 
@@ -10,20 +10,20 @@
 ## 実装範囲
 
 ### 1. UIコンポーネントの作成
-- [ ] `src/components/ui/alert-dialog.tsx` を追加（shadcn/uiから）
-- [ ] 削除確認用のカスタムダイアログコンポーネントを作成（オプション）
+- [x] `src/components/ui/alert-dialog.tsx` を追加（shadcn/uiから）
+- [x] 削除確認用のカスタムダイアログコンポーネントを作成（オプション）
 
 ### 2. FolderItemの修正
-- [ ] `src/components/layout/sidebar/FolderItem.tsx`
-  - [ ] 削除確認ダイアログの状態管理を追加
-  - [ ] 削除ボタンクリック時にダイアログを表示
-  - [ ] ダイアログの確認後に削除実行
+- [x] `src/components/layout/sidebar/FolderItem.tsx`
+  - [x] 削除確認ダイアログの状態管理を追加
+  - [x] 削除ボタンクリック時にダイアログを表示
+  - [x] ダイアログの確認後に削除実行
 
 ### 3. NoteItemの修正
-- [ ] `src/components/layout/sidebar/NoteItem.tsx`
-  - [ ] 削除確認ダイアログの状態管理を追加
-  - [ ] 削除ボタンクリック時にダイアログを表示
-  - [ ] ダイアログの確認後に削除実行
+- [x] `src/components/layout/sidebar/NoteItem.tsx`
+  - [x] 削除確認ダイアログの状態管理を追加
+  - [x] 削除ボタンクリック時にダイアログを表示
+  - [x] ダイアログの確認後に削除実行
 
 ## 技術的な詳細
 

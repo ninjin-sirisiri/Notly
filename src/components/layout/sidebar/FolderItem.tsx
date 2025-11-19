@@ -2,6 +2,16 @@ import { ChevronRight, Edit2, Folder, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
 import { useDeleteFolder, useUpdateFolder } from '@/hooks/useFolder';
 import { cn } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
@@ -19,6 +29,7 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
   const isOpen = openFolderIds.includes(folder.id);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(folder.name);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { updateFolder } = useUpdateFolder();
   const { deleteFolder } = useDeleteFolder();
 
@@ -58,7 +69,12 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
 
   function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
+    setShowDeleteConfirm(true);
+  }
+
+  function confirmDelete() {
     deleteFolder(folder.id);
+    setShowDeleteConfirm(false);
   }
 
   return (
@@ -139,6 +155,23 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
           </div>
         </div>
       )}
+
+      <AlertDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>フォルダを削除しますか？</AlertDialogTitle>
+            <AlertDialogDescription>
+              「{folder.name}」を削除します。この操作は取り消せません。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>削除</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

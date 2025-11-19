@@ -2,6 +2,16 @@ import { Edit2, FileText, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
 import { useCurrentNote, useDeleteNote, useMoveNote, useNotes } from '@/hooks/useNote';
 import { cn } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
@@ -20,6 +30,7 @@ export function NoteItem({ note }: NoteItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(note.title);
   const [showMoveMenu, setShowMoveMenu] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { folders } = useFolderStore();
 
@@ -47,7 +58,12 @@ export function NoteItem({ note }: NoteItemProps) {
 
   function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
+    setShowDeleteConfirm(true);
+  }
+
+  function confirmDelete() {
     deleteNote(note.id);
+    setShowDeleteConfirm(false);
   }
 
   function handleMoveToFolder(folderId: number | null) {
@@ -130,6 +146,23 @@ export function NoteItem({ note }: NoteItemProps) {
           ))}
         </div>
       )}
+
+      <AlertDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ノートを削除しますか？</AlertDialogTitle>
+            <AlertDialogDescription>
+              「{note.title}」を削除します。この操作は取り消せません。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>削除</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

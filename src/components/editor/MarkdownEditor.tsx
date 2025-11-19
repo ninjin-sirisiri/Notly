@@ -10,6 +10,7 @@ import {
 } from '@tiptap/react';
 import { BubbleMenu, FloatingMenu } from '@tiptap/react/menus';
 import { StarterKit } from '@tiptap/starter-kit';
+import { EditorToolbar } from './EditorToolbar';
 
 type Props = {
   content: string;
@@ -37,7 +38,7 @@ export function MarkdownEditor({ content, setContent, handleSave }: Props) {
     editorProps: {
       attributes: {
         class:
-          'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl dark:prose-invert m-5 focus:outline-none border border-gray-300 rounded-md p-4 min-w-[calc(100vw-320px)] h-[calc(100vh-240px)] overflow-auto dark:text-gray-300 dark:border-gray-700'
+          'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl dark:prose-invert focus:outline-none p-4 min-w-[calc(100vw-320px)] h-[calc(100vh-240px)] overflow-auto dark:text-gray-300'
       }
     },
     contentType: 'markdown'
@@ -59,7 +60,8 @@ export function MarkdownEditor({ content, setContent, handleSave }: Props) {
   });
 
   return (
-    <div>
+    <div className="m-5 border border-gray-300 dark:border-gray-700 rounded-md overflow-hidden flex flex-col bg-white dark:bg-gray-900">
+      <EditorToolbar editor={editor} />
       <BubbleMenu
         editor={editor}
         options={{ placement: 'bottom', offset: 8, flip: true }}>

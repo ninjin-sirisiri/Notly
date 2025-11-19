@@ -1,4 +1,4 @@
-import { ChevronRight, Edit2, Folder, Trash2 } from 'lucide-react';
+import { ChevronRight, Edit2, Folder, FolderInput, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 
@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
-import { useDeleteFolder, useUpdateFolder } from '@/hooks/useFolder';
+import { useDeleteFolder, useMoveFolder, useUpdateFolder } from '@/hooks/useFolder';
 import { cn } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
 import { type FileItem as FileItemType, type FolderWithChildren } from '@/types/files';
@@ -25,13 +25,15 @@ type FolderItemProps = {
 };
 
 export function FolderItem({ folder, isActive, FileItemComponent, onClick }: FolderItemProps) {
-  const { openFolderIds, toggleFolder } = useFolderStore();
+  const { openFolderIds, toggleFolder, folders } = useFolderStore();
   const isOpen = openFolderIds.includes(folder.id);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(folder.name);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showMoveMenu, setShowMoveMenu] = useState(false);
   const { updateFolder } = useUpdateFolder();
   const { deleteFolder } = useDeleteFolder();
+  const { moveFolder } = useMoveFolder();
 
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({
     id: folder.id
@@ -75,6 +77,11 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
   function confirmDelete() {
     deleteFolder(folder.id);
     setShowDeleteConfirm(false);
+  }
+
+  function handleMoveToFolder(parentId: number | null) {
+    moveFolder(folder.id, parentId);
+    setShowMoveMenu(false);
   }
 
   return (
@@ -136,11 +143,65 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
             </button>
             <button
               className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+              title="移動"
+              onClick={e => {
+                e.stopPropagation();
+                setShowMoveMenu(true);
+              }}>
+              <FolderInput className="h-3.5 w-3.5" />
+            </button>
+            <button
+              className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
               title="削除"
               onClick={handleDelete}>
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
+        </div>
+      )}
+      {showMoveMenu && (
+        <div className="absolute z-10 right-0 top-full mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg max-h-64 overflow-y-auto">
+          <button
+            className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+            onClick={e => {
+              e.stopPropagation();
+              handleMoveToFolder(null);
+            }}>
+            📁 ルート
+          </button>
+          {(() => {
+            // Build folder tree, excluding current folder and its descendants
+            function buildTree(
+              parentId: number | null
+            ): { folder: FolderWithChildren; depth: number }[] {
+              const result: { folder: FolderWithChildren; depth: number }[] = [];
+              const children = folders.filter(f => f.parentId === parentId && f.id !== folder.id);
+
+              for (const child of children) {
+                result.push({ folder: child, depth: 0 });
+                const subChildren = buildTree(child.id);
+                result.push(...subChildren.map(sc => ({ ...sc, depth: sc.depth + 1 })));
+              }
+
+              return result;
+            }
+
+            const tree = buildTree(null);
+
+            return tree.map(({ folder: f, depth }) => (
+              <button
+                key={f.id}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-1"
+                style={{ paddingLeft: `${12 + depth * 16}px` }}
+                onClick={e => {
+                  e.stopPropagation();
+                  handleMoveToFolder(f.id);
+                }}>
+                <span className="text-xs opacity-50">{'└─'.repeat(Math.min(depth, 1))}</span>📁{' '}
+                {f.name}
+              </button>
+            ));
+          })()}
         </div>
       )}
       {isOpen && folder.children && folder.children.length > 0 && (

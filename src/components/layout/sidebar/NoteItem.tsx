@@ -1,4 +1,4 @@
-import { Edit2, FileText, Trash2 } from 'lucide-react';
+import { Edit2, FileText, FolderInput, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 
@@ -116,6 +116,15 @@ export function NoteItem({ note }: NoteItemProps) {
             </button>
             <button
               className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+              title="移動"
+              onClick={e => {
+                e.stopPropagation();
+                setShowMoveMenu(true);
+              }}>
+              <FolderInput className="h-3.5 w-3.5" />
+            </button>
+            <button
+              className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
               title="削除"
               onClick={handleDelete}>
               <Trash2 className="h-3.5 w-3.5" />
@@ -124,26 +133,48 @@ export function NoteItem({ note }: NoteItemProps) {
         </div>
       )}
       {showMoveMenu && (
-        <div className="absolute z-10 right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg max-h-48 overflow-y-auto">
+        <div className="absolute z-10 right-0 top-full mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg max-h-64 overflow-y-auto">
           <button
             className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
             onClick={e => {
               e.stopPropagation();
               handleMoveToFolder(null);
             }}>
-            ルート
+            📁 ルート
           </button>
-          {folders.map(folder => (
-            <button
-              key={folder.id}
-              className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-              onClick={e => {
-                e.stopPropagation();
-                handleMoveToFolder(folder.id);
-              }}>
-              {folder.name}
-            </button>
-          ))}
+          {(() => {
+            // Build folder tree
+            function buildTree(
+              parentId: number | null
+            ): { folder: (typeof folders)[0]; depth: number }[] {
+              const result: { folder: (typeof folders)[0]; depth: number }[] = [];
+              const children = folders.filter(f => f.parentId === parentId);
+
+              for (const child of children) {
+                result.push({ folder: child, depth: 0 });
+                const subChildren = buildTree(child.id);
+                result.push(...subChildren.map(sc => ({ ...sc, depth: sc.depth + 1 })));
+              }
+
+              return result;
+            }
+
+            const tree = buildTree(null);
+
+            return tree.map(({ folder, depth }) => (
+              <button
+                key={folder.id}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-1"
+                style={{ paddingLeft: `${12 + depth * 16}px` }}
+                onClick={e => {
+                  e.stopPropagation();
+                  handleMoveToFolder(folder.id);
+                }}>
+                <span className="text-xs opacity-50">{'└─'.repeat(Math.min(depth, 1))}</span>📁{' '}
+                {folder.name}
+              </button>
+            ));
+          })()}
         </div>
       )}
 

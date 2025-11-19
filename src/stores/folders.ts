@@ -262,6 +262,9 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
         isLoading: false,
         error: null
       });
+
+      // Reload folders to reflect the updated structure
+      await get().loadFolders();
       useFileStore.getState().loadFiles();
     } catch (error) {
       set({

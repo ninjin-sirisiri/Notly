@@ -17,11 +17,11 @@ export function createFolder(
 }
 
 export function loadFolders(): Promise<Folder[]> {
-  return safeInvoke<Folder[]>('load_folders', {});
+  return safeInvoke<Folder[]>('get_all_folders', {});
 }
 
 export function loadFolder(id: number): Promise<Folder> {
-  return safeInvoke<Folder>('load_folder', {
+  return safeInvoke<Folder>('get_folder_by_id', {
     id
   });
 }

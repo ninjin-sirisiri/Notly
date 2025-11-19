@@ -17,14 +17,14 @@
 ## 実装範囲
 
 ### 1. NoteItemの修正
-- [ ] `src/components/layout/sidebar/NoteItem.tsx`
-  - [ ] Moveボタンを追加（Edit、Deleteボタンと並べて配置）
-  - [ ] ボタンクリック時に`setShowMoveMenu(true)`を呼び出し
+- [x] `src/components/layout/sidebar/NoteItem.tsx`
+  - [x] Moveボタンを追加（Edit、Deleteボタンと並べて配置）
+  - [x] ボタンクリック時に`setShowMoveMenu(true)`を呼び出し
 
 ### 2. FolderItemへの同様の機能追加（オプション）
-- [ ] `src/components/layout/sidebar/FolderItem.tsx`
-  - [ ] フォルダもMoveメニューで移動できるようにする
-  - [ ] ドラッグ&ドロップと併用可能にする
+- [x] `src/components/layout/sidebar/FolderItem.tsx`
+  - [x] フォルダもMoveメニューで移動できるようにする
+  - [x] ドラッグ&ドロップと併用可能にする
 
 ## 技術的な詳細
 
@@ -51,6 +51,6 @@ import { Edit2, FileText, Trash2, FolderInput } from 'lucide-react';
 
 ## 検討事項
 
-- [ ] アイコンの選択（FolderInput, Move, ArrowRightなど）
-- [ ] メニューの配置（ボタンエリアに収まるか）
-- [ ] クリック時にメニューが見切れないか確認
+- [x] アイコンの選択（FolderInput, Move, ArrowRightなど）
+- [x] メニューの配置（ボタンエリアに収まるか）
+- [x] クリック時にメニューが見切れないか確認

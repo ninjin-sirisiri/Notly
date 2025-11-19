@@ -186,6 +186,9 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         currentNote: get().currentNote?.id === id ? movedNote : get().currentNote,
         isLoading: false
       });
+
+      // Reload folders to reflect any changes in folder structure
+      await useFolderStore.getState().loadFolders();
       useFileStore.getState().loadFiles();
     } catch (error) {
       set({

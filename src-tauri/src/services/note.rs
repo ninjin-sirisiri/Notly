@@ -73,6 +73,7 @@ impl NoteService {
             updated_at: row.get(3)?,
             parent_id: row.get(4)?,
             file_path: row.get(5)?,
+            preview: String::new(),
           })
         },
       )
@@ -94,6 +95,35 @@ impl NoteService {
     Ok(note_with_content)
   }
 
+  pub fn generate_preview(content: &str) -> String {
+    let plain_text = content
+      .lines()
+      .map(|line| line.trim())
+      .filter(|line| !line.is_empty())
+      .collect::<Vec<&str>>()
+      .join(" ");
+
+    // Simple markdown stripping
+    let plain_text = plain_text
+      .replace("#", "")
+      .replace("*", "")
+      .replace("-", "")
+      .replace("`", "")
+      .replace(">", "")
+      .replace("[", "")
+      .replace("]", "")
+      .replace("(", "")
+      .replace(")", "");
+
+    let plain_text = plain_text.trim();
+
+    if plain_text.chars().count() > 100 {
+      plain_text.chars().take(100).collect::<String>() + "..."
+    } else {
+      plain_text.to_string()
+    }
+  }
+
   // 全てのノートを取得
   pub fn get_all_notes(&self) -> Result<Vec<Note>, String> {
     let conn = self.db.conn.lock().unwrap();
@@ -107,13 +137,18 @@ impl NoteService {
 
     let notes = stmt
       .query_map([], |row| {
+        let file_path: String = row.get(5)?;
+        let content = fs::read_to_string(&file_path).unwrap_or_default();
+        let preview = Self::generate_preview(&content);
+
         Ok(Note {
           id: row.get(0)?,
           title: row.get(1)?,
           created_at: row.get(2)?,
           updated_at: row.get(3)?,
           parent_id: row.get(4)?,
-          file_path: row.get(5)?,
+          file_path,
+          preview,
         })
       })
       .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
@@ -169,6 +204,7 @@ impl NoteService {
               updated_at: row.get(3)?,
               parent_id: row.get(4)?,
               file_path: row.get(5)?,
+              preview: String::new(),
             })
           },
         )
@@ -259,6 +295,7 @@ impl NoteService {
               updated_at: row.get(3)?,
               parent_id: row.get(4)?,
               file_path: row.get(5)?,
+              preview: String::new(),
             })
           },
         )
@@ -322,6 +359,7 @@ impl NoteService {
       updated_at,
       parent_id: new_parent_id,
       file_path: new_path_str,
+      preview: Self::generate_preview(&fs::read_to_string(&new_path).unwrap_or_default()),
     })
   }
 }

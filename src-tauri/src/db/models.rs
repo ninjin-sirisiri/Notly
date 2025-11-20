@@ -8,6 +8,7 @@ pub struct Note {
   pub created_at: String,
   pub updated_at: String,
   pub parent_id: Option<i64>,
+  pub preview: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

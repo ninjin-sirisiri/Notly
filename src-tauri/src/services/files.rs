@@ -1,8 +1,10 @@
 use std::collections::HashMap;
+use std::fs;
 use std::sync::Arc;
 
 use crate::db::Database;
 use crate::db::models::{FileItem, FolderWithChildren};
+use crate::services::NoteService;
 
 pub struct FileService {
   db: Arc<Database>,
@@ -40,13 +42,18 @@ impl FileService {
       .map_err(|e| format!("Failed to prepare statement: {}", e))?;
     let notes = note_stmt
       .query_map([], |row| {
+        let file_path: String = row.get(5)?;
+        let content = fs::read_to_string(&file_path).unwrap_or_default();
+        let preview = NoteService::generate_preview(&content);
+
         Ok(crate::db::models::Note {
           id: row.get(0)?,
           title: row.get(1)?,
           created_at: row.get(2)?,
           updated_at: row.get(3)?,
           parent_id: row.get(4)?,
-          file_path: row.get(5)?,
+          file_path,
+          preview,
         })
       })
       .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?

@@ -5,6 +5,7 @@ export type Note = {
   created_at: Date;
   updated_at: Date;
   parent_id: number | null;
+  preview: string;
 };
 
 export type NoteWithContent = Note & {

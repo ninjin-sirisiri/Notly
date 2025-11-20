@@ -12,6 +12,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger
+} from '@/components/ui/context-menu';
 import { useDeleteFolder, useMoveFolder, useUpdateFolder } from '@/hooks/useFolder';
 import { cn } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
@@ -110,54 +117,86 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
           />
         </div>
       ) : (
-        <div
-          ref={node => {
-            setDroppableRef(node);
-            setDraggableRef(node);
-          }}
-          {...attributes}
-          {...listeners}
-          className={cn(
-            'flex items-center gap-2 pl-2 pr-2 py-1.5 rounded text-primary dark:text-white group relative cursor-pointer',
-            isActive
-              ? 'bg-gray-200 dark:bg-gray-700'
-              : 'hover:bg-gray-200 dark:hover:bg-gray-700/50',
-            isOver && 'bg-blue-100 dark:bg-blue-900/30',
-            isDragging && 'opacity-50'
-          )}
-          onClick={handleClick}>
-          <ChevronRight
-            className={cn('h-4 w-4 transform transition-transform', isOpen && 'rotate-90')}
-          />
-          <Folder className="h-4 w-4" />
-          <p className="text-sm font-medium flex-1 truncate">{folder.name}</p>
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-              title="名前を変更"
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <div
+              ref={node => {
+                setDroppableRef(node);
+                setDraggableRef(node);
+              }}
+              {...attributes}
+              {...listeners}
+              className={cn(
+                'flex items-center gap-2 pl-2 pr-2 py-1.5 rounded text-primary dark:text-white group relative cursor-pointer',
+                isActive
+                  ? 'bg-gray-200 dark:bg-gray-700'
+                  : 'hover:bg-gray-200 dark:hover:bg-gray-700/50',
+                isOver && 'bg-blue-100 dark:bg-blue-900/30',
+                isDragging && 'opacity-50'
+              )}
+              onClick={handleClick}>
+              <ChevronRight
+                className={cn('h-4 w-4 transform transition-transform', isOpen && 'rotate-90')}
+              />
+              <Folder className="h-4 w-4" />
+              <p className="text-sm font-medium flex-1 truncate">{folder.name}</p>
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                  title="名前を変更"
+                  onClick={e => {
+                    e.stopPropagation();
+                    setIsEditing(true);
+                  }}>
+                  <Edit2 className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                  title="移動"
+                  onClick={e => {
+                    e.stopPropagation();
+                    setShowMoveMenu(true);
+                  }}>
+                  <FolderInput className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                  title="削除"
+                  onClick={handleDelete}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem
               onClick={e => {
                 e.stopPropagation();
                 setIsEditing(true);
               }}>
-              <Edit2 className="h-3.5 w-3.5" />
-            </button>
-            <button
-              className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-              title="移動"
+              <Edit2 className="mr-2 h-4 w-4" />
+              名前を変更
+            </ContextMenuItem>
+            <ContextMenuItem
               onClick={e => {
                 e.stopPropagation();
                 setShowMoveMenu(true);
               }}>
-              <FolderInput className="h-3.5 w-3.5" />
-            </button>
-            <button
-              className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-              title="削除"
-              onClick={handleDelete}>
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
+              <FolderInput className="mr-2 h-4 w-4" />
+              移動
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem
+              onClick={e => {
+                e.stopPropagation();
+                setShowDeleteConfirm(true);
+              }}
+              className="text-red-600 focus:text-red-600">
+              <Trash2 className="mr-2 h-4 w-4" />
+              削除
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
       )}
       {showMoveMenu && (
         <div className="absolute z-10 right-0 top-full mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg max-h-64 overflow-y-auto">

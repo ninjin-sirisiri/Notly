@@ -1,7 +1,7 @@
 # コンテキストメニュー（右クリックメニュー）
 
 **優先度**: 高  
-**ステータス**: 未着手
+**ステータス**: 完了
 
 ## 概要
 
@@ -10,25 +10,25 @@
 ## 実装範囲
 
 ### 1. コンテキストメニューコンポーネントの作成
-- [ ] `src/components/ui/context-menu.tsx` を追加（shadcn/uiから）
-- [ ] または独自のポップアップメニューコンポーネントを作成
+- [x] `src/components/ui/context-menu.tsx` を追加（shadcn/uiから）
+- [x] または独自のポップアップメニューコンポーネントを作成
 
 ### 2. NoteItemへの適用
-- [ ] `src/components/layout/sidebar/NoteItem.tsx`
-  - [ ] 右クリック時にコンテキストメニューを表示
-  - [ ] メニュー項目：
-    - [ ] 名前を変更
-    - [ ] 移動
-    - [ ] 削除
+- [x] `src/components/layout/sidebar/NoteItem.tsx`
+  - [x] 右クリック時にコンテキストメニューを表示
+  - [x] メニュー項目：
+    - [x] 名前を変更
+    - [x] 移動
+    - [x] 削除
     - [ ] ファイルパスをコピー（オプション）
 
 ### 3. FolderItemへの適用
-- [ ] `src/components/layout/sidebar/FolderItem.tsx`
-  - [ ] 右クリック時にコンテキストメニューを表示
-  - [ ] メニュー項目：
-    - [ ] 名前を変更
-    - [ ] 移動
-    - [ ] 削除
+- [x] `src/components/layout/sidebar/FolderItem.tsx`
+  - [x] 右クリック時にコンテキストメニューを表示
+  - [x] メニュー項目：
+    - [x] 名前を変更
+    - [x] 移動
+    - [x] 削除
     - [ ] 新しいノートを作成（オプション）
     - [ ] 新しいフォルダを作成（オプション）
 

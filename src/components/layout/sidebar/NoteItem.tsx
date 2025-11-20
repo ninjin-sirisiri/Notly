@@ -12,6 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -23,6 +24,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import { useCurrentNote, useDeleteNote, useMoveNote, useNotes } from '@/hooks/useNote';
 import { cn } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
+import { useSelectionStore } from '@/stores/selection';
 import { type Note } from '@/types/notes';
 
 type NoteItemProps = {
@@ -41,10 +43,12 @@ export function NoteItem({ note }: NoteItemProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { folders } = useFolderStore();
+  const { selectionMode, isSelected, toggleSelection } = useSelectionStore();
+  const selected = isSelected(note.id, 'note');
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: note.id,
-    disabled: isEditing
+    disabled: isEditing || selectionMode // 選択モード時はドラッグ無効
   });
 
   useEffect(() => {
@@ -109,11 +113,24 @@ export function NoteItem({ note }: NoteItemProps) {
                     currentNote?.id === note.id
                       ? 'bg-gray-300/50 dark:bg-gray-600/50'
                       : 'hover:bg-gray-200 dark:hover:bg-gray-700/50',
-                    isDragging && 'opacity-50'
+                    isDragging && 'opacity-50',
+                    selected && 'bg-blue-100 dark:bg-blue-900/30'
                   )}
                   onClick={() => {
-                    loadNote(note.id);
+                    if (selectionMode) {
+                      toggleSelection(note.id, 'note');
+                    } else {
+                      loadNote(note.id);
+                    }
                   }}>
+                  {selectionMode && (
+                    <Checkbox
+                      checked={selected}
+                      onCheckedChange={() => toggleSelection(note.id, 'note')}
+                      onClick={e => e.stopPropagation()}
+                      className="mr-1"
+                    />
+                  )}
                   <FileText className="h-4 w-4 shrink-0" />
                   <p className="text-sm font-medium truncate">{note.title}</p>
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">

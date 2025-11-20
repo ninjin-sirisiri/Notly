@@ -12,6 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -22,6 +23,7 @@ import {
 import { useDeleteFolder, useMoveFolder, useUpdateFolder } from '@/hooks/useFolder';
 import { cn } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
+import { useSelectionStore } from '@/stores/selection';
 import { type FileItem as FileItemType, type FolderWithChildren } from '@/types/files';
 
 type FolderItemProps = {
@@ -30,6 +32,34 @@ type FolderItemProps = {
   FileItemComponent: React.ComponentType<{ item: FileItemType }>;
   onClick: () => void;
 };
+
+// フォルダとその子要素を再帰的に取得
+function getAllDescendants(
+  targetFolder: FolderWithChildren
+): { id: number; type: 'note' | 'folder' }[] {
+  const result: { id: number; type: 'note' | 'folder' }[] = [];
+
+  // 現在のフォルダを追加
+  result.push({ id: targetFolder.id, type: 'folder' });
+
+  // 子要素がない場合は終了
+  if (!targetFolder.children || targetFolder.children.length === 0) {
+    return result;
+  }
+
+  // folder.childrenから子要素を取得
+  for (const child of targetFolder.children) {
+    if ('folder' in child) {
+      // サブフォルダの場合、再帰的に取得
+      result.push(...getAllDescendants(child.folder));
+    } else if ('note' in child) {
+      // ノートの場合
+      result.push({ id: child.note.id, type: 'note' });
+    }
+  }
+
+  return result;
+}
 
 export function FolderItem({ folder, isActive, FileItemComponent, onClick }: FolderItemProps) {
   const { openFolderIds, toggleFolder, folders } = useFolderStore();
@@ -42,6 +72,9 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
   const { deleteFolder } = useDeleteFolder();
   const { moveFolder } = useMoveFolder();
 
+  const { selectionMode, isSelected, toggleSelectionWithChildren } = useSelectionStore();
+  const selected = isSelected(folder.id, 'folder');
+
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({
     id: folder.id
   });
@@ -53,7 +86,7 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
     isDragging
   } = useDraggable({
     id: `folder-${folder.id}`,
-    disabled: isEditing
+    disabled: isEditing || selectionMode
   });
 
   useEffect(() => {
@@ -62,8 +95,24 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
 
   function handleClick(e: React.MouseEvent<HTMLDivElement>) {
     e.stopPropagation();
+    if (selectionMode) {
+      // 選択モード時は選択/選択解除
+      const allItems = getAllDescendants(folder);
+      toggleSelectionWithChildren(allItems);
+    } else {
+      // 通常モード時はフォルダを開閉
+      toggleFolder(folder.id);
+      onClick();
+    }
+  }
+
+  function handleToggleFolder(e: React.MouseEvent) {
+    e.stopPropagation();
+    // 選択モードでもフォルダの開閉を可能にする
     toggleFolder(folder.id);
-    onClick();
+    if (!selectionMode) {
+      onClick();
+    }
   }
 
   function handleSave() {
@@ -96,7 +145,11 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
       {isEditing ? (
         <div className="flex items-center gap-2 pl-2 pr-2 py-1.5 rounded text-primary dark:text-white group relative">
           <ChevronRight
-            className={cn('h-4 w-4 transform transition-transform', isOpen && 'rotate-90')}
+            className={cn(
+              'h-4 w-4 transform transition-transform cursor-pointer',
+              isOpen && 'rotate-90'
+            )}
+            onClick={handleToggleFolder}
           />
           <Folder className="h-4 w-4" />
           <input
@@ -132,11 +185,27 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
                   ? 'bg-gray-200 dark:bg-gray-700'
                   : 'hover:bg-gray-200 dark:hover:bg-gray-700/50',
                 isOver && 'bg-blue-100 dark:bg-blue-900/30',
-                isDragging && 'opacity-50'
+                isDragging && 'opacity-50',
+                selected && 'bg-blue-100 dark:bg-blue-900/30'
               )}
               onClick={handleClick}>
+              {selectionMode && (
+                <Checkbox
+                  checked={selected}
+                  onCheckedChange={() => {
+                    const allItems = getAllDescendants(folder);
+                    toggleSelectionWithChildren(allItems);
+                  }}
+                  onClick={e => e.stopPropagation()}
+                  className="mr-1"
+                />
+              )}
               <ChevronRight
-                className={cn('h-4 w-4 transform transition-transform', isOpen && 'rotate-90')}
+                className={cn(
+                  'h-4 w-4 transform transition-transform cursor-pointer',
+                  isOpen && 'rotate-90'
+                )}
+                onClick={handleToggleFolder}
               />
               <Folder className="h-4 w-4" />
               <p className="text-sm font-medium flex-1 truncate">{folder.name}</p>

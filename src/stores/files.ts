@@ -4,6 +4,7 @@ import { type FileItem } from '@/types/files';
 
 import { getAllFiles } from '@/lib/api/files';
 import { searchNotes } from '@/lib/api/notes';
+import { useFolderStore } from './folders';
 
 type SortBy = 'name' | 'createdAt' | 'updatedAt';
 type SortOrder = 'asc' | 'desc';
@@ -131,10 +132,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 
     if (query.trim()) {
       const folderIds = collectFolderIds(filteredFiles);
-      (async () => {
-        const { useFolderStore } = await import('./folders');
-        useFolderStore.getState().openFolders(folderIds);
-      })();
+      useFolderStore.getState().openFolders(folderIds);
     }
   },
 

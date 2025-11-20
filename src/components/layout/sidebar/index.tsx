@@ -21,6 +21,7 @@ import { CreateFolderButton } from './CreateFolderButton';
 import { CreateNoteButton } from './CreateNoteButton';
 import { FileItem } from './FileItem';
 import { FileSearch } from './FileSearch';
+import { SortMenu } from './SortMenu';
 
 function RootDroppable({ children }: { children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -77,8 +78,8 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     try {
       let newTitle = title.trim();
       if (!newTitle) {
-        const untitledNotes = allNotes.filter(note => note.title.startsWith('Untitled'));
-        newTitle = untitledNotes.length > 0 ? `Untitled ${untitledNotes.length + 1}` : 'Untitled';
+        const untitledNotes = allNotes.filter(note => note.title.startsWith('無題'));
+        newTitle = untitledNotes.length > 0 ? `無題 ${untitledNotes.length + 1}` : '無題';
       }
       await createNote(newTitle, '', currentFolder?.folderPath ?? '', currentFolder?.id ?? null);
     } catch (error) {
@@ -94,7 +95,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
   async function handleCreateFolder() {
     if (!isCreatingFolder) return;
     try {
-      const newFolderName = folderName.trim() || 'Untitled Folder';
+      const newFolderName = folderName.trim() || '新しいフォルダ';
       await createFolder(newFolderName, currentFolder?.folderPath ?? '', currentFolder?.id ?? null);
     } catch (error) {
       toast.error('Failed to create folder:', {
@@ -183,14 +184,17 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         <div className="h-full flex flex-col gap-4">
           <FileSearch />
           <div className="px-2 flex items-center justify-between gap-2">
-            <CreateNoteButton
-              onClick={() => setIsCreatingNote(true)}
-              disabled={isNoteCreating || isCreatingNote}
-            />
-            <CreateFolderButton
-              onClick={() => setIsCreatingFolder(true)}
-              disabled={isFolderCreating || isCreatingFolder}
-            />
+            <div className="flex items-center gap-1">
+              <CreateNoteButton
+                onClick={() => setIsCreatingNote(true)}
+                disabled={isNoteCreating || isCreatingNote}
+              />
+              <CreateFolderButton
+                onClick={() => setIsCreatingFolder(true)}
+                disabled={isFolderCreating || isCreatingFolder}
+              />
+            </div>
+            <SortMenu />
           </div>
           <div className="h-full">
             <DndContext
@@ -208,7 +212,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                         onChange={e => setTitle(e.target.value)}
                         onKeyDown={handleNoteKeyDown}
                         onBlur={handleNoteBlur}
-                        placeholder="Note title..."
+                        placeholder="ノートのタイトル..."
                         disabled={isNoteCreating}
                         className="h-8"
                       />
@@ -222,7 +226,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                         onChange={e => setFolderName(e.target.value)}
                         onKeyDown={handleFolderKeyDown}
                         onBlur={handleFolderBlur}
-                        placeholder="Folder name..."
+                        placeholder="フォルダ名..."
                         disabled={isFolderCreating}
                         className="h-8"
                       />

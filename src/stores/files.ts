@@ -5,6 +5,9 @@ import { type FileItem } from '@/types/files';
 import { getAllFiles } from '@/lib/api/files';
 import { searchNotes } from '@/lib/api/notes';
 
+type SortBy = 'name' | 'createdAt' | 'updatedAt';
+type SortOrder = 'asc' | 'desc';
+
 type FileStore = {
   files: FileItem[];
   filteredFiles: FileItem[];
@@ -13,6 +16,10 @@ type FileStore = {
   error: string | null;
   loadFiles: () => Promise<void>;
   setSearchQuery: (query: string) => void;
+  sortBy: SortBy;
+  sortOrder: SortOrder;
+  setSortBy: (sortBy: SortBy) => void;
+  setSortOrder: (sortOrder: SortOrder) => void;
 };
 
 function collectFolderIds(items: FileItem[]): number[] {
@@ -62,20 +69,53 @@ async function filterFilesWithContent(files: FileItem[], query: string): Promise
   return filterRecursive(files);
 }
 
+function sortFiles(files: FileItem[], sortBy: SortBy, sortOrder: SortOrder): FileItem[] {
+  return [...files].toSorted((a, b) => {
+    const aIsFolder = 'folder' in a;
+    const bIsFolder = 'folder' in b;
+
+    if (aIsFolder && !bIsFolder) return -1;
+    if (!aIsFolder && bIsFolder) return 1;
+
+    function getTime(item: FileItem): number {
+      const isFolder = 'folder' in item;
+      if (sortBy === 'createdAt') {
+        return new Date(isFolder ? item.folder.createdAt : item.note.created_at).getTime();
+      }
+      return new Date(isFolder ? item.folder.updatedAt : item.note.updated_at).getTime();
+    }
+
+    let comparison = 0;
+
+    if (sortBy === 'name') {
+      const aName = aIsFolder ? a.folder.name : a.note.title;
+      const bName = bIsFolder ? b.folder.name : b.note.title;
+      comparison = aName.localeCompare(bName);
+    } else {
+      comparison = getTime(a) - getTime(b);
+    }
+
+    return sortOrder === 'asc' ? comparison : -comparison;
+  });
+}
+
 export const useFileStore = create<FileStore>()((set, get) => ({
   files: [],
   filteredFiles: [],
   searchQuery: '',
   isLoading: false,
   error: null,
+  sortBy: 'name',
+  sortOrder: 'asc',
 
   loadFiles: async () => {
     set({ isLoading: true, error: null });
     try {
       const files = await getAllFiles();
-      const { searchQuery } = get();
+      const { searchQuery, sortBy, sortOrder } = get();
       const filteredFiles = await filterFilesWithContent(files, searchQuery);
-      set({ files, filteredFiles, isLoading: false });
+      const sortedFiles = sortFiles(filteredFiles, sortBy, sortOrder);
+      set({ files, filteredFiles: sortedFiles, isLoading: false });
     } catch (error) {
       set({ isLoading: false, error: String(error) });
       throw error;
@@ -83,10 +123,11 @@ export const useFileStore = create<FileStore>()((set, get) => ({
   },
 
   setSearchQuery: async (query: string) => {
-    const { files } = get();
+    const { files, sortBy, sortOrder } = get();
     const filteredFiles = await filterFilesWithContent(files, query);
+    const sortedFiles = sortFiles(filteredFiles, sortBy, sortOrder);
 
-    set({ searchQuery: query, filteredFiles });
+    set({ searchQuery: query, filteredFiles: sortedFiles });
 
     if (query.trim()) {
       const folderIds = collectFolderIds(filteredFiles);
@@ -95,5 +136,17 @@ export const useFileStore = create<FileStore>()((set, get) => ({
         useFolderStore.getState().openFolders(folderIds);
       })();
     }
+  },
+
+  setSortBy: sortBy => {
+    const { filteredFiles, sortOrder } = get();
+    const sortedFiles = sortFiles(filteredFiles, sortBy, sortOrder);
+    set({ sortBy, filteredFiles: sortedFiles });
+  },
+
+  setSortOrder: sortOrder => {
+    const { filteredFiles, sortBy } = get();
+    const sortedFiles = sortFiles(filteredFiles, sortBy, sortOrder);
+    set({ sortOrder, filteredFiles: sortedFiles });
   }
 }));

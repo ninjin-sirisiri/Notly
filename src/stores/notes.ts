@@ -124,12 +124,12 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
     });
     try {
       const updatedNote = await updateNote(id, title, content);
-      set({
-        notes: get().notes.map(note => (note.id === id ? updatedNote : note)),
-        currentNote: updatedNote,
-        currentContent: updatedNote.content,
+      set(state => ({
+        notes: state.notes.map(note => (note.id === id ? updatedNote : note)),
+        currentNote: state.currentNote?.id === id ? updatedNote : state.currentNote,
+        currentContent: state.currentNote?.id === id ? updatedNote.content : state.currentContent,
         isLoading: false
-      });
+      }));
       useFileStore.getState().loadFiles();
     } catch (error) {
       set({

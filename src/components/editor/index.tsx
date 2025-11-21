@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { useCurrentNote } from '@/hooks/useNote';
 import { useNoteStore } from '@/stores/notes';
@@ -14,14 +14,41 @@ export function Editor() {
   const [title, setTitle] = useState(currentNote?.title || '');
   const [content, setContent] = useState(currentContent || '');
   const [showFolderDialog, setShowFolderDialog] = useState(false);
+  const previousNoteIdRef = useRef<number | undefined>(currentNote?.id);
+  const previousContentRef = useRef<string | null>(currentContent);
 
+  // ノートまたはコンテンツが変わったときの処理
   useEffect(() => {
-    if (currentNote) {
-      setTitle(currentNote.title);
-      setContent(currentContent || '');
-    } else {
-      setTitle('');
-      setContent('');
+    const currentNoteId = currentNote?.id;
+    const isNoteChanged = previousNoteIdRef.current !== currentNoteId;
+    const isContentChanged = previousContentRef.current !== currentContent;
+
+    if (isNoteChanged) {
+      // ノートが変わった場合
+      previousNoteIdRef.current = currentNoteId;
+      previousContentRef.current = currentContent;
+
+      if (currentNote) {
+        setTitle(currentNote.title);
+        // 即座にエディタをクリア
+        setContent('');
+
+        // 次のフレームで新しいコンテンツを設定
+        setTimeout(() => {
+          const latestContent = useNoteStore.getState().currentContent;
+          setContent(latestContent || '');
+        }, 0);
+      } else {
+        setTitle('');
+        setContent('');
+      }
+    } else if (isContentChanged) {
+      // ノートは同じだが、コンテンツが外部から更新された場合
+      previousContentRef.current = currentContent;
+      if (currentNote) {
+        setTitle(currentNote.title);
+        setContent(currentContent || '');
+      }
     }
   }, [currentNote, currentContent]);
 
@@ -56,10 +83,12 @@ export function Editor() {
           isNewNote={!currentNote}
         />
         <MarkdownEditor
+          key={currentNote?.id}
           content={content}
           setContent={setContent}
           handleSave={handleSave}
           isNewNote={!currentNote}
+          noteId={currentNote?.id}
         />
       </main>
       <FolderSelectDialog

@@ -101,6 +101,12 @@ export function MarkdownEditor({ content, setContent, handleSave, isNewNote, not
 
   // ノートリンククリック時の処理
   async function handleNoteLinkClick(noteName: string) {
+    // 現在のノートを保存
+    const { currentNote, currentContent, updateNote } = useNoteStore.getState();
+    if (currentNote && currentContent) {
+      await updateNote(currentNote.id, currentNote.title, currentContent);
+    }
+
     // 最新のnotesを取得
     const { notes } = useNoteStore.getState();
 

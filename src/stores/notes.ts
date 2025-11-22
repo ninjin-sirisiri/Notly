@@ -5,6 +5,7 @@ import { type Note, type NoteWithContent } from '@/types/notes';
 
 import { useFileStore } from './files';
 import { useFolderStore } from './folders';
+import { useStreakStore } from './streak';
 
 type NoteStore = {
   notes: Note[];
@@ -66,6 +67,10 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         isLoading: false
       });
       useFileStore.getState().loadFiles();
+
+      // Record activity for streak tracking
+      useStreakStore.getState().recordActivity();
+
       return newNote; // Return the created note to match the function signature
     } catch (error) {
       set({
@@ -131,6 +136,9 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         isLoading: false
       }));
       useFileStore.getState().loadFiles();
+
+      // Record activity for streak tracking
+      useStreakStore.getState().recordActivity();
     } catch (error) {
       set({
         isLoading: false,

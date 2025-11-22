@@ -55,6 +55,8 @@ pub fn run() {
       commands::folder::delete_folder,
       commands::folder::move_folder,
       commands::files::get_all_files,
+      commands::activity::record_daily_activity,
+      commands::activity::get_streak,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

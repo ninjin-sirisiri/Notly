@@ -27,5 +27,14 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     [],
   )?;
 
+  conn.execute(
+    "CREATE TABLE IF NOT EXISTS activity_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    activity_date DATE NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )",
+    [],
+  )?;
+
   Ok(())
 }

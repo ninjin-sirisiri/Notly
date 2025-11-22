@@ -33,6 +33,8 @@ impl NoteService {
         .map_err(|e| format!("ノートディレクトリの作成に失敗しました: {}", e))?;
     }
 
+    let preview = Self::generate_preview(&content);
+
     let note_id = {
       let conn = self.db.conn.lock().unwrap();
       let file_path_str = full_path.to_str().unwrap_or_default().to_string();
@@ -40,10 +42,10 @@ impl NoteService {
       conn
         .execute(
           "
-		    INSERT INTO notes (title, parent_id, file_path)
-		    VALUES (?, ?, ?)
+		    INSERT INTO notes (title, parent_id, file_path, preview)
+		    VALUES (?, ?, ?, ?)
 		    ",
-          params![title, parent_id, file_path_str],
+          params![title, parent_id, file_path_str, preview],
         )
         .map_err(|e| format!("ノートの作成に失敗しました: {}", e))?;
       conn.last_insert_rowid()
@@ -130,25 +132,21 @@ impl NoteService {
 
     let mut stmt = conn
       .prepare(
-        "SELECT id, title, created_at, updated_at, parent_id, file_path
+        "SELECT id, title, created_at, updated_at, parent_id, file_path, preview
         FROM notes ORDER BY updated_at DESC",
       )
       .map_err(|e| format!("Failed to prepare statement: {}", e))?;
 
     let notes = stmt
       .query_map([], |row| {
-        let file_path: String = row.get(5)?;
-        let content = fs::read_to_string(&file_path).unwrap_or_default();
-        let preview = Self::generate_preview(&content);
-
         Ok(Note {
           id: row.get(0)?,
           title: row.get(1)?,
           created_at: row.get(2)?,
           updated_at: row.get(3)?,
           parent_id: row.get(4)?,
-          file_path,
-          preview,
+          file_path: row.get(5)?,
+          preview: row.get(6)?,
         })
       })
       .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
@@ -224,13 +222,14 @@ impl NoteService {
     }
 
     let new_path_str = new_path.to_str().unwrap_or_default().to_string();
+    let preview = Self::generate_preview(&content);
 
     let updated_at = {
       let conn = self.db.conn.lock().unwrap();
       conn
         .execute(
-          "UPDATE notes SET title = ?, file_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-          params![title, new_path_str, id],
+          "UPDATE notes SET title = ?, file_path = ?, preview = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+          params![title, new_path_str, preview, id],
         )
         .map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
 
@@ -285,7 +284,7 @@ impl NoteService {
       let conn = self.db.conn.lock().unwrap();
       conn
         .query_row(
-          "SELECT id, title, created_at, updated_at, parent_id, file_path FROM notes WHERE id = ?",
+          "SELECT id, title, created_at, updated_at, parent_id, file_path, preview FROM notes WHERE id = ?",
           params![id],
           |row| {
             Ok(Note {
@@ -295,7 +294,7 @@ impl NoteService {
               updated_at: row.get(3)?,
               parent_id: row.get(4)?,
               file_path: row.get(5)?,
-              preview: String::new(),
+              preview: row.get(6)?,
             })
           },
         )
@@ -359,7 +358,7 @@ impl NoteService {
       updated_at,
       parent_id: new_parent_id,
       file_path: new_path_str,
-      preview: Self::generate_preview(&fs::read_to_string(&new_path).unwrap_or_default()),
+      preview: old_note.preview,
     })
   }
 }

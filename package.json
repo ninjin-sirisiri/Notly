@@ -9,9 +9,9 @@
   "version": "0.2.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
+    "dev": "bunx --bun vite",
+    "build": "tsc && bunx --bun vite build",
+    "preview": "bunx --bun vite preview",
     "tauri": "tauri",
     "format:front": "bunx --bun oxfmt",
     "lint:front": "bunx --bun oxlint",

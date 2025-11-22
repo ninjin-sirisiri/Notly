@@ -34,11 +34,17 @@ export const AutoCloseExtension = Extension.create({
         // If selection is not empty, wrap the selection
         if (!empty) {
           editor
+
             .chain()
+
             .focus()
+
             .insertContentAt(from, open)
+
             .insertContentAt(to + 1, close)
+
             .setTextSelection({ from: from + 1, to: to + 1 })
+
             .run();
           return true;
         }
@@ -96,9 +102,13 @@ export const AutoCloseExtension = Extension.create({
 
       if (openToClose[prevChar] === nextChar) {
         editor
+
           .chain()
+
           .focus()
+
           .deleteRange({ from: head - 1, to: head + 1 })
+
           .run();
         return true;
       }

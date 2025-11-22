@@ -1,5 +1,10 @@
+import tippy, { type Instance as TippyInstance } from 'tippy.js';
+import { useNoteStore } from '@/stores/notes';
 import { Node, mergeAttributes, nodePasteRule, nodeInputRule } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { ReactRenderer } from '@tiptap/react';
+import { Suggestion as SuggestionPlugin } from '@tiptap/suggestion';
+import { SuggestionList, type SuggestionListRef } from '../SuggestionList';
 
 export type NoteLinkOptions = {
   HTMLAttributes: Record<string, unknown>;
@@ -134,6 +139,107 @@ export const NoteLinkExtension = Node.create<NoteLinkOptions>({
 
   addProseMirrorPlugins() {
     return [
+      SuggestionPlugin({
+        editor: this.editor,
+        pluginKey: new PluginKey('noteLinkSuggestion'),
+        char: '[[',
+        items: ({ query }) => {
+          const notes = useNoteStore.getState().notes;
+          const candidates = notes
+            .filter(note => note.title.toLowerCase().includes(query.toLowerCase()))
+            .map(note => note.title)
+            .slice(0, 5);
+
+          // If no candidates found, or just to allow creating a new note with the current input
+          if (query && !candidates.includes(query)) {
+            candidates.push(query);
+          } else if (candidates.length === 0) {
+            candidates.push('New Note');
+          }
+
+          return candidates;
+        },
+        render: () => {
+          let component: ReactRenderer<SuggestionListRef>;
+          let popup: TippyInstance[];
+
+          return {
+            onStart: props => {
+              component = new ReactRenderer(SuggestionList, {
+                props,
+                editor: props.editor
+              });
+
+              if (!props.clientRect) {
+                return;
+              }
+
+              popup = tippy('body', {
+                getReferenceClientRect: () => props.clientRect?.() || new DOMRect(0, 0, 0, 0),
+                appendTo: () => document.body,
+                content: component.element,
+                showOnCreate: true,
+                interactive: true,
+                trigger: 'manual',
+                placement: 'bottom-start'
+              });
+            },
+
+            onUpdate(props) {
+              component.updateProps(props);
+
+              if (!props.clientRect) {
+                return;
+              }
+
+              popup[0].setProps({
+                getReferenceClientRect: () => props.clientRect?.() || new DOMRect(0, 0, 0, 0)
+              });
+            },
+
+            onKeyDown(props) {
+              if (props.event.key === 'Escape') {
+                popup[0].hide();
+                return true;
+              }
+
+              return component.ref?.onKeyDown(props) || false;
+            },
+
+            onExit() {
+              popup[0].destroy();
+              component.destroy();
+            }
+          };
+        },
+        command: ({ editor, range, props }) => {
+          // Check if there is a closing bracket ']' after the cursor (from AutoClose)
+          const afterText = editor.state.doc.textBetween(range.to, range.to + 1);
+          const hasClosingBracket = afterText === ']';
+
+          editor
+            .chain()
+            .focus()
+            // Delete the trigger '[[' and the query
+            .deleteRange(range)
+            .insertContent({
+              type: this.name,
+              attrs: { noteName: props.noteName }
+            })
+            .command(({ tr }) => {
+              if (hasClosingBracket) {
+                // If we had ']' after, delete it to avoid duplication
+                // We just inserted the node (atom), so the position has moved.
+                // The node size is 1.
+                // So we are at `range.from + 1`.
+                // The ']' should be at `range.from + 1`.
+                tr.delete(range.from + 1, range.from + 1 + 1);
+              }
+              return true;
+            })
+            .run();
+        }
+      }),
       new Plugin({
         key: new PluginKey('noteLinkClick'),
         props: {

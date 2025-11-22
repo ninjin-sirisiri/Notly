@@ -49,6 +49,15 @@ export const AutoCloseExtension = Extension.create({
           return true;
         }
 
+        // Special handling for Note Links [[
+        // If typing '[' and previous char is '[', skip auto-close to allow Suggestion plugin to trigger
+        if (open === '[' && empty) {
+          const prevChar = doc.textBetween(head - 1, head);
+          if (prevChar === '[') {
+            return false;
+          }
+        }
+
         // If it's a quote or backtick, check if we should skip instead of open
         // This handles the case where the user types the closing quote to "move over" it
         if (open === close) {

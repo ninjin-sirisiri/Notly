@@ -100,6 +100,7 @@
     "unicorn/switch-case-braces": "off",
     "init-declarations": "off",
     "max-depth": "off",
-    "no-continue": "off"
+    "no-continue": "off",
+    "new-cap": "off"
   }
 }

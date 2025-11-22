@@ -155,6 +155,37 @@ export const NoteLinkExtension = Node.create<NoteLinkOptions>({
 
             return false;
           }
+        },
+        appendTransaction: (transactions, _oldState, newState) => {
+          const docChanged = transactions.some(tr => tr.docChanged);
+          if (!docChanged) return;
+
+          const { doc, tr } = newState;
+          const regex = /\[\[([^\]]+)\]\]/g;
+          let hasMatch = false;
+
+          doc.descendants((node, pos) => {
+            if (!node.isText || !node.text) return;
+
+            let match;
+            while ((match = regex.exec(node.text)) !== null) {
+              const start = pos + match.index;
+              const end = start + match[0].length;
+              const noteName = match[1];
+
+              // Check if the match is already a noteLink (shouldn't happen in text node but good to be safe)
+              // Actually, we are scanning text nodes, so we found text "[[...]]".
+              // We need to replace this range with a noteLink node.
+
+              // Ensure we don't replace if it's inside a code block or other non-linkable context if needed
+              // For now, simple replacement.
+
+              tr.replaceWith(start, end, this.type.create({ noteName }));
+              hasMatch = true;
+            }
+          });
+
+          if (hasMatch) return tr;
         }
       })
     ];

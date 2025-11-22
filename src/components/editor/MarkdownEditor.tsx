@@ -13,6 +13,7 @@ import {
 import { BubbleMenu, FloatingMenu } from '@tiptap/react/menus';
 import { StarterKit } from '@tiptap/starter-kit';
 import { EditorToolbar } from './EditorToolbar';
+import { AutoCloseExtension } from './extensions/AutoCloseExtension';
 import { NoteLinkExtension } from './extensions/NoteLinkExtension';
 
 type Props = {
@@ -134,7 +135,8 @@ export function MarkdownEditor({ content, setContent, handleSave, isNewNote, not
       }),
       NoteLinkExtension.configure({
         onLinkClick: handleNoteLinkClick
-      })
+      }),
+      AutoCloseExtension
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -165,7 +167,8 @@ export function MarkdownEditor({ content, setContent, handleSave, isNewNote, not
     if (!editor) return;
 
     const noteIdChanged = previousNoteIdRef.current !== noteId;
-    const currentMarkdown = editor.getMarkdown().trim();
+    // Use the same custom markdown conversion as onUpdate to prevent unnecessary updates
+    const currentMarkdown = getNoteLinkMarkdown(editor);
     const newContent = content.trim();
 
     // ノートIDが変わっていない場合は、コンテンツが同じなら更新しない

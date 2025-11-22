@@ -29,12 +29,32 @@ impl FolderService {
       .join(parent_path.clone().unwrap_or_default())
       .join(name.clone());
 
+    let folder_path_str = full_path.to_str().unwrap_or_default().to_string();
+
+    // 同じパスのフォルダが既に存在するかチェック
+    {
+      let conn = self.db.conn.lock().unwrap();
+      let exists: bool = conn
+        .query_row(
+          "SELECT EXISTS(SELECT 1 FROM folders WHERE folder_path = ?)",
+          params![folder_path_str],
+          |row| row.get(0),
+        )
+        .unwrap_or(false);
+
+      if exists {
+        return Err(format!(
+          "同じパスのフォルダが既に存在します: {}",
+          folder_path_str
+        ));
+      }
+    }
+
     fs::create_dir_all(&full_path)
       .map_err(|e| format!("ディレクトリの作成に失敗しました: {}", e))?;
 
     let folder_id = {
       let conn = self.db.conn.lock().unwrap();
-      let folder_path_str = full_path.to_str().unwrap_or_default().to_string();
 
       conn
         .execute(

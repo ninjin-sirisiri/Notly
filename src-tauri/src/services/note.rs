@@ -28,6 +28,27 @@ impl NoteService {
       .join(folder_path.clone().unwrap_or_default())
       .join(format!("{}.md", title.clone()));
 
+    let file_path_str = full_path.to_str().unwrap_or_default().to_string();
+
+    // 同じパスのノートが既に存在するかチェック
+    {
+      let conn = self.db.conn.lock().unwrap();
+      let exists: bool = conn
+        .query_row(
+          "SELECT EXISTS(SELECT 1 FROM notes WHERE file_path = ?)",
+          params![file_path_str],
+          |row| row.get(0),
+        )
+        .unwrap_or(false);
+
+      if exists {
+        return Err(format!(
+          "同じパスのノートが既に存在します: {}",
+          file_path_str
+        ));
+      }
+    }
+
     if let Some(parent) = full_path.parent() {
       fs::create_dir_all(parent)
         .map_err(|e| format!("ノートディレクトリの作成に失敗しました: {}", e))?;
@@ -37,7 +58,6 @@ impl NoteService {
 
     let note_id = {
       let conn = self.db.conn.lock().unwrap();
-      let file_path_str = full_path.to_str().unwrap_or_default().to_string();
 
       conn
         .execute(

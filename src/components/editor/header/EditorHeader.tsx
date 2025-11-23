@@ -1,7 +1,7 @@
 import { Save } from 'lucide-react';
 
-import { Button } from '../ui/button';
-import { Spinner } from '../ui/spinner';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 
 type Props = {
   title: string;

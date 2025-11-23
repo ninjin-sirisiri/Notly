@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
 import { type FolderWithChildren } from '@/types/files';
 
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '../ui/dialog';
+} from '@/components/ui/dialog';
 
 type Props = {
   open: boolean;

@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { EditorContent } from '@tiptap/react';
-import { BubbleMenus } from './BubbleMenus';
-import { EditorToolbar } from './EditorToolbar';
 import { useMarkdownEditor } from './hooks/useMarkdownEditor';
+import { BubbleMenus } from './menus';
+import { EditorToolbar } from './toolbar/EditorToolbar';
 
 type Props = {
   content: string;

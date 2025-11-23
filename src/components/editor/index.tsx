@@ -3,8 +3,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useCurrentNote } from '@/hooks/useNote';
 import { useNoteStore } from '@/stores/notes';
 
-import { EditorHeader } from './EditorHeader';
-import { FolderSelectDialog } from './FolderSelectDialog';
+import { FolderSelectDialog } from './dialogs/FolderSelectDialog';
+import { EditorHeader } from './header/EditorHeader';
 import { MarkdownEditor } from './MarkdownEditor';
 
 export function Editor() {

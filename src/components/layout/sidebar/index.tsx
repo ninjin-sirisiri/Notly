@@ -1,4 +1,3 @@
-import { CheckSquare, CheckCheck, FolderInput, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { toast } from 'sonner';
@@ -26,14 +25,11 @@ import { useFolderStore } from '@/stores/folders';
 import { useNoteStore } from '@/stores/notes';
 import { useSelectionStore } from '@/stores/selection';
 
-import { CreateFolderButton } from './CreateFolderButton';
-import { CreateNoteButton } from './CreateNoteButton';
-import { FileItem } from './FileItem';
-import { FileSearch } from './FileSearch';
-import { SortMenu } from './SortMenu';
-import { TrashButton } from './TrashButton';
-
-import { TrashView } from '@/components/layout/sidebar/TrashView';
+import { BulkActions } from './actions/BulkActions';
+import { TrashButton } from './actions/TrashButton';
+import { SidebarHeader } from './header/SidebarHeader';
+import { TrashView } from './trash';
+import { FileItem } from './tree/FileItem';
 
 function RootDroppable({ children }: { children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -52,7 +48,7 @@ function RootDroppable({ children }: { children: React.ReactNode }) {
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { files } = useFiles();
   const allNotes = useNoteStore(state => state.notes);
-  const { currentFolder, folders } = useFolderStore();
+  const { currentFolder } = useFolderStore();
   const { createNote, isLoading: isNoteCreating } = useCreateNote();
   const { createFolder, isLoading: isFolderCreating } = useCreateFolder();
   const { moveNote } = useMoveNote();
@@ -135,8 +131,6 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     },
     { enableOnFormTags: true }
   );
-
-  const [showBulkMoveMenu, setShowBulkMoveMenu] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -281,7 +275,6 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
       ]);
       toast.success(`${selectedItems.length}個のアイテムを移動しました`);
       clearSelection();
-      setShowBulkMoveMenu(false);
     } catch (error) {
       toast.error('移動に失敗しました', {
         description: error as string
@@ -330,120 +323,26 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         <div className="h-full flex flex-col gap-4">
-          <div className="flex items-center gap-2">
-            <FileSearch />
-            <SortMenu />
-          </div>
-          <div className="px-2 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1">
-              {!selectionMode && (
-                <>
-                  <CreateNoteButton
-                    onClick={() => setIsCreatingNote(true)}
-                    disabled={isNoteCreating || isCreatingNote}
-                  />
-                  <CreateFolderButton
-                    onClick={() => setIsCreatingFolder(true)}
-                    disabled={isFolderCreating || isCreatingFolder}
-                  />
-                </>
-              )}
-              {selectionMode && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleSelectAll}
-                  title="全選択">
-                  <CheckCheck className="h-4 w-4" />
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleSelectionMode}
-                title={selectionMode ? '選択モードを終了' : '選択モード'}>
-                <CheckSquare className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <SidebarHeader
+            selectionMode={selectionMode}
+            toggleSelectionMode={toggleSelectionMode}
+            handleSelectAll={handleSelectAll}
+            isNoteCreating={isNoteCreating}
+            isCreatingNote={isCreatingNote}
+            setIsCreatingNote={setIsCreatingNote}
+            isFolderCreating={isFolderCreating}
+            isCreatingFolder={isCreatingFolder}
+            setIsCreatingFolder={setIsCreatingFolder}
+          />
 
           {/* 一括操作メニュー */}
           {selectionMode && selectedItems.length > 0 && (
-            <div className="px-2 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                  {selectedItems.length}個選択中
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearSelection}
-                  className="h-6 px-2">
-                  <X className="h-3 w-3 mr-1" />
-                  解除
-                </Button>
-              </div>
-              <div className="flex gap-2 relative">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleBulkDelete}
-                  className="flex-1 h-8">
-                  <Trash2 className="h-3 w-3 mr-1" />
-                  削除
-                </Button>
-                <div className="relative flex-1">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setShowBulkMoveMenu(!showBulkMoveMenu)}
-                    className="w-full h-8">
-                    <FolderInput className="h-3 w-3 mr-1" />
-                    移動
-                  </Button>
-                  {showBulkMoveMenu && (
-                    <div className="absolute z-10 left-0 top-full mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg max-h-64 overflow-y-auto">
-                      <button
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                        onClick={() => handleBulkMove(null)}>
-                        📁 ルート
-                      </button>
-                      {(() => {
-                        function buildTree(
-                          parentId: number | null
-                        ): { folder: (typeof folders)[0]; depth: number }[] {
-                          const result: { folder: (typeof folders)[0]; depth: number }[] = [];
-                          const children = folders.filter(f => f.parentId === parentId);
-
-                          for (const child of children) {
-                            result.push({ folder: child, depth: 0 });
-                            const subChildren = buildTree(child.id);
-                            result.push(...subChildren.map(sc => ({ ...sc, depth: sc.depth + 1 })));
-                          }
-
-                          return result;
-                        }
-
-                        const tree = buildTree(null);
-
-                        return tree.map(({ folder, depth }) => (
-                          <button
-                            key={folder.id}
-                            className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-1"
-                            style={{ paddingLeft: `${12 + depth * 16}px` }}
-                            onClick={() => handleBulkMove(folder.id)}>
-                            <span className="text-xs opacity-50">
-                              {'└─'.repeat(Math.min(depth, 1))}
-                            </span>
-                            📁 {folder.name}
-                          </button>
-                        ));
-                      })()}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <BulkActions
+              selectedCount={selectedItems.length}
+              onClearSelection={clearSelection}
+              onDelete={handleBulkDelete}
+              onMove={handleBulkMove}
+            />
           )}
 
           {showTrash ? (

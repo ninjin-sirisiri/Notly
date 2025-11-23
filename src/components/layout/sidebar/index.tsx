@@ -31,6 +31,9 @@ import { CreateNoteButton } from './CreateNoteButton';
 import { FileItem } from './FileItem';
 import { FileSearch } from './FileSearch';
 import { SortMenu } from './SortMenu';
+import { TrashButton } from './TrashButton';
+
+import { TrashView } from '@/components/layout/sidebar/TrashView';
 
 function RootDroppable({ children }: { children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -63,6 +66,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
   const noteInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const { setCurrentFolder } = useCurrentFolder();
+  const [showTrash, setShowTrash] = useState(false);
 
   const {
     selectionMode,
@@ -442,52 +446,76 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             </div>
           )}
 
-          <div className="h-full">
-            <DndContext
-              sensors={sensors}
-              onDragEnd={handleDragEnd}>
-              <RootDroppable>
-                <div
-                  className="overflow-y-auto h-full"
-                  onClick={() => setCurrentFolder(null)}>
-                  {isCreatingNote && (
-                    <div className="px-2 py-1">
-                      <Input
-                        ref={noteInputRef}
-                        value={title}
-                        onChange={e => setTitle(e.target.value)}
-                        onKeyDown={handleNoteKeyDown}
-                        onBlur={handleNoteBlur}
-                        placeholder="ノートのタイトル..."
-                        disabled={isNoteCreating}
-                        className="h-8"
-                      />
+          {showTrash ? (
+            <div className="flex-1 overflow-hidden flex flex-col">
+              <div className="px-2 mb-2">
+                <Button
+                  className="w-full justify-start gap-2"
+                  onClick={() => setShowTrash(false)}
+                  size="sm"
+                  variant="ghost">
+                  ← ファイル一覧に戻る
+                </Button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <TrashView />
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="px-2">
+                <TrashButton onClick={() => setShowTrash(true)} />
+              </div>
+              <div className="h-full">
+                <DndContext
+                  sensors={sensors}
+                  onDragEnd={handleDragEnd}>
+                  <RootDroppable>
+                    <div
+                      className="overflow-y-auto h-full"
+                      onClick={() => setCurrentFolder(null)}>
+                      {isCreatingNote && (
+                        <div className="px-2 py-1">
+                          <Input
+                            ref={noteInputRef}
+                            value={title}
+                            onChange={e => setTitle(e.target.value)}
+                            onKeyDown={handleNoteKeyDown}
+                            onBlur={handleNoteBlur}
+                            placeholder="ノートのタイトル..."
+                            disabled={isNoteCreating}
+                            className="h-8"
+                          />
+                        </div>
+                      )}
+                      {isCreatingFolder && (
+                        <div className="px-2 py-1">
+                          <Input
+                            ref={folderInputRef}
+                            value={folderName}
+                            onChange={e => setFolderName(e.target.value)}
+                            onKeyDown={handleFolderKeyDown}
+                            onBlur={handleFolderBlur}
+                            placeholder="フォルダ名..."
+                            disabled={isFolderCreating}
+                            className="h-8"
+                          />
+                        </div>
+                      )}
+                      {files.map(item => (
+                        <FileItem
+                          key={
+                            'folder' in item ? `folder-${item.folder.id}` : `note-${item.note.id}`
+                          }
+                          item={item}
+                        />
+                      ))}
                     </div>
-                  )}
-                  {isCreatingFolder && (
-                    <div className="px-2 py-1">
-                      <Input
-                        ref={folderInputRef}
-                        value={folderName}
-                        onChange={e => setFolderName(e.target.value)}
-                        onKeyDown={handleFolderKeyDown}
-                        onBlur={handleFolderBlur}
-                        placeholder="フォルダ名..."
-                        disabled={isFolderCreating}
-                        className="h-8"
-                      />
-                    </div>
-                  )}
-                  {files.map(item => (
-                    <FileItem
-                      key={'folder' in item ? `folder-${item.folder.id}` : `note-${item.note.id}`}
-                      item={item}
-                    />
-                  ))}
-                </div>
-              </RootDroppable>
-            </DndContext>
-          </div>
+                  </RootDroppable>
+                </DndContext>
+              </div>
+            </>
+          )}
         </div>
       </aside>
     </>

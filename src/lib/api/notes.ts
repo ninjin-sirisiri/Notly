@@ -52,3 +52,15 @@ export function moveNote(id: number, newParentId: number | null): Promise<Note> 
 export function searchNotes(query: string): Promise<Note[]> {
   return safeInvoke<Note[]>('search_notes', { query });
 }
+
+export function restoreNote(id: number): Promise<void> {
+  return safeInvoke<void>('restore_note', { id });
+}
+
+export function permanentlyDeleteNote(id: number): Promise<void> {
+  return safeInvoke<void>('permanently_delete_note', { id });
+}
+
+export function getDeletedNotes(): Promise<Note[]> {
+  return safeInvoke<Note[]>('get_deleted_notes');
+}

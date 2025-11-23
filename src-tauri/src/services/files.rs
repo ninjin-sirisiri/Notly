@@ -17,7 +17,7 @@ impl FileService {
     let conn = self.db.conn.lock().unwrap();
 
     let mut folder_stmt = conn
-      .prepare("SELECT id, name, created_at, updated_at, parent_id, folder_path FROM folders")
+      .prepare("SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at FROM folders WHERE is_deleted = FALSE")
       .map_err(|e| format!("Failed to prepare statement: {}", e))?;
     let folders = folder_stmt
       .query_map([], |row| {
@@ -29,6 +29,8 @@ impl FileService {
           parent_id: row.get(4)?,
           folder_path: row.get(5)?,
           children: Vec::new(),
+          is_deleted: row.get(6)?,
+          deleted_at: row.get(7)?,
         })
       })
       .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?
@@ -36,7 +38,7 @@ impl FileService {
       .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?;
 
     let mut note_stmt = conn
-      .prepare("SELECT id, title, created_at, updated_at, parent_id, file_path, preview FROM notes ORDER BY updated_at DESC")
+      .prepare("SELECT id, title, created_at, updated_at, parent_id, file_path, preview, is_deleted, deleted_at FROM notes WHERE is_deleted = FALSE ORDER BY updated_at DESC")
       .map_err(|e| format!("Failed to prepare statement: {}", e))?;
     let notes = note_stmt
       .query_map([], |row| {
@@ -48,6 +50,8 @@ impl FileService {
           parent_id: row.get(4)?,
           file_path: row.get(5)?,
           preview: row.get(6)?,
+          is_deleted: row.get(7)?,
+          deleted_at: row.get(8)?,
         })
       })
       .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?

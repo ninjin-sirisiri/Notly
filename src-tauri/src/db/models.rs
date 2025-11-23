@@ -9,6 +9,9 @@ pub struct Note {
   pub updated_at: String,
   pub parent_id: Option<i64>,
   pub preview: String,
+  #[serde(default)]
+  pub is_deleted: bool,
+  pub deleted_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -20,6 +23,9 @@ pub struct NoteWithContent {
   pub updated_at: String,
   pub parent_id: Option<i64>,
   pub content: String,
+  #[serde(default)]
+  pub is_deleted: bool,
+  pub deleted_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -51,6 +57,9 @@ pub struct Folder {
   pub updated_at: String,
   pub parent_id: Option<i64>,
   pub folder_path: String,
+  #[serde(default)]
+  pub is_deleted: bool,
+  pub deleted_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -90,4 +99,7 @@ pub struct FolderWithChildren {
   pub parent_id: Option<i64>,
   pub folder_path: String,
   pub children: Vec<FileItem>,
+  #[serde(default)]
+  pub is_deleted: bool,
+  pub deleted_at: Option<String>,
 }

@@ -5,4 +5,6 @@ export type Folder = {
   updated_at: Date;
   parent_id?: number;
   folder_path: string;
+  isDeleted?: boolean;
+  deletedAt?: string | null;
 };

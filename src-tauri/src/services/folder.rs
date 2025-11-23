@@ -78,7 +78,7 @@ impl FolderService {
     let folder = conn
       .query_row(
         "
-    SELECT id, name, created_at, updated_at, parent_id, folder_path FROM folders WHERE id = ?
+    SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at FROM folders WHERE id = ?
     ",
         params![id],
         |row| {
@@ -89,6 +89,8 @@ impl FolderService {
             updated_at: row.get(3)?,
             parent_id: row.get(4)?,
             folder_path: row.get(5)?,
+            is_deleted: row.get(6)?,
+            deleted_at: row.get(7)?,
           })
         },
       )
@@ -101,7 +103,7 @@ impl FolderService {
     let conn = self.db.conn.lock().unwrap();
 
     let mut stmt = conn
-      .prepare("SELECT id, name, created_at, updated_at, parent_id, folder_path FROM folders")
+      .prepare("SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at FROM folders WHERE is_deleted = FALSE")
       .map_err(|e| format!("Failed to prepare statement: {}", e))?;
 
     let folders = stmt
@@ -113,6 +115,8 @@ impl FolderService {
           updated_at: row.get(3)?,
           parent_id: row.get(4)?,
           folder_path: row.get(5)?,
+          is_deleted: row.get(6)?,
+          deleted_at: row.get(7)?,
         })
       })
       .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?
@@ -133,7 +137,7 @@ impl FolderService {
 
     let old_folder: Folder = conn
       .query_row(
-        "SELECT id, name, created_at, updated_at, parent_id, folder_path FROM folders WHERE id = ?",
+        "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at FROM folders WHERE id = ?",
         params![folder_id],
         |row| {
           Ok(Folder {
@@ -143,6 +147,8 @@ impl FolderService {
             updated_at: row.get(3)?,
             parent_id: row.get(4)?,
             folder_path: row.get(5)?,
+            is_deleted: row.get(6)?,
+            deleted_at: row.get(7)?,
           })
         },
       )
@@ -189,7 +195,7 @@ impl FolderService {
 
     let updated_folder = conn
       .query_row(
-        "SELECT id, name, created_at, updated_at, parent_id, folder_path FROM folders WHERE id = ?",
+        "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at FROM folders WHERE id = ?",
         params![folder_id],
         |row| {
           Ok(Folder {
@@ -199,6 +205,8 @@ impl FolderService {
             updated_at: row.get(3)?,
             parent_id: row.get(4)?,
             folder_path: row.get(5)?,
+            is_deleted: row.get(6)?,
+            deleted_at: row.get(7)?,
           })
         },
       )
@@ -208,6 +216,129 @@ impl FolderService {
   }
 
   fn delete_folder_recursive(&self, folder_id: i64) -> Result<(), String> {
+    let conn = self.db.conn.lock().unwrap();
+
+    // Use recursive CTE to get all descendant folders in a single query
+    let all_folder_ids: Vec<i64> = {
+      let mut stmt = conn
+        .prepare(
+          "WITH RECURSIVE folder_tree AS (
+            SELECT id FROM folders WHERE id = ?
+            UNION ALL
+            SELECT f.id FROM folders f
+            INNER JOIN folder_tree ft ON f.parent_id = ft.id
+          )
+          SELECT id FROM folder_tree",
+        )
+        .map_err(|e| format!("Failed to prepare statement: {}", e))?;
+
+      stmt
+        .query_map(params![folder_id], |row| row.get(0))
+        .map_err(|e| format!("フォルダツリーの取得に失敗しました: {}", e))?
+        .collect::<SqlResult<Vec<i64>>>()
+        .map_err(|e| format!("フォルダツリーの取得に失敗しました: {}", e))?
+    };
+
+    // Get all notes in these folders
+    let notes_to_delete: Vec<(i64, String)> = {
+      let placeholders = all_folder_ids
+        .iter()
+        .map(|_| "?")
+        .collect::<Vec<_>>()
+        .join(",");
+      let query = format!(
+        "SELECT id, file_path FROM notes WHERE parent_id IN ({})",
+        placeholders
+      );
+
+      let mut stmt = conn
+        .prepare(&query)
+        .map_err(|e| format!("Failed to prepare statement: {}", e))?;
+
+      let params: Vec<&dyn rusqlite::ToSql> = all_folder_ids
+        .iter()
+        .map(|id| id as &dyn rusqlite::ToSql)
+        .collect();
+
+      stmt
+        .query_map(params.as_slice(), |row| Ok((row.get(0)?, row.get(1)?)))
+        .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
+        .collect::<SqlResult<Vec<(i64, String)>>>()
+        .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
+    };
+
+    // Get all folder paths for file system deletion
+    let _folder_paths: Vec<String> = {
+      let placeholders = all_folder_ids
+        .iter()
+        .map(|_| "?")
+        .collect::<Vec<_>>()
+        .join(",");
+      let query = format!(
+        "SELECT folder_path FROM folders WHERE id IN ({}) ORDER BY id DESC",
+        placeholders
+      );
+
+      let mut stmt = conn
+        .prepare(&query)
+        .map_err(|e| format!("Failed to prepare statement: {}", e))?;
+
+      let params: Vec<&dyn rusqlite::ToSql> = all_folder_ids
+        .iter()
+        .map(|id| id as &dyn rusqlite::ToSql)
+        .collect();
+
+      stmt
+        .query_map(params.as_slice(), |row| row.get(0))
+        .map_err(|e| format!("フォルダパスの取得に失敗しました: {}", e))?
+        .collect::<SqlResult<Vec<String>>>()
+        .map_err(|e| format!("フォルダパスの取得に失敗しました: {}", e))?
+    };
+
+    // Soft delete notes using IN clause
+    if !notes_to_delete.is_empty() {
+      let note_ids: Vec<i64> = notes_to_delete.iter().map(|(id, _)| *id).collect();
+      let placeholders = note_ids.iter().map(|_| "?").collect::<Vec<_>>().join(",");
+      let query = format!(
+        "UPDATE notes SET is_deleted = TRUE, deleted_at = CURRENT_TIMESTAMP WHERE id IN ({})",
+        placeholders
+      );
+
+      let params: Vec<&dyn rusqlite::ToSql> = note_ids
+        .iter()
+        .map(|id| id as &dyn rusqlite::ToSql)
+        .collect();
+
+      conn
+        .execute(&query, params.as_slice())
+        .map_err(|e| format!("ノートの削除に失敗しました: {}", e))?;
+    }
+
+    // Soft delete folders using IN clause
+    let placeholders = all_folder_ids
+      .iter()
+      .map(|_| "?")
+      .collect::<Vec<_>>()
+      .join(",");
+    let query = format!(
+      "UPDATE folders SET is_deleted = TRUE, deleted_at = CURRENT_TIMESTAMP WHERE id IN ({})",
+      placeholders
+    );
+
+    let params: Vec<&dyn rusqlite::ToSql> = all_folder_ids
+      .iter()
+      .map(|id| id as &dyn rusqlite::ToSql)
+      .collect();
+
+    conn
+      .execute(&query, params.as_slice())
+      .map_err(|e| format!("フォルダの削除に失敗しました: {}", e))?;
+
+    Ok(())
+  }
+
+  // フォルダの完全削除
+  pub fn permanently_delete_folder(&self, folder_id: i64) -> Result<(), String> {
     let conn = self.db.conn.lock().unwrap();
 
     // Use recursive CTE to get all descendant folders in a single query
@@ -339,6 +470,120 @@ impl FolderService {
     Ok(())
   }
 
+  // フォルダの復元
+  pub fn restore_folder(&self, id: i64) -> Result<(), String> {
+    let conn = self.db.conn.lock().unwrap();
+
+    // 親フォルダが存在し、削除されていないか確認
+    let parent_id: Option<i64> = conn
+      .query_row(
+        "SELECT parent_id FROM folders WHERE id = ?",
+        params![id],
+        |row| row.get(0),
+      )
+      .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?;
+
+    let new_parent_id = if let Some(pid) = parent_id {
+      let parent_exists: bool = conn
+        .query_row(
+          "SELECT EXISTS(SELECT 1 FROM folders WHERE id = ? AND is_deleted = FALSE)",
+          params![pid],
+          |row| row.get(0),
+        )
+        .unwrap_or(false);
+      if parent_exists { Some(pid) } else { None }
+    } else {
+      None
+    };
+
+    // 再帰的に復元
+    // Use recursive CTE to get all descendant folders
+    let all_folder_ids: Vec<i64> = {
+      let mut stmt = conn
+        .prepare(
+          "WITH RECURSIVE folder_tree AS (
+            SELECT id FROM folders WHERE id = ?
+            UNION ALL
+            SELECT f.id FROM folders f
+            INNER JOIN folder_tree ft ON f.parent_id = ft.id
+          )
+          SELECT id FROM folder_tree",
+        )
+        .map_err(|e| format!("Failed to prepare statement: {}", e))?;
+
+      stmt
+        .query_map(params![id], |row| row.get(0))
+        .map_err(|e| format!("フォルダツリーの取得に失敗しました: {}", e))?
+        .collect::<SqlResult<Vec<i64>>>()
+        .map_err(|e| format!("フォルダツリーの取得に失敗しました: {}", e))?
+    };
+
+    // Restore folders
+    let placeholders = all_folder_ids
+      .iter()
+      .map(|_| "?")
+      .collect::<Vec<_>>()
+      .join(",");
+    let query = format!(
+      "UPDATE folders SET is_deleted = FALSE, deleted_at = NULL WHERE id IN ({})",
+      placeholders
+    );
+    let params: Vec<&dyn rusqlite::ToSql> = all_folder_ids
+      .iter()
+      .map(|id| id as &dyn rusqlite::ToSql)
+      .collect();
+    conn
+      .execute(&query, params.as_slice())
+      .map_err(|e| format!("フォルダの復元に失敗しました: {}", e))?;
+
+    // Restore notes in these folders
+    let query_notes = format!(
+      "UPDATE notes SET is_deleted = FALSE, deleted_at = NULL WHERE parent_id IN ({})",
+      placeholders
+    );
+    conn
+      .execute(&query_notes, params.as_slice())
+      .map_err(|e| format!("ノートの復元に失敗しました: {}", e))?;
+
+    // Update parent_id of the root restored folder
+    conn
+      .execute(
+        "UPDATE folders SET parent_id = ? WHERE id = ?",
+        params![new_parent_id, id],
+      )
+      .map_err(|e| format!("フォルダの親ID更新に失敗しました: {}", e))?;
+
+    Ok(())
+  }
+
+  // 削除されたフォルダの取得
+  pub fn get_deleted_folders(&self) -> Result<Vec<Folder>, String> {
+    let conn = self.db.conn.lock().unwrap();
+
+    let mut stmt = conn
+      .prepare("SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at FROM folders WHERE is_deleted = TRUE ORDER BY deleted_at DESC")
+      .map_err(|e| format!("Failed to prepare statement: {}", e))?;
+
+    let folders = stmt
+      .query_map([], |row| {
+        Ok(Folder {
+          id: row.get(0)?,
+          name: row.get(1)?,
+          created_at: row.get(2)?,
+          updated_at: row.get(3)?,
+          parent_id: row.get(4)?,
+          folder_path: row.get(5)?,
+          is_deleted: row.get(6)?,
+          deleted_at: row.get(7)?,
+        })
+      })
+      .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?
+      .collect::<SqlResult<Vec<Folder>>>()
+      .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?;
+
+    Ok(folders)
+  }
+
   // フォルダの削除
   pub fn delete_folder(&self, folder_id: i64) -> Result<(), String> {
     self.delete_folder_recursive(folder_id)
@@ -418,7 +663,7 @@ impl FolderService {
       let conn = self.db.conn.lock().unwrap();
       conn
         .query_row(
-          "SELECT id, name, created_at, updated_at, parent_id, folder_path FROM folders WHERE id = ?",
+          "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at FROM folders WHERE id = ?",
           params![id],
           |row| {
             Ok(Folder {
@@ -428,6 +673,8 @@ impl FolderService {
               updated_at: row.get(3)?,
               parent_id: row.get(4)?,
               folder_path: row.get(5)?,
+              is_deleted: row.get(6)?,
+              deleted_at: row.get(7)?,
             })
           },
         )

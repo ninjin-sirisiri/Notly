@@ -56,3 +56,15 @@ export function moveFolder(id: number, newParentId: number | null): Promise<Fold
     }
   });
 }
+
+export function restoreFolder(id: number): Promise<void> {
+  return safeInvoke<void>('restore_folder', { id });
+}
+
+export function permanentlyDeleteFolder(id: number): Promise<void> {
+  return safeInvoke<void>('permanently_delete_folder', { id });
+}
+
+export function getDeletedFolders(): Promise<Folder[]> {
+  return safeInvoke<Folder[]>('get_deleted_folders');
+}

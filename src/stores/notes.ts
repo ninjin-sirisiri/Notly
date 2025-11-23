@@ -165,6 +165,9 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         };
       });
       useFileStore.getState().loadFiles();
+      // Refresh trash items
+      const { useTrashStore } = await import('./trash');
+      useTrashStore.getState().loadDeletedItems();
     } catch (error) {
       set({
         isLoading: false,

@@ -6,6 +6,8 @@ export type Note = {
   updated_at: Date;
   parent_id: number | null;
   preview: string;
+  isDeleted?: boolean;
+  deletedAt?: string | null;
 };
 
 export type NoteWithContent = Note & {

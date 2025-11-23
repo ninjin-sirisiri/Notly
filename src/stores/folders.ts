@@ -233,6 +233,9 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
         };
       });
       useFileStore.getState().loadFiles();
+      // Refresh trash items
+      const { useTrashStore } = await import('./trash');
+      useTrashStore.getState().loadDeletedItems();
     } catch (error) {
       set({
         isLoading: false,

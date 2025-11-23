@@ -138,3 +138,68 @@ pub async fn move_folder<R: tauri::Runtime>(
   .await
   .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
 }
+
+#[tauri::command]
+pub async fn restore_folder<R: tauri::Runtime>(
+  id: i64,
+  state: State<'_, AppState>,
+  app: tauri::AppHandle<R>,
+) -> Result<(), String> {
+  let notes_dir = app
+    .path()
+    .app_data_dir()
+    .map_err(|e| format!("ノートディレクトリの取得に失敗しました: {}", e))?
+    .join("notes");
+
+  let db = Arc::clone(&state.db);
+
+  tauri::async_runtime::spawn_blocking(move || {
+    let folder_service = FolderService::new(db, notes_dir);
+    folder_service.restore_folder(id)
+  })
+  .await
+  .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
+}
+
+#[tauri::command]
+pub async fn permanently_delete_folder<R: tauri::Runtime>(
+  id: i64,
+  state: State<'_, AppState>,
+  app: tauri::AppHandle<R>,
+) -> Result<(), String> {
+  let notes_dir = app
+    .path()
+    .app_data_dir()
+    .map_err(|e| format!("ノートディレクトリの取得に失敗しました: {}", e))?
+    .join("notes");
+
+  let db = Arc::clone(&state.db);
+
+  tauri::async_runtime::spawn_blocking(move || {
+    let folder_service = FolderService::new(db, notes_dir);
+    folder_service.permanently_delete_folder(id)
+  })
+  .await
+  .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
+}
+
+#[tauri::command]
+pub async fn get_deleted_folders<R: tauri::Runtime>(
+  state: State<'_, AppState>,
+  app: tauri::AppHandle<R>,
+) -> Result<Vec<Folder>, String> {
+  let notes_dir = app
+    .path()
+    .app_data_dir()
+    .map_err(|e| format!("ノートディレクトリの取得に失敗しました: {}", e))?
+    .join("notes");
+
+  let db = Arc::clone(&state.db);
+
+  tauri::async_runtime::spawn_blocking(move || {
+    let folder_service = FolderService::new(db, notes_dir);
+    folder_service.get_deleted_folders()
+  })
+  .await
+  .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
+}

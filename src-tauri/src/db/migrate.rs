@@ -34,6 +34,34 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     [],
   )?;
 
+  // Add is_deleted and deleted_at columns to notes
+  conn
+    .execute(
+      "ALTER TABLE notes ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE",
+      [],
+    )
+    .ok();
+  conn
+    .execute(
+      "ALTER TABLE notes ADD COLUMN deleted_at DATETIME DEFAULT NULL",
+      [],
+    )
+    .ok();
+
+  // Add is_deleted and deleted_at columns to folders
+  conn
+    .execute(
+      "ALTER TABLE folders ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE",
+      [],
+    )
+    .ok();
+  conn
+    .execute(
+      "ALTER TABLE folders ADD COLUMN deleted_at DATETIME DEFAULT NULL",
+      [],
+    )
+    .ok();
+
   conn.execute(
     "CREATE TABLE IF NOT EXISTS activity_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

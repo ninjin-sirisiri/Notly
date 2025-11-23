@@ -12,6 +12,9 @@ pub struct Note {
   #[serde(default)]
   pub is_deleted: bool,
   pub deleted_at: Option<String>,
+  #[serde(default)]
+  pub is_favorite: bool,
+  pub favorite_order: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

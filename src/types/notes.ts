@@ -8,6 +8,8 @@ export type Note = {
   preview: string;
   isDeleted?: boolean;
   deletedAt?: string | null;
+  isFavorite?: boolean;
+  favoriteOrder?: number | null;
 };
 
 export type NoteWithContent = Note & {

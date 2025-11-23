@@ -48,6 +48,20 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     )
     .ok();
 
+  // Add is_favorite and favorite_order columns to notes
+  conn
+    .execute(
+      "ALTER TABLE notes ADD COLUMN is_favorite BOOLEAN DEFAULT FALSE",
+      [],
+    )
+    .ok();
+  conn
+    .execute(
+      "ALTER TABLE notes ADD COLUMN favorite_order INTEGER DEFAULT NULL",
+      [],
+    )
+    .ok();
+
   // Add is_deleted and deleted_at columns to folders
   conn
     .execute(

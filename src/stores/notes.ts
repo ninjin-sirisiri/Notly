@@ -27,6 +27,8 @@ type NoteStore = {
   updateNote: (id: number, title: string, content: string) => Promise<void>;
   deleteNote: (id: number) => Promise<void>;
   moveNote: (id: number, newParentId: number | null) => Promise<void>;
+  toggleFavorite: (id: number) => Promise<void>;
+  loadFavoriteNotes: () => Promise<Note[]>;
 };
 
 export const useNoteStore = create<NoteStore>()((set, get) => ({
@@ -204,6 +206,41 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
+        error: String(error)
+      });
+      throw error;
+    }
+  },
+
+  toggleFavorite: async (id: number) => {
+    set({
+      isLoading: true,
+      error: null
+    });
+    try {
+      const { toggleFavorite } = await import('@/lib/api/notes');
+      const updatedNote = await toggleFavorite(id);
+      set(state => ({
+        notes: state.notes.map(note => (note.id === id ? updatedNote : note)),
+        currentNote: state.currentNote?.id === id ? updatedNote : state.currentNote,
+        isLoading: false
+      }));
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: String(error)
+      });
+      throw error;
+    }
+  },
+
+  loadFavoriteNotes: async () => {
+    try {
+      const { getFavoriteNotes } = await import('@/lib/api/notes');
+      const favoriteNotes = await getFavoriteNotes();
+      return favoriteNotes;
+    } catch (error) {
+      set({
         error: String(error)
       });
       throw error;

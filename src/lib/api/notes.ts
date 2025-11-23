@@ -64,3 +64,15 @@ export function permanentlyDeleteNote(id: number): Promise<void> {
 export function getDeletedNotes(): Promise<Note[]> {
   return safeInvoke<Note[]>('get_deleted_notes');
 }
+
+export function toggleFavorite(id: number): Promise<Note> {
+  return safeInvoke<Note>('toggle_favorite', { id });
+}
+
+export function getFavoriteNotes(): Promise<Note[]> {
+  return safeInvoke<Note[]>('get_favorite_notes');
+}
+
+export function updateFavoriteOrder(id: number, order: number): Promise<void> {
+  return safeInvoke<void>('update_favorite_order', { id, order });
+}

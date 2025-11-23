@@ -228,3 +228,69 @@ pub async fn get_deleted_notes<R: tauri::Runtime>(
   .await
   .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
 }
+
+#[tauri::command]
+pub async fn toggle_favorite<R: tauri::Runtime>(
+  id: i64,
+  state: State<'_, AppState>,
+  app: tauri::AppHandle<R>,
+) -> Result<Note, String> {
+  let notes_dir = app
+    .path()
+    .app_data_dir()
+    .map_err(|e| format!("ノートディレクトリの取得に失敗しました: {}", e))?
+    .join("notes");
+
+  let db = Arc::clone(&state.db);
+
+  tauri::async_runtime::spawn_blocking(move || {
+    let note_service = NoteService::new(db, notes_dir);
+    note_service.toggle_favorite(id)
+  })
+  .await
+  .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
+}
+
+#[tauri::command]
+pub async fn get_favorite_notes<R: tauri::Runtime>(
+  state: State<'_, AppState>,
+  app: tauri::AppHandle<R>,
+) -> Result<Vec<Note>, String> {
+  let notes_dir = app
+    .path()
+    .app_data_dir()
+    .map_err(|e| format!("ノートディレクトリの取得に失敗しました: {}", e))?
+    .join("notes");
+
+  let db = Arc::clone(&state.db);
+
+  tauri::async_runtime::spawn_blocking(move || {
+    let note_service = NoteService::new(db, notes_dir);
+    note_service.get_favorite_notes()
+  })
+  .await
+  .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
+}
+
+#[tauri::command]
+pub async fn update_favorite_order<R: tauri::Runtime>(
+  id: i64,
+  order: i64,
+  state: State<'_, AppState>,
+  app: tauri::AppHandle<R>,
+) -> Result<(), String> {
+  let notes_dir = app
+    .path()
+    .app_data_dir()
+    .map_err(|e| format!("ノートディレクトリの取得に失敗しました: {}", e))?
+    .join("notes");
+
+  let db = Arc::clone(&state.db);
+
+  tauri::async_runtime::spawn_blocking(move || {
+    let note_service = NoteService::new(db, notes_dir);
+    note_service.update_favorite_order(id, order)
+  })
+  .await
+  .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
+}

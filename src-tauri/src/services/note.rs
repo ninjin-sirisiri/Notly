@@ -85,7 +85,7 @@ impl NoteService {
 
     let note = conn
       .query_row(
-        "SELECT id, title, created_at, updated_at, parent_id, file_path, is_deleted, deleted_at FROM notes WHERE id = ?",
+        "SELECT id, title, created_at, updated_at, parent_id, file_path, is_deleted, deleted_at, is_favorite, favorite_order FROM notes WHERE id = ?",
         params![id],
         |row| {
           Ok(Note {
@@ -98,6 +98,8 @@ impl NoteService {
             preview: String::new(),
             is_deleted: row.get(6)?,
             deleted_at: row.get(7)?,
+            is_favorite: row.get(8)?,
+            favorite_order: row.get(9)?,
           })
         },
       )
@@ -156,7 +158,7 @@ impl NoteService {
 
     let mut stmt = conn
       .prepare(
-        "SELECT id, title, created_at, updated_at, parent_id, file_path, preview, is_deleted, deleted_at
+        "SELECT id, title, created_at, updated_at, parent_id, file_path, preview, is_deleted, deleted_at, is_favorite, favorite_order
         FROM notes WHERE is_deleted = FALSE ORDER BY updated_at DESC",
       )
       .map_err(|e| format!("Failed to prepare statement: {}", e))?;
@@ -173,6 +175,8 @@ impl NoteService {
           preview: row.get(6)?,
           is_deleted: row.get(7)?,
           deleted_at: row.get(8)?,
+          is_favorite: row.get(9)?,
+          favorite_order: row.get(10)?,
         })
       })
       .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
@@ -280,7 +284,7 @@ impl NoteService {
       let conn = self.db.conn.lock().unwrap();
       conn
         .query_row(
-          "SELECT id, title, created_at, updated_at, parent_id, file_path, is_deleted, deleted_at FROM notes WHERE id = ?",
+          "SELECT id, title, created_at, updated_at, parent_id, file_path, is_deleted, deleted_at, is_favorite, favorite_order FROM notes WHERE id = ?",
           params![id],
           |row| {
             Ok(Note {
@@ -293,6 +297,8 @@ impl NoteService {
               preview: String::new(),
               is_deleted: row.get(6)?,
               deleted_at: row.get(7)?,
+              is_favorite: row.get(8)?,
+              favorite_order: row.get(9)?,
             })
           },
         )
@@ -431,7 +437,7 @@ impl NoteService {
 
     let mut stmt = conn
       .prepare(
-        "SELECT id, title, created_at, updated_at, parent_id, file_path, preview, is_deleted, deleted_at
+        "SELECT id, title, created_at, updated_at, parent_id, file_path, preview, is_deleted, deleted_at, is_favorite, favorite_order
         FROM notes WHERE is_deleted = TRUE ORDER BY deleted_at DESC",
       )
       .map_err(|e| format!("Failed to prepare statement: {}", e))?;
@@ -448,6 +454,8 @@ impl NoteService {
           preview: row.get(6)?,
           is_deleted: row.get(7)?,
           deleted_at: row.get(8)?,
+          is_favorite: row.get(9)?,
+          favorite_order: row.get(10)?,
         })
       })
       .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
@@ -463,7 +471,7 @@ impl NoteService {
       let conn = self.db.conn.lock().unwrap();
       conn
         .query_row(
-          "SELECT id, title, created_at, updated_at, parent_id, file_path, preview, is_deleted, deleted_at FROM notes WHERE id = ?",
+          "SELECT id, title, created_at, updated_at, parent_id, file_path, preview, is_deleted, deleted_at, is_favorite, favorite_order FROM notes WHERE id = ?",
           params![id],
           |row| {
             Ok(Note {
@@ -476,6 +484,8 @@ impl NoteService {
               preview: row.get(6)?,
               is_deleted: row.get(7)?,
               deleted_at: row.get(8)?,
+              is_favorite: row.get(9)?,
+              favorite_order: row.get(10)?,
             })
           },
         )
@@ -545,6 +555,119 @@ impl NoteService {
       preview: old_note.preview,
       is_deleted: old_note.is_deleted,
       deleted_at: old_note.deleted_at,
+      is_favorite: old_note.is_favorite,
+      favorite_order: old_note.favorite_order,
     })
+  }
+
+  // お気に入りのトグル
+  pub fn toggle_favorite(&self, id: i64) -> Result<Note, String> {
+    let conn = self.db.conn.lock().unwrap();
+
+    // 現在のis_favoriteの状態を取得
+    let current_favorite: bool = conn
+      .query_row(
+        "SELECT is_favorite FROM notes WHERE id = ?",
+        params![id],
+        |row| row.get(0),
+      )
+      .map_err(|e| format!("お気に入り状態の取得に失敗しました: {}", e))?;
+
+    let new_favorite = !current_favorite;
+
+    // お気に入りに追加する場合、最大のfavorite_orderを取得して+1
+    let favorite_order = if new_favorite {
+      let max_order: Option<i64> = conn
+        .query_row(
+          "SELECT MAX(favorite_order) FROM notes WHERE is_favorite = TRUE",
+          [],
+          |row| row.get(0),
+        )
+        .ok()
+        .flatten();
+      Some(max_order.unwrap_or(0) + 1)
+    } else {
+      None
+    };
+
+    conn
+      .execute(
+        "UPDATE notes SET is_favorite = ?, favorite_order = ? WHERE id = ?",
+        params![new_favorite, favorite_order, id],
+      )
+      .map_err(|e| format!("お気に入りの更新に失敗しました: {}", e))?;
+
+    // 更新されたノートを取得
+    let note = conn
+      .query_row(
+        "SELECT id, title, created_at, updated_at, parent_id, file_path, preview, is_deleted, deleted_at, is_favorite, favorite_order FROM notes WHERE id = ?",
+        params![id],
+        |row| {
+          Ok(Note {
+            id: row.get(0)?,
+            title: row.get(1)?,
+            created_at: row.get(2)?,
+            updated_at: row.get(3)?,
+            parent_id: row.get(4)?,
+            file_path: row.get(5)?,
+            preview: row.get(6)?,
+            is_deleted: row.get(7)?,
+            deleted_at: row.get(8)?,
+            is_favorite: row.get(9)?,
+            favorite_order: row.get(10)?,
+          })
+        },
+      )
+      .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?;
+
+    Ok(note)
+  }
+
+  // お気に入りノート一覧を取得
+  pub fn get_favorite_notes(&self) -> Result<Vec<Note>, String> {
+    let conn = self.db.conn.lock().unwrap();
+
+    let mut stmt = conn
+      .prepare(
+        "SELECT id, title, created_at, updated_at, parent_id, file_path, preview, is_deleted, deleted_at, is_favorite, favorite_order
+        FROM notes WHERE is_favorite = TRUE AND is_deleted = FALSE ORDER BY favorite_order ASC",
+      )
+      .map_err(|e| format!("Failed to prepare statement: {}", e))?;
+
+    let notes = stmt
+      .query_map([], |row| {
+        Ok(Note {
+          id: row.get(0)?,
+          title: row.get(1)?,
+          created_at: row.get(2)?,
+          updated_at: row.get(3)?,
+          parent_id: row.get(4)?,
+          file_path: row.get(5)?,
+          preview: row.get(6)?,
+          is_deleted: row.get(7)?,
+          deleted_at: row.get(8)?,
+          is_favorite: row.get(9)?,
+          favorite_order: row.get(10)?,
+        })
+      })
+      .map_err(|e| format!("お気に入りノートの取得に失敗しました: {}", e))?
+      .collect::<SqlResult<Vec<Note>>>()
+      .map_err(|e| format!("お気に入りノートの取得に失敗しました: {}", e))?;
+
+    Ok(notes)
+  }
+
+  // お気に入りの並び順を更新
+  pub fn update_favorite_order(&self, id: i64, order: i64) -> Result<(), String> {
+    let conn = self.db.conn.lock().unwrap();
+
+    conn
+      .execute(
+        "UPDATE notes SET favorite_order = ? WHERE id = ?",
+        params![order, id],
+      )
+      .map_err(|e| format!("並び順の更新に失敗しました: {}", e))?;
+
+    Ok(())
   }
 }

@@ -71,3 +71,13 @@ export function useMoveNote() {
     moveNote
   };
 }
+
+export function useToggleFavorite() {
+  const { toggleFavorite, isLoading, error } = useNoteStore();
+
+  return {
+    error,
+    isLoading,
+    toggleFavorite
+  };
+}

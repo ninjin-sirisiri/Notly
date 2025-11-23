@@ -1,10 +1,16 @@
-import { Edit2, FileText, FolderInput, Trash2 } from 'lucide-react';
+import { Edit2, FileText, FolderInput, Star, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { useCurrentNote, useDeleteNote, useMoveNote, useNotes } from '@/hooks/useNote';
+import {
+  useCurrentNote,
+  useDeleteNote,
+  useMoveNote,
+  useNotes,
+  useToggleFavorite
+} from '@/hooks/useNote';
 import { cn } from '@/lib/utils';
 import { useSelectionStore } from '@/stores/selection';
 import { type Note } from '@/types/notes';
@@ -22,6 +28,7 @@ export function NoteItem({ note }: NoteItemProps) {
   const { currentNote, currentContent, updateNote } = useCurrentNote();
   const { deleteNote } = useDeleteNote();
   const { moveNote } = useMoveNote();
+  const { toggleFavorite } = useToggleFavorite();
 
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(note.title);
@@ -66,6 +73,11 @@ export function NoteItem({ note }: NoteItemProps) {
   function handleMoveToFolder(folderId: number | null) {
     moveNote(note.id, folderId);
     setShowMoveMenu(false);
+  }
+
+  function handleToggleFavorite(e: React.MouseEvent<HTMLButtonElement>) {
+    e.stopPropagation();
+    toggleFavorite(note.id);
   }
 
   return (
@@ -121,6 +133,20 @@ export function NoteItem({ note }: NoteItemProps) {
                 <FileText className="h-4 w-4 shrink-0" />
                 <p className="text-sm font-medium truncate">{note.title}</p>
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    className={cn(
+                      'p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600',
+                      note.isFavorite && 'opacity-100'
+                    )}
+                    title={note.isFavorite ? 'お気に入りから削除' : 'お気に入りに追加'}
+                    onClick={handleToggleFavorite}>
+                    <Star
+                      className={cn(
+                        'h-3.5 w-3.5',
+                        note.isFavorite && 'fill-yellow-400 text-yellow-400'
+                      )}
+                    />
+                  </button>
                   <button
                     className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
                     title="名前を変更"

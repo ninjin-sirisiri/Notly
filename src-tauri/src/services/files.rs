@@ -38,7 +38,7 @@ impl FileService {
       .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?;
 
     let mut note_stmt = conn
-      .prepare("SELECT id, title, created_at, updated_at, parent_id, file_path, preview, is_deleted, deleted_at FROM notes WHERE is_deleted = FALSE ORDER BY updated_at DESC")
+      .prepare("SELECT id, title, created_at, updated_at, parent_id, file_path, preview, is_deleted, deleted_at, is_favorite, favorite_order FROM notes WHERE is_deleted = FALSE ORDER BY updated_at DESC")
       .map_err(|e| format!("Failed to prepare statement: {}", e))?;
     let notes = note_stmt
       .query_map([], |row| {
@@ -52,6 +52,8 @@ impl FileService {
           preview: row.get(6)?,
           is_deleted: row.get(7)?,
           deleted_at: row.get(8)?,
+          is_favorite: row.get(9)?,
+          favorite_order: row.get(10)?,
         })
       })
       .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?

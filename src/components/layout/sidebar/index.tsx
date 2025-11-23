@@ -27,6 +27,7 @@ import { useSelectionStore } from '@/stores/selection';
 
 import { BulkActions } from './actions/BulkActions';
 import { TrashButton } from './actions/TrashButton';
+import { FavoriteSection } from './FavoriteSection';
 import { SidebarHeader } from './header/SidebarHeader';
 import { TrashView } from './trash';
 import { FileItem } from './tree/FileItem';
@@ -365,6 +366,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
               <div className="px-2">
                 <TrashButton onClick={() => setShowTrash(true)} />
               </div>
+              <FavoriteSection />
               <div className="h-full">
                 <DndContext
                   sensors={sensors}

@@ -6,7 +6,6 @@
 
 ### 中優先度
 - [P2-tag-system.md](./P2-tag-system.md) - タグ機能
-- [P2-bookmark-feature.md](./P2-bookmark-feature.md) - お気に入り/ブックマーク機能
 - [P2-export-import.md](./P2-export-import.md) - エクスポート/インポート機能
 - [P2-note-history.md](./P2-note-history.md) - ノート編集履歴・バージョン管理
 

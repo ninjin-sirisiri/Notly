@@ -4,10 +4,6 @@
 
 ## タスクファイル一覧
 
-### 高優先度
-- [P1-trash-feature.md](./P1-trash-feature.md) - ゴミ箱機能
-- [P1-keyboard-shortcuts.md](./P1-keyboard-shortcuts.md) - キーボードショートカット
-
 ### 中優先度
 - [P2-tag-system.md](./P2-tag-system.md) - タグ機能
 - [P2-bookmark-feature.md](./P2-bookmark-feature.md) - お気に入り/ブックマーク機能

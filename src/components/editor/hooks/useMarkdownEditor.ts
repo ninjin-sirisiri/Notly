@@ -39,14 +39,34 @@ export function useMarkdownEditor({
     // 最新のnotesを取得
     const { notes } = useNoteStore.getState();
 
-    // タイトルが一致するノートを検索
-    const targetNote = notes.find(note => note.title === noteName);
+    // ノートを検索
+    let targetNote = notes.find(note => {
+      // パスが含まれている場合（フォルダ/ノート名）
+      if (noteName.includes('/') || noteName.includes('\\')) {
+        // パスセパレータを統一して比較
+        const normalizedNotePath = note.file_path.replaceAll('\\', '/');
+        const normalizedLinkPath = noteName.replaceAll('\\', '/');
+        // ファイルパスがリンクパスで終わるかチェック（拡張子なしの比較も考慮）
+        return (
+          normalizedNotePath.endsWith(normalizedLinkPath) ||
+          normalizedNotePath.endsWith(`${normalizedLinkPath}.md`)
+        );
+      }
+      // タイトルのみの場合
+      return note.title === noteName;
+    });
+
+    // タイトルのみで検索して、重複がある場合はパスで絞り込むロジックが必要だが、
+    // ここでは単純にタイトル一致の最初のものを返す（既存動作）か、
+    // パス指定があればそれを優先する形にする。
 
     if (targetNote) {
       // 既存のノートを開く
       await loadNote(targetNote.id);
     } else {
       // ノートが存在しない場合は新規作成
+      // パスが含まれている場合は、そのフォルダ構造で作成する必要があるが、
+      // 現状は簡易的にルートまたは指定された名前で作成
       await createNote(noteName, '', '', null);
     }
   }

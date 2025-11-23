@@ -201,6 +201,68 @@ impl NoteService {
     Ok(matched_notes)
   }
 
+  fn get_relative_link_path(&self, path: &std::path::Path) -> String {
+    path
+      .strip_prefix(&self.base_path)
+      .unwrap_or(path)
+      .with_extension("")
+      .to_string_lossy()
+      .replace("\\", "/")
+  }
+
+  fn update_backlinks(
+    &self,
+    old_path: &std::path::Path,
+    new_path: &std::path::Path,
+    old_title: &str,
+    new_title: &str,
+  ) -> Result<(), String> {
+    let old_rel = self.get_relative_link_path(old_path);
+    let new_rel = self.get_relative_link_path(new_path);
+
+    if old_rel == new_rel && old_title == new_title {
+      return Ok(());
+    }
+
+    let all_notes = self.get_all_notes()?;
+
+    for note in all_notes {
+      let content = match fs::read_to_string(&note.file_path) {
+        Ok(c) => c,
+        Err(_) => continue,
+      };
+
+      let mut new_content = content.clone();
+
+      // Replace [[old_rel]] -> [[new_rel]]
+      let old_link_rel = format!("[[{}]]", old_rel);
+      let new_link_rel = format!("[[{}]]", new_rel);
+      new_content = new_content.replace(&old_link_rel, &new_link_rel);
+
+      // Replace [[old_title]] -> [[new_title]]
+      if old_rel != old_title {
+        let old_link_title = format!("[[{}]]", old_title);
+        let new_link_title = format!("[[{}]]", new_title);
+        new_content = new_content.replace(&old_link_title, &new_link_title);
+      }
+
+      if new_content != content {
+        fs::write(&note.file_path, &new_content)
+          .map_err(|e| format!("バックリンクの更新に失敗しました ({}): {}", note.title, e))?;
+
+        let preview = Self::generate_preview(&new_content);
+        let conn = self.db.conn.lock().unwrap();
+        conn
+          .execute(
+            "UPDATE notes SET preview = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            params![preview, note.id],
+          )
+          .map_err(|e| format!("プレビューの更新に失敗しました ({}): {}", note.title, e))?;
+      }
+    }
+    Ok(())
+  }
+
   // ノートの更新
   pub fn update_note(
     &self,
@@ -262,8 +324,11 @@ impl NoteService {
         .map_err(|e| format!("更新日時の取得に失敗しました: {}", e))?
     };
 
-    fs::write(new_path, content.clone())
+    fs::write(&new_path, content.clone())
       .map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
+
+    // バックリンクの更新
+    self.update_backlinks(&old_path, &new_path, &old_note.title, &title)?;
 
     Ok(NoteWithContent {
       id: old_note.id,
@@ -370,6 +435,9 @@ impl NoteService {
         )
         .map_err(|e| format!("更新日時の取得に失敗しました: {}", e))?
     };
+
+    // バックリンクの更新
+    self.update_backlinks(&old_path, &new_path, &old_note.title, &old_note.title)?;
 
     Ok(Note {
       id: old_note.id,

@@ -1,10 +1,11 @@
 import tippy, { type Instance as TippyInstance } from 'tippy.js';
+import { useFolderStore } from '@/stores/folders';
 import { useNoteStore } from '@/stores/notes';
 import { Node, mergeAttributes, nodePasteRule, nodeInputRule } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { ReactRenderer } from '@tiptap/react';
 import { Suggestion as SuggestionPlugin } from '@tiptap/suggestion';
-import { SuggestionList, type SuggestionListRef } from '../SuggestionList';
+import { SuggestionList, type SuggestionListRef, type SuggestionItem } from '../SuggestionList';
 
 export type NoteLinkOptions = {
   HTMLAttributes: Record<string, unknown>;
@@ -90,14 +91,18 @@ export const NoteLinkExtension = Node.create<NoteLinkOptions>({
   },
 
   renderHTML({ HTMLAttributes, node }) {
+    const noteName = node.attrs.noteName as string;
+    const displayTitle = noteName.split(/[/\\]/).pop() || noteName;
+
     return [
       'span',
       mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
         'data-note-link': '',
         class:
-          'note-link cursor-pointer text-blue-600 dark:text-blue-400 hover:underline font-medium'
+          'note-link cursor-pointer text-blue-600 dark:text-blue-400 hover:underline font-medium',
+        title: noteName
       }),
-      node.attrs.noteName
+      displayTitle
     ];
   },
 
@@ -145,16 +150,39 @@ export const NoteLinkExtension = Node.create<NoteLinkOptions>({
         char: '[[',
         items: ({ query }) => {
           const notes = useNoteStore.getState().notes;
-          const candidates = notes
+          const folders = useFolderStore.getState().folders;
+
+          const candidates: SuggestionItem[] = notes
             .filter(note => note.title.toLowerCase().includes(query.toLowerCase()))
-            .map(note => note.title)
+            .map(note => {
+              let path = '';
+              if (note.parent_id) {
+                const folder = folders.find(f => f.id === note.parent_id);
+                if (folder) {
+                  path = folder.name;
+                }
+              }
+              return {
+                title: note.title,
+                path,
+                id: note.id
+              };
+            })
             .slice(0, 5);
 
-          // If no candidates found, or just to allow creating a new note with the current input
-          if (query && !candidates.includes(query)) {
-            candidates.push(query);
+          const exactMatch = candidates.find(c => c.title === query && c.path === '');
+          if (query && !exactMatch) {
+            candidates.push({
+              title: query,
+              path: 'New Note',
+              id: 'new'
+            });
           } else if (candidates.length === 0) {
-            candidates.push('New Note');
+            candidates.push({
+              title: 'New Note',
+              path: '',
+              id: 'new'
+            });
           }
 
           return candidates;

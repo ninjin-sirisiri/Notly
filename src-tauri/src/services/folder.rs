@@ -184,6 +184,9 @@ impl FolderService {
       )
       .map_err(|e| format!("フォルダの更新に失敗しました: {}", e))?;
 
+    // バックリンクの更新
+    self.update_backlinks(&old_path, &new_path)?;
+
     let updated_folder = conn
       .query_row(
         "SELECT id, name, created_at, updated_at, parent_id, folder_path FROM folders WHERE id = ?",
@@ -341,6 +344,74 @@ impl FolderService {
     self.delete_folder_recursive(folder_id)
   }
 
+  fn get_relative_path(&self, path: &std::path::Path) -> String {
+    path
+      .strip_prefix(&self.base_path)
+      .unwrap_or(path)
+      .with_extension("")
+      .to_string_lossy()
+      .replace("\\", "/")
+  }
+
+  fn update_backlinks(
+    &self,
+    old_path: &std::path::Path,
+    new_path: &std::path::Path,
+  ) -> Result<(), String> {
+    let old_rel = self.get_relative_path(old_path);
+    let new_rel = self.get_relative_path(new_path);
+
+    if old_rel == new_rel {
+      return Ok(());
+    }
+
+    let old_prefix = format!("[[{}/", old_rel);
+    let new_prefix = format!("[[{}/", new_rel);
+
+    let notes = {
+      let conn = self.db.conn.lock().unwrap();
+      let mut stmt = conn
+        .prepare("SELECT id, title, file_path FROM notes")
+        .map_err(|e| format!("Failed to prepare statement: {}", e))?;
+
+      stmt
+        .query_map([], |row| {
+          Ok((
+            row.get::<_, i64>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?,
+          ))
+        })
+        .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
+        .collect::<SqlResult<Vec<(i64, String, String)>>>()
+        .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
+    };
+
+    for (id, title, file_path) in notes {
+      let content = match fs::read_to_string(&file_path) {
+        Ok(c) => c,
+        Err(_) => continue,
+      };
+
+      if content.contains(&old_prefix) {
+        let new_content = content.replace(&old_prefix, &new_prefix);
+        fs::write(&file_path, &new_content)
+          .map_err(|e| format!("バックリンクの更新に失敗しました ({}): {}", title, e))?;
+
+        let preview = crate::services::note::NoteService::generate_preview(&new_content);
+        let conn = self.db.conn.lock().unwrap();
+        conn
+          .execute(
+            "UPDATE notes SET preview = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            params![preview, id],
+          )
+          .map_err(|e| format!("プレビューの更新に失敗しました ({}): {}", title, e))?;
+      }
+    }
+
+    Ok(())
+  }
+
   // フォルダの移動
   pub fn move_folder(&self, id: i64, new_parent_id: Option<i64>) -> Result<Folder, String> {
     let old_folder: Folder = {
@@ -441,6 +512,9 @@ impl FolderService {
         )
         .map_err(|e| format!("フォルダの移動に失敗しました: {}", e))?;
     }
+
+    // バックリンクの更新
+    self.update_backlinks(&old_path, &new_path)?;
 
     let updated_folder = self.get_folder_by_id(id)?;
 

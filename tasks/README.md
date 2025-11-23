@@ -5,7 +5,6 @@
 ## タスクファイル一覧
 
 ### 高優先度
-- [P1-drag-and-drop.md](./P1-drag-and-drop.md) - ドラッグ&ドロップによるノート・フォルダ移動
 - [P1-trash-feature.md](./P1-trash-feature.md) - ゴミ箱機能
 - [P1-keyboard-shortcuts.md](./P1-keyboard-shortcuts.md) - キーボードショートカット
 

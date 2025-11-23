@@ -1,5 +1,6 @@
 import { CheckSquare, CheckCheck, FolderInput, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { toast } from 'sonner';
 import {
   DndContext,
@@ -71,6 +72,65 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     getSelectedByType,
     selectAll
   } = useSelectionStore();
+
+  useHotkeys(
+    'ctrl+n, cmd+n',
+    e => {
+      e.preventDefault();
+      setIsCreatingNote(true);
+    },
+    { enableOnFormTags: true }
+  );
+
+  useHotkeys(
+    'ctrl+shift+n, cmd+shift+n',
+    e => {
+      e.preventDefault();
+      setIsCreatingFolder(true);
+    },
+    { enableOnFormTags: true }
+  );
+
+  useHotkeys(
+    'delete',
+    () => {
+      if (selectedItems.length > 0) {
+        // Don't prevent default if we are in an input/textarea (handled by enableOnFormTags: false by default)
+        // But if we are NOT in an input, we might want to prevent default if it does something else (like nav back)
+        handleBulkDelete();
+      }
+    }
+    // Default enableOnFormTags is false, which is what we want for Delete
+  );
+
+  useHotkeys(
+    'ctrl+d, cmd+d',
+    async e => {
+      e.preventDefault();
+      const { currentNote, currentContent } = useNoteStore.getState();
+      if (currentNote && currentContent !== null) {
+        try {
+          // Simple directory extraction
+          const separator = currentNote.file_path.includes('\\') ? '\\' : '/';
+          const folderPath = currentNote.file_path.slice(
+            0,
+            currentNote.file_path.lastIndexOf(separator)
+          );
+
+          await createNote(
+            `${currentNote.title} (Copy)`,
+            currentContent,
+            folderPath,
+            currentNote.parent_id
+          );
+          toast.success('Note duplicated');
+        } catch {
+          toast.error('Failed to duplicate note');
+        }
+      }
+    },
+    { enableOnFormTags: true }
+  );
 
   const [showBulkMoveMenu, setShowBulkMoveMenu] = useState(false);
 

@@ -1,4 +1,9 @@
 import { useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { toast } from 'sonner';
+import { exit } from '@tauri-apps/plugin-process';
+
+import { useNoteStore } from '@/stores/notes';
 
 import { Editor } from '@/components/editor';
 import { Header } from '@/components/layout/header';
@@ -11,6 +16,32 @@ import { Toaster } from './components/ui/sonner';
 
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { setCurrentNote } = useNoteStore();
+
+  useHotkeys('ctrl+b, cmd+b', e => {
+    e.preventDefault();
+    setIsSidebarOpen(prev => !prev);
+  });
+
+  useHotkeys('ctrl+q, cmd+q', e => {
+    e.preventDefault();
+    exit();
+  });
+
+  useHotkeys('ctrl+w, cmd+w', e => {
+    e.preventDefault();
+    setCurrentNote(null);
+  });
+
+  useHotkeys('ctrl+s, cmd+s', e => {
+    e.preventDefault();
+    toast.success('Saved');
+  });
+
+  useHotkeys('ctrl+,', e => {
+    e.preventDefault();
+    toast.info('Settings not implemented yet');
+  });
 
   return (
     <ThemeProvider

@@ -4,6 +4,7 @@ import { type FileItem } from '@/types/files';
 
 import { getAllFiles } from '@/lib/api/files';
 import { searchNotes } from '@/lib/api/notes';
+import { getNotesByTag } from '@/lib/api/tags';
 import { useFolderStore } from './folders';
 
 type SortBy = 'name' | 'createdAt' | 'updatedAt';
@@ -21,6 +22,8 @@ type FileStore = {
   sortOrder: SortOrder;
   setSortBy: (sortBy: SortBy) => void;
   setSortOrder: (sortOrder: SortOrder) => void;
+  selectedTagId: number | null;
+  setSelectedTagId: (tagId: number | null) => Promise<void>;
 };
 
 function collectFolderIds(items: FileItem[]): number[] {
@@ -108,10 +111,19 @@ export const useFileStore = create<FileStore>()((set, get) => ({
   error: null,
   sortBy: 'name',
   sortOrder: 'asc',
+  selectedTagId: null,
 
   loadFiles: async () => {
     set({ isLoading: true, error: null });
     try {
+      const { selectedTagId } = get();
+      if (selectedTagId !== null) {
+        const notes = await getNotesByTag(selectedTagId);
+        const fileItems: FileItem[] = notes.map(note => ({ note }));
+        set({ filteredFiles: fileItems, isLoading: false });
+        return;
+      }
+
       const files = await getAllFiles();
       const { searchQuery, sortBy, sortOrder } = get();
       const filteredFiles = await filterFilesWithContent(files, searchQuery);
@@ -146,5 +158,20 @@ export const useFileStore = create<FileStore>()((set, get) => ({
     const { filteredFiles, sortBy } = get();
     const sortedFiles = sortFiles(filteredFiles, sortBy, sortOrder);
     set({ sortOrder, filteredFiles: sortedFiles });
+  },
+
+  setSelectedTagId: async (tagId: number | null) => {
+    set({ selectedTagId: tagId, isLoading: true });
+    if (tagId === null) {
+      await get().loadFiles();
+    } else {
+      try {
+        const notes = await getNotesByTag(tagId);
+        const fileItems: FileItem[] = notes.map(note => ({ note }));
+        set({ filteredFiles: fileItems, isLoading: false });
+      } catch (error) {
+        set({ isLoading: false, error: String(error) });
+      }
+    }
   }
 }));

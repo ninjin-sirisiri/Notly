@@ -106,3 +106,25 @@ pub struct FolderWithChildren {
   pub is_deleted: bool,
   pub deleted_at: Option<String>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Tag {
+  pub id: i64,
+  pub name: String,
+  pub color: Option<String>,
+  pub created_at: String,
+  pub updated_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreateTagInput {
+  pub name: String,
+  pub color: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateTagInput {
+  pub id: i64,
+  pub name: String,
+  pub color: Option<String>,
+}

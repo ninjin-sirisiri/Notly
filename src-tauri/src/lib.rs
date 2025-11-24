@@ -66,6 +66,14 @@ pub fn run() {
       commands::files::get_all_files,
       commands::activity::record_daily_activity,
       commands::activity::get_streak,
+      commands::tags::create_tag,
+      commands::tags::update_tag,
+      commands::tags::delete_tag,
+      commands::tags::get_all_tags,
+      commands::tags::add_tag_to_note,
+      commands::tags::remove_tag_from_note,
+      commands::tags::get_notes_by_tag,
+      commands::tags::get_tags_by_note,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

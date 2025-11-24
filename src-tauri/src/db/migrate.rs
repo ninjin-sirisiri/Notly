@@ -112,6 +112,34 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     }
   }
 
+  conn.execute(
+    "CREATE TABLE IF NOT EXISTS tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    color TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )",
+    [],
+  )?;
+
+  conn.execute(
+    "CREATE TABLE IF NOT EXISTS note_tags (
+    note_id INTEGER,
+    tag_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (note_id, tag_id),
+    FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+    )",
+    [],
+  )?;
+
+  conn.execute(
+    "INSERT OR IGNORE INTO tags (name, color) VALUES (?, ?)",
+    params!["お気に入り", "#FFD700"],
+  )?;
+
   Ok(())
 }
 

@@ -6,6 +6,7 @@ import { useNoteStore } from '@/stores/notes';
 import { FolderSelectDialog } from './dialogs/FolderSelectDialog';
 import { EditorHeader } from './header/EditorHeader';
 import { MarkdownEditor } from './MarkdownEditor';
+import { NoteTags } from './NoteTags';
 
 export function Editor() {
   const { currentNote, currentContent, updateNote, isLoading } = useCurrentNote();
@@ -82,6 +83,7 @@ export function Editor() {
           isLoading={isLoading}
           isNewNote={!currentNote}
         />
+        {currentNote?.id && <NoteTags noteId={currentNote.id} />}
         <MarkdownEditor
           key={currentNote?.id}
           content={content}

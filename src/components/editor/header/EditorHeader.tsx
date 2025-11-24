@@ -23,7 +23,7 @@ export function EditorHeader({
   return (
     <div className="flex items-center sm:justify-between gap-2 p-2">
       <input
-        className="w-full text-2xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-primary dark:text-white p-0.5"
+        className="w-full text-2xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-foreground p-0.5 bg-transparent border-none focus:outline-none"
         value={title}
         onChange={e => setTitle(e.target.value)}
         onBlur={() => {
@@ -46,9 +46,7 @@ export function EditorHeader({
             <span>Save</span>
           )}
         </Button>
-        <span className="text-xs text-gray-400 dark:text-gray-500">
-          {created_at.toLocaleString()}
-        </span>
+        <span className="text-xs text-muted-foreground">{created_at.toLocaleString()}</span>
       </div>
     </div>
   );

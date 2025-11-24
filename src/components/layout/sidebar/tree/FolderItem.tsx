@@ -1,8 +1,15 @@
-import { ChevronRight, Edit2, Folder, FolderInput, Trash2 } from 'lucide-react';
+import { ChevronRight, Edit2, Folder, FolderInput, MoreHorizontal, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 import { useDeleteFolder, useMoveFolder, useUpdateFolder } from '@/hooks/useFolder';
 import { cn } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
@@ -83,11 +90,6 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
       updateFolder(folder.id, name, folder.folderPath, folder.parentId);
       setIsEditing(false);
     }
-  }
-
-  function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {
-    e.stopPropagation();
-    setShowDeleteConfirm(true);
   }
 
   function confirmDelete() {
@@ -172,30 +174,32 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
             <Folder className="h-4 w-4" />
             <p className="text-sm font-medium flex-1 truncate">{folder.name}</p>
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                title="名前を変更"
-                onClick={e => {
-                  e.stopPropagation();
-                  setIsEditing(true);
-                }}>
-                <Edit2 className="h-3.5 w-3.5" />
-              </button>
-              <button
-                className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                title="移動"
-                onClick={e => {
-                  e.stopPropagation();
-                  setShowMoveMenu(true);
-                }}>
-                <FolderInput className="h-3.5 w-3.5" />
-              </button>
-              <button
-                className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                title="削除"
-                onClick={handleDelete}>
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                    onClick={e => e.stopPropagation()}>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                    <Edit2 className="mr-2 h-4 w-4" />
+                    名前を変更
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowMoveMenu(true)}>
+                    <FolderInput className="mr-2 h-4 w-4" />
+                    移動
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="text-destructive focus:text-destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    削除
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </FolderItemContextMenu>

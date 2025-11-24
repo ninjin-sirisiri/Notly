@@ -26,7 +26,6 @@ import { useNoteStore } from '@/stores/notes';
 import { useSelectionStore } from '@/stores/selection';
 
 import { BulkActions } from './actions/BulkActions';
-import { TrashButton } from './actions/TrashButton';
 import { SidebarHeader } from './header/SidebarHeader';
 import { TagList } from './TagList';
 import { TrashView } from './trash';
@@ -40,7 +39,7 @@ function RootDroppable({ children }: { children: React.ReactNode }) {
   return (
     <div
       ref={setNodeRef}
-      className={cn('overflow-y-auto h-full', isOver && 'bg-blue-50 dark:bg-blue-950/20')}>
+      className={cn('overflow-y-auto h-full', isOver && 'bg-accent/50')}>
       {children}
     </div>
   );
@@ -64,6 +63,8 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
   const folderInputRef = useRef<HTMLInputElement>(null);
   const { setCurrentFolder } = useCurrentFolder();
   const [showTrash, setShowTrash] = useState(false);
+
+  const [showTags, setShowTags] = useState(false);
 
   const {
     selectionMode,
@@ -317,8 +318,8 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         className={`
         fixed md:relative inset-y-0 left-0 z-50
         w-64 md:w-64 shrink-0
-        border-r border-[#EAEAEA] dark:border-[#333333]
-        bg-white dark:bg-[#1A1A1A]
+        border-r border-border
+        bg-sidebar
         p-2 flex flex-col
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
@@ -334,6 +335,10 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             isFolderCreating={isFolderCreating}
             isCreatingFolder={isCreatingFolder}
             setIsCreatingFolder={setIsCreatingFolder}
+            showTrash={showTrash}
+            setShowTrash={setShowTrash}
+            showTags={showTags}
+            setShowTags={setShowTags}
           />
 
           {/* 一括操作メニュー */}
@@ -363,10 +368,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             </div>
           ) : (
             <>
-              <div className="px-2">
-                <TrashButton onClick={() => setShowTrash(true)} />
-              </div>
-              <TagList />
+              {showTags && <TagList />}
               <div className="h-full">
                 <DndContext
                   sensors={sensors}

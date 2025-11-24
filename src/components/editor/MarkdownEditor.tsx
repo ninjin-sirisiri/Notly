@@ -31,7 +31,7 @@ export function MarkdownEditor({ content, setContent, handleSave, isNewNote, not
   }, [editor, content]);
 
   return (
-    <div className="m-5 border border-gray-300 dark:border-gray-700 rounded-md overflow-hidden flex flex-col bg-white dark:bg-gray-900">
+    <div className="m-5 border border-border rounded-md overflow-hidden flex flex-col bg-card">
       <EditorToolbar editor={editor} />
       <BubbleMenus editor={editor} />
       <EditorContent editor={editor} />

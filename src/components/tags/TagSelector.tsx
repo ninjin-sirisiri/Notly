@@ -107,7 +107,7 @@ export function TagSelector({
           onChange={e => setInputValue(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onKeyDown={handleKeyDown}
-          placeholder={selectedTags.length === 0 ? 'Add tags...' : ''}
+          placeholder={selectedTags.length === 0 ? 'タグを追加...' : ''}
           className="flex-1 bg-transparent outline-none min-w-[80px] text-sm"
         />
       </div>

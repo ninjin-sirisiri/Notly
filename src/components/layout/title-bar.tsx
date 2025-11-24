@@ -8,7 +8,7 @@ export function TitleBar() {
 
   return (
     <div
-      className="flex items-center justify-between bg-gray-900 text-white h-8 px-2 select-none"
+      className="flex items-center justify-between bg-background text-foreground border-b border-border h-8 px-2 select-none"
       data-tauri-drag-region>
       <div>
         <img

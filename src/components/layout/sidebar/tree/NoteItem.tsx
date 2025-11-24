@@ -1,10 +1,19 @@
-import { Edit2, FileText, FolderInput, Star, Trash2 } from 'lucide-react';
+import { Copy, Edit2, FileText, FolderInput, MoreHorizontal, Star, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 
+import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import {
+  useCreateNote,
   useCurrentNote,
   useDeleteNote,
   useMoveNote,
@@ -28,6 +37,7 @@ export function NoteItem({ note }: NoteItemProps) {
   const { currentNote, currentContent, updateNote } = useCurrentNote();
   const { deleteNote } = useDeleteNote();
   const { moveNote } = useMoveNote();
+  const { createNote } = useCreateNote();
   const { toggleFavorite } = useToggleFavorite();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -60,11 +70,6 @@ export function NoteItem({ note }: NoteItemProps) {
     }
   }
 
-  function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {
-    e.stopPropagation();
-    setShowDeleteConfirm(true);
-  }
-
   function confirmDelete() {
     deleteNote(note.id);
     setShowDeleteConfirm(false);
@@ -75,9 +80,28 @@ export function NoteItem({ note }: NoteItemProps) {
     setShowMoveMenu(false);
   }
 
-  function handleToggleFavorite(e: React.MouseEvent<HTMLButtonElement>) {
+  function handleToggleFavorite(e: React.MouseEvent<HTMLDivElement>) {
     e.stopPropagation();
     toggleFavorite(note.id);
+  }
+
+  async function handleDuplicate(e: React.MouseEvent<HTMLDivElement>) {
+    e.stopPropagation();
+    try {
+      // Simple directory extraction
+      const separator = note.file_path.includes('\\') ? '\\' : '/';
+      const folderPath = note.file_path.slice(0, note.file_path.lastIndexOf(separator));
+
+      let contentToCopy = '';
+      if (currentNote?.id === note.id && currentContent) {
+        contentToCopy = currentContent;
+      }
+
+      await createNote(`${note.title} (Copy)`, contentToCopy, folderPath, note.parent_id);
+      toast.success('Note duplicated');
+    } catch {
+      toast.error('Failed to duplicate note');
+    }
   }
 
   return (
@@ -133,51 +157,52 @@ export function NoteItem({ note }: NoteItemProps) {
                 <FileText className="h-4 w-4 shrink-0" />
                 <p className="text-sm font-medium truncate">{note.title}</p>
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    className={cn(
-                      'p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600',
-                      note.isFavorite && 'opacity-100'
-                    )}
-                    title={note.isFavorite ? 'お気に入りから削除' : 'お気に入りに追加'}
-                    onClick={handleToggleFavorite}>
-                    <Star
-                      className={cn(
-                        'h-3.5 w-3.5',
-                        note.isFavorite && 'fill-yellow-400 text-yellow-400'
-                      )}
-                    />
-                  </button>
-                  <button
-                    className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                    title="名前を変更"
-                    onClick={e => {
-                      e.stopPropagation();
-                      setIsEditing(true);
-                    }}>
-                    <Edit2 className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                    title="移動"
-                    onClick={e => {
-                      e.stopPropagation();
-                      setShowMoveMenu(true);
-                    }}>
-                    <FolderInput className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                    title="削除"
-                    onClick={handleDelete}>
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className="p-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                        onClick={e => e.stopPropagation()}>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleToggleFavorite}>
+                        <Star
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            note.isFavorite && 'fill-yellow-400 text-yellow-400'
+                          )}
+                        />
+                        {note.isFavorite ? 'お気に入り解除' : 'お気に入りに追加'}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                        <Edit2 className="mr-2 h-4 w-4" />
+                        名前を変更
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setShowMoveMenu(true)}>
+                        <FolderInput className="mr-2 h-4 w-4" />
+                        移動
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleDuplicate}>
+                        <Copy className="mr-2 h-4 w-4" />
+                        複製
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="text-destructive focus:text-destructive">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        削除
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </HoverCardTrigger>
           </NoteItemContextMenu>
           <HoverCardContent
             side="right"
-            align="start"
+            align="center"
             className="w-60">
             <p className="text-sm text-muted-foreground line-clamp-1">{note.preview}</p>
           </HoverCardContent>

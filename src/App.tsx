@@ -11,6 +11,7 @@ import { InitializationScreen } from '@/components/InitializationScreen';
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { TitleBar } from '@/components/layout/title-bar';
+import { SettingsPage } from '@/components/settings/SettingsPage';
 
 import './App.css';
 import { ThemeProvider } from './components/theme/theme-provider';
@@ -19,6 +20,7 @@ import { Toaster } from './components/ui/sonner';
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { setCurrentNote } = useNoteStore();
 
   useEffect(() => {
@@ -55,7 +57,7 @@ export default function App() {
 
   useHotkeys('ctrl+,', e => {
     e.preventDefault();
-    toast.info('Settings not implemented yet');
+    setIsSettingsOpen(prev => !prev);
   });
 
   if (isInitialized === null) {
@@ -87,13 +89,16 @@ export default function App() {
       <div className="flex h-screen w-full flex-col font-sans text-[#1A1A1A] dark:text-[#F8F8F8]">
         <TitleBar />
         <div className="flex flex-col flex-1 overflow-hidden">
-          <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
+          <Header
+            onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            onSettingsClick={() => setIsSettingsOpen(!isSettingsOpen)}
+          />
           <div className="flex flex-1 overflow-hidden">
             <Sidebar
               isOpen={isSidebarOpen}
               onClose={() => setIsSidebarOpen(false)}
             />
-            <Editor />
+            {isSettingsOpen ? <SettingsPage /> : <Editor />}
           </div>
         </div>
         <Toaster />

@@ -3,11 +3,13 @@ mod config;
 mod db;
 mod services;
 
+use chrono::Timelike;
 use std::sync::{Arc, Mutex};
 
 use config::AppConfig;
 use db::{Database, migrate};
 use tauri::Manager;
+use tauri_plugin_notification::NotificationExt;
 
 pub struct AppContext {
   pub db: Arc<Database>,
@@ -33,6 +35,7 @@ impl AppState {
 pub fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_notification::init())
     .setup(|app| {
       let app_dir = app.path().app_data_dir()?;
       std::fs::create_dir_all(&app_dir)?;
@@ -62,8 +65,37 @@ pub fn run() {
       };
 
       app.manage(AppState {
-        context: Mutex::new(context),
+        context: Mutex::new(context.clone()),
       });
+
+      // Start notification checker
+      if let Some(ctx) = context {
+        let app_handle = app.handle().clone();
+        std::thread::spawn(move || {
+          let mut last_notified_minute = None;
+          loop {
+            std::thread::sleep(std::time::Duration::from_secs(30));
+
+            let conn = ctx.db.conn.lock().unwrap();
+            if let Ok(Some(message)) = services::NotificationService::should_notify(&conn) {
+              let now = chrono::Local::now();
+              let current_minute = (now.hour(), now.minute());
+
+              // Only notify once per minute
+              if last_notified_minute != Some(current_minute) {
+                last_notified_minute = Some(current_minute);
+
+                let _ = app_handle
+                  .notification()
+                  .builder()
+                  .title("Notly")
+                  .body(&message)
+                  .show();
+              }
+            }
+          }
+        });
+      }
 
       Ok(())
     })
@@ -103,6 +135,8 @@ pub fn run() {
       commands::tags::remove_tag_from_note,
       commands::tags::get_notes_by_tag,
       commands::tags::get_tags_by_note,
+      commands::notification::get_notification_settings,
+      commands::notification::update_notification_settings,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

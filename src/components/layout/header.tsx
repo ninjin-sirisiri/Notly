@@ -3,7 +3,13 @@ import { useEffect } from 'react';
 import { useStreakStore } from '../../stores/streak';
 import { ModeToggle } from '../theme/ModeToggle';
 
-export function Header({ onMenuClick }: { onMenuClick: () => void }) {
+export function Header({
+  onMenuClick,
+  onSettingsClick
+}: {
+  onMenuClick: () => void;
+  onSettingsClick?: () => void;
+}) {
   const { streak, fetchStreak } = useStreakStore();
 
   useEffect(() => {
@@ -39,7 +45,9 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
       </div>
       <div className="flex items-center justify-between gap-2 md:gap-4">
         <ModeToggle />
-        <button className="flex items-center justify-center rounded-lg h-8 w-8 md:h-10 md:w-10 text-[#666666] hover:bg-gray-200 dark:hover:bg-[#333333]">
+        <button
+          onClick={onSettingsClick}
+          className="flex items-center justify-center rounded-lg h-8 w-8 md:h-10 md:w-10 text-[#666666] hover:bg-gray-200 dark:hover:bg-[#333333]">
           <Settings className="h-5 w-5 md:h-6 md:w-6" />
         </button>
       </div>

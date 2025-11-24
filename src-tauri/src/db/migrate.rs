@@ -140,6 +140,25 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     params!["お気に入り", "#FFD700"],
   )?;
 
+  // Create notification_settings table
+  conn.execute(
+    "CREATE TABLE IF NOT EXISTS notification_settings (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    enabled BOOLEAN DEFAULT TRUE,
+    notification_time TEXT NOT NULL DEFAULT '09:00',
+    message TEXT DEFAULT 'ノートを書く時間です!',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )",
+    [],
+  )?;
+
+  // Insert default notification settings if not exists
+  conn.execute(
+    "INSERT OR IGNORE INTO notification_settings (id, enabled, notification_time, message) VALUES (1, TRUE, '09:00', 'ノートを書く時間です!')",
+    [],
+  )?;
+
   Ok(())
 }
 

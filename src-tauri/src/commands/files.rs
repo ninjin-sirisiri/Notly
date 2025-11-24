@@ -10,7 +10,8 @@ pub async fn get_all_files<R: tauri::Runtime>(
   state: State<'_, AppState>,
   _app: tauri::AppHandle<R>,
 ) -> Result<Vec<FileItem>, String> {
-  let db = Arc::clone(&state.db);
+  let context = state.get_context().map_err(|e| e.to_string())?;
+  let db = Arc::clone(&context.db);
 
   tauri::async_runtime::spawn_blocking(move || {
     let file_service = FileService::new(db);

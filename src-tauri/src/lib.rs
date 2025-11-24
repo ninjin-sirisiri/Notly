@@ -1,46 +1,75 @@
 mod commands;
+mod config;
 mod db;
 mod services;
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
+use config::AppConfig;
 use db::{Database, migrate};
 use tauri::Manager;
 
-pub struct AppState {
+pub struct AppContext {
   pub db: Arc<Database>,
+  pub config: AppConfig,
+}
+
+pub struct AppState {
+  pub context: Mutex<Option<Arc<AppContext>>>,
+}
+
+impl AppState {
+  pub fn get_context(&self) -> Result<Arc<AppContext>, String> {
+    self
+      .context
+      .lock()
+      .unwrap()
+      .clone()
+      .ok_or_else(|| "App not initialized".to_string())
+  }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-use tauri::test::mock_builder;
-
 pub fn run() {
   tauri::Builder::default()
+    .plugin(tauri_plugin_dialog::init())
     .setup(|app| {
-      // データベース初期化
       let app_dir = app.path().app_data_dir()?;
       std::fs::create_dir_all(&app_dir)?;
 
-      let metadata_dir = app_dir.join("metadata");
-      std::fs::create_dir_all(&metadata_dir)?;
+      let config_path = app_dir.join("config.json");
+      let context = if let Some(config) = AppConfig::load(&config_path) {
+        let path = std::path::PathBuf::from(&config.data_dir);
+        let metadata_dir = path.join("metadata");
+        let db_path = metadata_dir.join("app.db");
 
-      let note_dir = app_dir.join("notes");
-      std::fs::create_dir_all(&note_dir)?;
+        if let Ok(db) = Database::new(db_path.to_str().unwrap()) {
+          {
+            let conn = db.conn.lock().unwrap();
+            if let Err(e) = migrate(&conn) {
+              eprintln!("Migration failed: {}", e);
+            }
+          }
+          Some(Arc::new(AppContext {
+            db: Arc::new(db),
+            config,
+          }))
+        } else {
+          None
+        }
+      } else {
+        None
+      };
 
-      let db_path = metadata_dir.join("app.db");
-      let db = Database::new(db_path.to_str().unwrap()).expect("Failed to initialize database");
-
-      // マイグレーション実行
-      {
-        let conn = db.conn.lock().unwrap();
-        migrate(&conn).expect("Failed to run migrations");
-      }
-
-      app.manage(AppState { db: Arc::new(db) });
+      app.manage(AppState {
+        context: Mutex::new(context),
+      });
 
       Ok(())
     })
     .invoke_handler(tauri::generate_handler![
+      commands::app::check_initialization,
+      commands::app::initialize_app,
       commands::note::get_all_notes,
       commands::note::get_note_by_id,
       commands::note::create_note,
@@ -81,6 +110,7 @@ pub fn run() {
 
 #[allow(dead_code)]
 pub fn setup_test_app() -> tauri::AppHandle<tauri::test::MockRuntime> {
+  use tauri::test::mock_builder;
   let app = mock_builder()
     .build(tauri::generate_context!())
     .expect("failed to build mock app");
@@ -89,6 +119,15 @@ pub fn setup_test_app() -> tauri::AppHandle<tauri::test::MockRuntime> {
     let conn = db.conn.lock().unwrap();
     migrate(&conn).expect("Failed to run migrations");
   }
-  app.manage(AppState { db: Arc::new(db) });
+  let config = AppConfig {
+    data_dir: ".".to_string(),
+  };
+  let context = AppContext {
+    db: Arc::new(db),
+    config,
+  };
+  app.manage(AppState {
+    context: Mutex::new(Some(Arc::new(context))),
+  });
   app.handle().clone()
 }

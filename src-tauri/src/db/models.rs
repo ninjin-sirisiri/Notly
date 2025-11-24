@@ -8,6 +8,13 @@ pub struct Note {
   pub created_at: String,
   pub updated_at: String,
   pub parent_id: Option<i64>,
+  pub preview: String,
+  #[serde(default)]
+  pub is_deleted: bool,
+  pub deleted_at: Option<String>,
+  #[serde(default)]
+  pub is_favorite: bool,
+  pub favorite_order: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -19,6 +26,9 @@ pub struct NoteWithContent {
   pub updated_at: String,
   pub parent_id: Option<i64>,
   pub content: String,
+  #[serde(default)]
+  pub is_deleted: bool,
+  pub deleted_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,4 +44,87 @@ pub struct UpdateNoteInput {
   pub id: i64,
   pub title: String,
   pub content: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MoveNoteInput {
+  pub id: i64,
+  pub new_parent_id: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Folder {
+  pub id: i64,
+  pub name: String,
+  pub created_at: String,
+  pub updated_at: String,
+  pub parent_id: Option<i64>,
+  pub folder_path: String,
+  #[serde(default)]
+  pub is_deleted: bool,
+  pub deleted_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreateFolderInput {
+  pub name: String,
+  pub parent_id: Option<i64>,
+  pub parent_path: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateFolderInput {
+  pub id: i64,
+  pub name: String,
+  pub parent_id: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MoveFolderInput {
+  pub id: i64,
+  pub new_parent_id: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum FileItem {
+  Folder(FolderWithChildren),
+  Note(Note),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FolderWithChildren {
+  pub id: i64,
+  pub name: String,
+  pub created_at: String,
+  pub updated_at: String,
+  pub parent_id: Option<i64>,
+  pub folder_path: String,
+  pub children: Vec<FileItem>,
+  #[serde(default)]
+  pub is_deleted: bool,
+  pub deleted_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Tag {
+  pub id: i64,
+  pub name: String,
+  pub color: Option<String>,
+  pub created_at: String,
+  pub updated_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreateTagInput {
+  pub name: String,
+  pub color: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateTagInput {
+  pub id: i64,
+  pub name: String,
+  pub color: Option<String>,
 }

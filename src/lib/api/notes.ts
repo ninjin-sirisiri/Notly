@@ -39,3 +39,40 @@ export function updateNote(id: number, title: string, content: string): Promise<
 export function deleteNote(id: number): Promise<void> {
   return safeInvoke<void>('delete_note', { id });
 }
+
+export function moveNote(id: number, newParentId: number | null): Promise<Note> {
+  return safeInvoke<Note>('move_note', {
+    input: {
+      id,
+      new_parent_id: newParentId
+    }
+  });
+}
+
+export function searchNotes(query: string): Promise<Note[]> {
+  return safeInvoke<Note[]>('search_notes', { query });
+}
+
+export function restoreNote(id: number): Promise<void> {
+  return safeInvoke<void>('restore_note', { id });
+}
+
+export function permanentlyDeleteNote(id: number): Promise<void> {
+  return safeInvoke<void>('permanently_delete_note', { id });
+}
+
+export function getDeletedNotes(): Promise<Note[]> {
+  return safeInvoke<Note[]>('get_deleted_notes');
+}
+
+export function toggleFavorite(id: number): Promise<Note> {
+  return safeInvoke<Note>('toggle_favorite', { id });
+}
+
+export function getFavoriteNotes(): Promise<Note[]> {
+  return safeInvoke<Note[]>('get_favorite_notes');
+}
+
+export function updateFavoriteOrder(id: number, order: number): Promise<void> {
+  return safeInvoke<void>('update_favorite_order', { id, order });
+}

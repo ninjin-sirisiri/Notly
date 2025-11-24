@@ -1,7 +1,11 @@
 import { create } from 'zustand';
 
-import { createNote, deleteNote, loadNote, loadNotes, updateNote } from '@/lib/api/notes';
+import { createNote, deleteNote, loadNote, loadNotes, moveNote, updateNote } from '@/lib/api/notes';
 import { type Note, type NoteWithContent } from '@/types/notes';
+
+import { useFileStore } from './files';
+import { useFolderStore } from './folders';
+import { useStreakStore } from './streak';
 
 type NoteStore = {
   notes: Note[];
@@ -16,29 +20,60 @@ type NoteStore = {
     title: string,
     content: string,
     folderPath: string,
-    parentId?: number
+    parentId?: number | null
   ) => Promise<NoteWithContent>;
   loadNotes: () => Promise<void>;
   loadNote: (id: number) => Promise<void>;
   updateNote: (id: number, title: string, content: string) => Promise<void>;
   deleteNote: (id: number) => Promise<void>;
+  moveNote: (id: number, newParentId: number | null) => Promise<void>;
+  toggleFavorite: (id: number) => Promise<void>;
+  loadFavoriteNotes: () => Promise<Note[]>;
 };
 
 export const useNoteStore = create<NoteStore>()((set, get) => ({
-  createNote: async (title: string, content: string, folderPath = '', parentId?: number) => {
+  notes: [],
+  currentNote: null,
+  currentContent: null,
+  setCurrentContent: (content: string | null) =>
+    set({
+      currentContent: content
+    }),
+  setCurrentNote: (note: Note | null) =>
+    set({
+      currentNote: note
+    }),
+  isLoading: false,
+  error: null,
+
+  createNote: async (title: string, content: string, folderPath = '', parentId?: number | null) => {
     set({
       isLoading: true,
       error: null
     });
     try {
       const newNote = await createNote(title, content, folderPath, parentId);
+
+      // If the note has a parent folder, ensure it's open
+      if (parentId && parentId !== null) {
+        const folderStore = useFolderStore.getState();
+        if (!folderStore.openFolderIds.includes(parentId)) {
+          useFolderStore.getState().toggleFolder(parentId);
+        }
+      }
+
       set({
         notes: [...get().notes, newNote],
         currentNote: newNote,
         currentContent: newNote.content,
         isLoading: false
       });
-      return newNote;
+      useFileStore.getState().loadFiles();
+
+      // Record activity for streak tracking
+      useStreakStore.getState().recordActivity();
+
+      return newNote; // Return the created note to match the function signature
     } catch (error) {
       set({
         error: String(error),
@@ -47,8 +82,74 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
       throw error;
     }
   },
-  currentContent: null,
-  currentNote: null,
+
+  loadNote: async (id: number) => {
+    set({
+      isLoading: true,
+      error: null
+    });
+    try {
+      const note = await loadNote(id);
+      set({
+        currentNote: note,
+        currentContent: note.content,
+        isLoading: false
+      });
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: String(error)
+      });
+      throw error;
+    }
+  },
+
+  loadNotes: async () => {
+    set({
+      isLoading: true,
+      error: null
+    });
+    try {
+      const notes = await loadNotes();
+      set({
+        notes,
+        isLoading: false
+      });
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: String(error)
+      });
+      throw error;
+    }
+  },
+
+  updateNote: async (id: number, title: string, content: string) => {
+    set({
+      isLoading: true,
+      error: null
+    });
+    try {
+      const updatedNote = await updateNote(id, title, content);
+      set(state => ({
+        notes: state.notes.map(note => (note.id === id ? updatedNote : note)),
+        currentNote: state.currentNote?.id === id ? updatedNote : state.currentNote,
+        currentContent: state.currentNote?.id === id ? updatedNote.content : state.currentContent,
+        isLoading: false
+      }));
+      useFileStore.getState().loadFiles();
+
+      // Record activity for streak tracking
+      useStreakStore.getState().recordActivity();
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: String(error)
+      });
+      throw error;
+    }
+  },
+
   deleteNote: async (id: number) => {
     set({
       isLoading: true,
@@ -65,81 +166,82 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
           isLoading: false
         };
       });
+      useFileStore.getState().loadFiles();
+      // Refresh trash items
+      const { useTrashStore } = await import('./trash');
+      useTrashStore.getState().loadDeletedItems();
     } catch (error) {
       set({
-        error: String(error),
-        isLoading: false
+        isLoading: false,
+        error: String(error)
       });
       throw error;
     }
   },
-  error: null,
-  isLoading: false,
-  loadNote: async (id: number) => {
+
+  moveNote: async (id: number, newParentId: number | null) => {
     set({
       isLoading: true,
       error: null
     });
     try {
-      const note = await loadNote(id);
+      const movedNote = await moveNote(id, newParentId);
+
+      if (newParentId && newParentId !== null) {
+        const folderStore = useFolderStore.getState();
+        if (!folderStore.openFolderIds.includes(newParentId)) {
+          useFolderStore.getState().toggleFolder(newParentId);
+        }
+      }
+
       set({
-        currentNote: note,
-        currentContent: note.content,
+        notes: get().notes.map(note => (note.id === id ? movedNote : note)),
+        currentNote: get().currentNote?.id === id ? movedNote : get().currentNote,
         isLoading: false
       });
+
+      // Reload folders to reflect any changes in folder structure
+      await useFolderStore.getState().loadFolders();
+      useFileStore.getState().loadFiles();
     } catch (error) {
       set({
-        error: String(error),
-        isLoading: false
+        isLoading: false,
+        error: String(error)
       });
       throw error;
     }
   },
-  loadNotes: async () => {
+
+  toggleFavorite: async (id: number) => {
     set({
       isLoading: true,
       error: null
     });
     try {
-      const notes = await loadNotes();
-      set({
-        notes,
+      const { toggleFavorite } = await import('@/lib/api/notes');
+      const updatedNote = await toggleFavorite(id);
+      set(state => ({
+        notes: state.notes.map(note => (note.id === id ? updatedNote : note)),
+        currentNote: state.currentNote?.id === id ? updatedNote : state.currentNote,
         isLoading: false
-      });
+      }));
     } catch (error) {
       set({
-        error: String(error),
-        isLoading: false
+        isLoading: false,
+        error: String(error)
       });
       throw error;
     }
   },
-  notes: [],
-  setCurrentContent: (content: string | null) =>
-    set({
-      currentContent: content
-    }),
-  setCurrentNote: (note: Note | null) =>
-    set({
-      currentNote: note
-    }),
-  updateNote: async (id: number, title: string, content: string) => {
-    set({
-      isLoading: true,
-      error: null
-    });
+
+  loadFavoriteNotes: async () => {
     try {
-      const updatedNote = await updateNote(id, title, content);
-      set({
-        notes: get().notes.map(note => (note.id === id ? updatedNote : note)),
-        currentNote: updatedNote,
-        currentContent: updatedNote.content,
-        isLoading: false
-      });
+      const { getFavoriteNotes } = await import('@/lib/api/notes');
+      const favoriteNotes = await getFavoriteNotes();
+      return favoriteNotes;
     } catch (error) {
       set({
-        error: String(error),
-        isLoading: false
+        error: String(error)
       });
       throw error;
     }

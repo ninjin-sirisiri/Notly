@@ -267,33 +267,14 @@ impl FolderService {
         .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
     };
 
-    // Get all folder paths for file system deletion
-    let _folder_paths: Vec<String> = {
-      let placeholders = all_folder_ids
-        .iter()
-        .map(|_| "?")
-        .collect::<Vec<_>>()
-        .join(",");
-      let query = format!(
-        "SELECT folder_path FROM folders WHERE id IN ({}) ORDER BY id DESC",
-        placeholders
-      );
-
-      let mut stmt = conn
-        .prepare(&query)
-        .map_err(|e| format!("Failed to prepare statement: {}", e))?;
-
-      let params: Vec<&dyn rusqlite::ToSql> = all_folder_ids
-        .iter()
-        .map(|id| id as &dyn rusqlite::ToSql)
-        .collect();
-
-      stmt
-        .query_map(params.as_slice(), |row| row.get(0))
-        .map_err(|e| format!("フォルダパスの取得に失敗しました: {}", e))?
-        .collect::<SqlResult<Vec<String>>>()
-        .map_err(|e| format!("フォルダパスの取得に失敗しました: {}", e))?
-    };
+    // Get the main folder path for moving to trash
+    let main_folder_path: String = conn
+      .query_row(
+        "SELECT folder_path FROM folders WHERE id = ?",
+        params![folder_id],
+        |row| row.get(0),
+      )
+      .map_err(|e| format!("フォルダパスの取得に失敗しました: {}", e))?;
 
     // Soft delete notes using IN clause
     if !notes_to_delete.is_empty() {
@@ -333,6 +314,30 @@ impl FolderService {
     conn
       .execute(&query, params.as_slice())
       .map_err(|e| format!("フォルダの削除に失敗しました: {}", e))?;
+
+    drop(conn);
+
+    // フォルダをtrashに移動
+    let folder_path = PathBuf::from(&main_folder_path);
+    if folder_path.exists() {
+      let trash_base = self.base_path.join(".trash");
+
+      let relative_path = folder_path
+        .strip_prefix(&self.base_path)
+        .unwrap_or(&folder_path);
+
+      let trash_path = trash_base.join(relative_path);
+
+      // trash内の親ディレクトリを作成
+      if let Some(parent) = trash_path.parent() {
+        fs::create_dir_all(parent)
+          .map_err(|e| format!("trashディレクトリの作成に失敗しました: {}", e))?;
+      }
+
+      // フォルダを移動（中身ごと）
+      fs::rename(&folder_path, &trash_path)
+        .map_err(|e| format!("フォルダのtrashへの移動に失敗しました: {}", e))?;
+    }
 
     Ok(())
   }
@@ -390,41 +395,14 @@ impl FolderService {
         .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
     };
 
-    // Get all folder paths for file system deletion
-    let folder_paths: Vec<String> = {
-      let placeholders = all_folder_ids
-        .iter()
-        .map(|_| "?")
-        .collect::<Vec<_>>()
-        .join(",");
-      let query = format!(
-        "SELECT folder_path FROM folders WHERE id IN ({}) ORDER BY id DESC",
-        placeholders
-      );
-
-      let mut stmt = conn
-        .prepare(&query)
-        .map_err(|e| format!("Failed to prepare statement: {}", e))?;
-
-      let params: Vec<&dyn rusqlite::ToSql> = all_folder_ids
-        .iter()
-        .map(|id| id as &dyn rusqlite::ToSql)
-        .collect();
-
-      stmt
-        .query_map(params.as_slice(), |row| row.get(0))
-        .map_err(|e| format!("フォルダパスの取得に失敗しました: {}", e))?
-        .collect::<SqlResult<Vec<String>>>()
-        .map_err(|e| format!("フォルダパスの取得に失敗しました: {}", e))?
-    };
-
-    // Delete note files
-    for (_note_id, note_path) in &notes_to_delete {
-      if PathBuf::from(note_path).exists() {
-        fs::remove_file(note_path)
-          .map_err(|e| format!("ノートファイルの削除に失敗しました: {}", e))?;
-      }
-    }
+    // Get the main folder path
+    let main_folder_path: String = conn
+      .query_row(
+        "SELECT folder_path FROM folders WHERE id = ?",
+        params![folder_id],
+        |row| row.get(0),
+      )
+      .map_err(|e| format!("フォルダパスの取得に失敗しました: {}", e))?;
 
     // Delete notes from database using IN clause
     if !notes_to_delete.is_empty() {
@@ -440,14 +418,6 @@ impl FolderService {
       conn
         .execute(&query, params.as_slice())
         .map_err(|e| format!("ノートの削除に失敗しました: {}", e))?;
-    }
-
-    // Delete folder directories (in reverse order to delete children first)
-    for folder_path in &folder_paths {
-      if PathBuf::from(folder_path).exists() {
-        fs::remove_dir_all(folder_path)
-          .map_err(|e| format!("フォルダディレクトリの削除に失敗しました: {}", e))?;
-      }
     }
 
     // Delete folders from database using IN clause
@@ -467,6 +437,23 @@ impl FolderService {
       .execute(&query, params.as_slice())
       .map_err(|e| format!("フォルダの削除に失敗しました: {}", e))?;
 
+    drop(conn);
+
+    // trashフォルダからフォルダを削除
+    let folder_path = PathBuf::from(&main_folder_path);
+    let trash_base = self.base_path.join(".trash");
+
+    let relative_path = folder_path
+      .strip_prefix(&self.base_path)
+      .unwrap_or(&folder_path);
+
+    let trash_path = trash_base.join(relative_path);
+
+    if trash_path.exists() {
+      fs::remove_dir_all(&trash_path)
+        .map_err(|e| format!("フォルダディレクトリの削除に失敗しました: {}", e))?;
+    }
+
     Ok(())
   }
 
@@ -474,15 +461,16 @@ impl FolderService {
   pub fn restore_folder(&self, id: i64) -> Result<(), String> {
     let conn = self.db.conn.lock().unwrap();
 
-    // 親フォルダが存在し、削除されていないか確認
-    let parent_id: Option<i64> = conn
+    // フォルダ情報を取得
+    let (parent_id, folder_path): (Option<i64>, String) = conn
       .query_row(
-        "SELECT parent_id FROM folders WHERE id = ?",
+        "SELECT parent_id, folder_path FROM folders WHERE id = ?",
         params![id],
-        |row| row.get(0),
+        |row| Ok((row.get(0)?, row.get(1)?)),
       )
       .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?;
 
+    // 親フォルダが存在し、削除されていないか確認
     let new_parent_id = if let Some(pid) = parent_id {
       let parent_exists: bool = conn
         .query_row(
@@ -552,6 +540,30 @@ impl FolderService {
         params![new_parent_id, id],
       )
       .map_err(|e| format!("フォルダの親ID更新に失敗しました: {}", e))?;
+
+    drop(conn);
+
+    // フォルダをtrashから元の場所に戻す
+    let main_folder_path = PathBuf::from(&folder_path);
+    let trash_base = self.base_path.join(".trash");
+
+    let relative_path = main_folder_path
+      .strip_prefix(&self.base_path)
+      .unwrap_or(&main_folder_path);
+
+    let trash_path = trash_base.join(relative_path);
+
+    if trash_path.exists() {
+      // 元の場所の親ディレクトリを作成
+      if let Some(parent) = main_folder_path.parent() {
+        fs::create_dir_all(parent)
+          .map_err(|e| format!("ディレクトリの作成に失敗しました: {}", e))?;
+      }
+
+      // フォルダを戻す（中身ごと）
+      fs::rename(&trash_path, &main_folder_path)
+        .map_err(|e| format!("フォルダの復元に失敗しました: {}", e))?;
+    }
 
     Ok(())
   }

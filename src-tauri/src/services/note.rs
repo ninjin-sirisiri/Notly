@@ -362,10 +362,47 @@ impl NoteService {
     })
   }
 
-  // ノートの削除 (論理削除)
+  // ノートの削除 (論理削除 + trashフォルダに移動)
   pub fn delete_note(&self, id: i64) -> Result<(), String> {
-    let conn = self.db.conn.lock().unwrap();
+    // ノート情報を取得
+    let file_path: String = {
+      let conn = self.db.conn.lock().unwrap();
+      conn
+        .query_row(
+          "SELECT file_path FROM notes WHERE id = ?",
+          params![id],
+          |row| row.get(0),
+        )
+        .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
+    };
 
+    let note_path = PathBuf::from(&file_path);
+
+    // ファイルが存在する場合、trashフォルダに移動
+    if note_path.exists() {
+      // trashフォルダのパスを作成
+      let trash_base = self.base_path.join(".trash");
+
+      // 相対パスを取得
+      let relative_path = note_path
+        .strip_prefix(&self.base_path)
+        .unwrap_or(&note_path);
+
+      let trash_path = trash_base.join(relative_path);
+
+      // trash内の親ディレクトリを作成
+      if let Some(parent) = trash_path.parent() {
+        fs::create_dir_all(parent)
+          .map_err(|e| format!("trashディレクトリの作成に失敗しました: {}", e))?;
+      }
+
+      // ファイルを移動
+      fs::rename(&note_path, &trash_path)
+        .map_err(|e| format!("ファイルのtrashへの移動に失敗しました: {}", e))?;
+    }
+
+    // データベースで論理削除
+    let conn = self.db.conn.lock().unwrap();
     conn
       .execute(
         "UPDATE notes SET is_deleted = TRUE, deleted_at = CURRENT_TIMESTAMP WHERE id = ?",
@@ -388,8 +425,18 @@ impl NoteService {
       )
       .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?;
 
-    if PathBuf::from(&file_path).exists() {
-      fs::remove_file(&file_path)
+    // trashフォルダからファイルを削除
+    let note_path = PathBuf::from(&file_path);
+    let trash_base = self.base_path.join(".trash");
+
+    let relative_path = note_path
+      .strip_prefix(&self.base_path)
+      .unwrap_or(&note_path);
+
+    let trash_path = trash_base.join(relative_path);
+
+    if trash_path.exists() {
+      fs::remove_file(&trash_path)
         .map_err(|e| format!("ノートファイルの削除に失敗しました: {}", e))?;
     }
 
@@ -404,15 +451,16 @@ impl NoteService {
   pub fn restore_note(&self, id: i64) -> Result<(), String> {
     let conn = self.db.conn.lock().unwrap();
 
-    // 親フォルダが存在し、削除されていないか確認
-    let parent_id: Option<i64> = conn
+    // ノート情報を取得
+    let (parent_id, file_path): (Option<i64>, String) = conn
       .query_row(
-        "SELECT parent_id FROM notes WHERE id = ?",
+        "SELECT parent_id, file_path FROM notes WHERE id = ?",
         params![id],
-        |row| row.get(0),
+        |row| Ok((row.get(0)?, row.get(1)?)),
       )
       .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?;
 
+    // 親フォルダが存在し、削除されていないか確認
     let new_parent_id = if let Some(pid) = parent_id {
       let parent_exists: bool = conn
         .query_row(
@@ -426,12 +474,37 @@ impl NoteService {
       None
     };
 
+    // データベースで復元
     conn
       .execute(
         "UPDATE notes SET is_deleted = FALSE, deleted_at = NULL, parent_id = ? WHERE id = ?",
         params![new_parent_id, id],
       )
       .map_err(|e| format!("ノートの復元に失敗しました: {}", e))?;
+
+    drop(conn);
+
+    // ファイルをtrashから元の場所に戻す
+    let note_path = PathBuf::from(&file_path);
+    let trash_base = self.base_path.join(".trash");
+
+    let relative_path = note_path
+      .strip_prefix(&self.base_path)
+      .unwrap_or(&note_path);
+
+    let trash_path = trash_base.join(relative_path);
+
+    if trash_path.exists() {
+      // 元の場所の親ディレクトリを作成
+      if let Some(parent) = note_path.parent() {
+        fs::create_dir_all(parent)
+          .map_err(|e| format!("ディレクトリの作成に失敗しました: {}", e))?;
+      }
+
+      // ファイルを戻す
+      fs::rename(&trash_path, &note_path)
+        .map_err(|e| format!("ファイルの復元に失敗しました: {}", e))?;
+    }
 
     Ok(())
   }

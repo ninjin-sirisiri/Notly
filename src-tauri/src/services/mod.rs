@@ -5,6 +5,9 @@ pub mod note;
 pub mod notification;
 pub mod tags;
 
+pub mod assets;
+
+pub use assets::AssetService;
 pub use files::FileService;
 pub use folder::FolderService;
 pub use note::NoteService;

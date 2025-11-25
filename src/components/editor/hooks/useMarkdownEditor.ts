@@ -4,6 +4,7 @@ import { Markdown } from '@tiptap/markdown';
 import { useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { AutoCloseExtension } from '../extensions/AutoCloseExtension';
+import { ImageExtension } from '../extensions/ImageExtension';
 import { NoteLinkExtension } from '../extensions/NoteLinkExtension';
 import { getNoteLinkMarkdown, parseMarkdownWithNoteLinks } from '../utils/markdownConverter';
 
@@ -84,7 +85,8 @@ export function useMarkdownEditor({
       NoteLinkExtension.configure({
         onLinkClick: handleNoteLinkClick
       }),
-      AutoCloseExtension
+      AutoCloseExtension,
+      ImageExtension
     ],
     content,
     onUpdate: ({ editor }) => {

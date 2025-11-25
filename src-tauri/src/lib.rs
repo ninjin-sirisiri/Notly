@@ -137,6 +137,7 @@ pub fn run() {
       commands::tags::get_tags_by_note,
       commands::notification::get_notification_settings,
       commands::notification::update_notification_settings,
+      commands::assets::save_image,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

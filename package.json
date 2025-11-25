@@ -6,7 +6,7 @@
     "email": "ubsa17@gmail.com"
   },
   "private": true,
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "bunx --bun vite",
@@ -43,6 +43,7 @@
     "@tauri-apps/api": "^2.9.0",
     "@tauri-apps/plugin-dialog": "~2.4.2",
     "@tauri-apps/plugin-process": "^2.3.1",
+    "@tiptap/extension-image": "^3.11.0",
     "@tiptap/markdown": "^3.11.0",
     "@tiptap/pm": "^3.11.0",
     "@tiptap/react": "^3.11.0",

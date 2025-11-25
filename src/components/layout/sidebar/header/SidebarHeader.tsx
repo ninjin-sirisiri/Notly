@@ -84,16 +84,17 @@ export function SidebarHeader({
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="min-w-[200px]">
             <DropdownMenuCheckboxItem
               checked={selectionMode}
-              onCheckedChange={toggleSelectionMode}>
+              onCheckedChange={toggleSelectionMode}
+              className="justify-start">
               <CheckSquare className="mr-2 h-4 w-4" />
               選択モード
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
+              <DropdownMenuSubTrigger className="pl-8">
                 <ArrowUpDown className="mr-2 h-4 w-4" />
                 並び替え
               </DropdownMenuSubTrigger>
@@ -129,18 +130,20 @@ export function SidebarHeader({
             <DropdownMenuSeparator />
             <DropdownMenuCheckboxItem
               checked={showTrash}
-              onCheckedChange={setShowTrash}>
+              onCheckedChange={setShowTrash}
+              className="justify-start">
               <Trash2 className="mr-2 h-4 w-4" />
               ゴミ箱
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={showTags}
-              onCheckedChange={setShowTags}>
+              onCheckedChange={setShowTags}
+              className="justify-start">
               <Tags className="mr-2 h-4 w-4" />
               タグ一覧
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setShowTemplateManager(!showTemplateManager)}>
+            <DropdownMenuItem onClick={() => setShowTemplateManager(!showTemplateManager)} className="pl-8">
               <FileText className="mr-2 h-4 w-4" />
               テンプレート管理
             </DropdownMenuItem>

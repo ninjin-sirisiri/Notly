@@ -6,6 +6,7 @@ import { type Note, type NoteWithContent } from '@/types/notes';
 import { useFileStore } from './files';
 import { useFolderStore } from './folders';
 import { useStreakStore } from './streak';
+import { useTemplateStore } from './templates';
 
 type NoteStore = {
   notes: Note[];
@@ -69,6 +70,7 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         isLoading: false
       });
       useFileStore.getState().loadFiles();
+      useTemplateStore.getState().setTemplateEditorOpen(false);
 
       // Record activity for streak tracking
       useStreakStore.getState().recordActivity();
@@ -95,6 +97,7 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         currentContent: note.content,
         isLoading: false
       });
+      useTemplateStore.getState().setTemplateEditorOpen(false);
     } catch (error) {
       set({
         isLoading: false,

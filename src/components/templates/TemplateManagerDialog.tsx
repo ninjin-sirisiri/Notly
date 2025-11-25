@@ -20,8 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTemplateStore } from '@/stores/templates';
-import { CreateTemplateDialog } from './CreateTemplateDialog';
-import { EditTemplateDialog } from './EditTemplateDialog';
+import { type Template } from '@/types/templates';
 
 type TemplateManagerDialogProps = {
   open: boolean;
@@ -29,9 +28,14 @@ type TemplateManagerDialogProps = {
 };
 
 export function TemplateManagerDialog({ open, onOpenChange }: TemplateManagerDialogProps) {
-  const { templates, loadTemplates, deleteTemplate, isLoading } = useTemplateStore();
-  const [editingTemplate, setEditingTemplate] = useState<(typeof templates)[0] | null>(null);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const {
+    templates,
+    loadTemplates,
+    deleteTemplate,
+    isLoading,
+    setCurrentTemplate,
+    setTemplateEditorOpen
+  } = useTemplateStore();
   const [deleteTemplateId, setDeleteTemplateId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -39,6 +43,18 @@ export function TemplateManagerDialog({ open, onOpenChange }: TemplateManagerDia
       loadTemplates();
     }
   }, [open, loadTemplates]);
+
+  function handleCreate() {
+    setCurrentTemplate(null);
+    setTemplateEditorOpen(true);
+    onOpenChange(false);
+  }
+
+  function handleEdit(template: Template) {
+    setCurrentTemplate(template);
+    setTemplateEditorOpen(true);
+    onOpenChange(false);
+  }
 
   async function handleConfirmDelete() {
     if (deleteTemplateId === null) return;
@@ -78,11 +94,6 @@ export function TemplateManagerDialog({ open, onOpenChange }: TemplateManagerDia
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-1 min-w-0">
                 <h3 className="font-semibold truncate">{template.name}</h3>
-                {template.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {template.description}
-                  </p>
-                )}
                 <div className="text-xs text-muted-foreground pt-1">
                   更新日: {new Date(template.updatedAt).toLocaleDateString('ja-JP')}
                 </div>
@@ -91,7 +102,7 @@ export function TemplateManagerDialog({ open, onOpenChange }: TemplateManagerDia
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setEditingTemplate(template)}>
+                  onClick={() => handleEdit(template)}>
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Button
@@ -121,7 +132,7 @@ export function TemplateManagerDialog({ open, onOpenChange }: TemplateManagerDia
                 <DialogDescription>テンプレートの編集と削除を行います</DialogDescription>
               </div>
               <Button
-                onClick={() => setShowCreateDialog(true)}
+                onClick={handleCreate}
                 size="sm"
                 className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -132,19 +143,6 @@ export function TemplateManagerDialog({ open, onOpenChange }: TemplateManagerDia
           <ScrollArea className="h-[500px] pr-4">{renderContent()}</ScrollArea>
         </DialogContent>
       </Dialog>
-
-      <CreateTemplateDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
-      />
-
-      {editingTemplate && (
-        <EditTemplateDialog
-          open={!!editingTemplate}
-          onOpenChange={(isOpen: boolean) => !isOpen && setEditingTemplate(null)}
-          template={editingTemplate}
-        />
-      )}
 
       <AlertDialog
         open={deleteTemplateId !== null}

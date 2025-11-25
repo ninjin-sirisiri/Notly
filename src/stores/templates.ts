@@ -22,6 +22,12 @@ type TemplateStore = {
   createTemplate: (input: CreateTemplateInput) => Promise<Template>;
   updateTemplate: (input: UpdateTemplateInput) => Promise<Template>;
   deleteTemplate: (id: number) => Promise<void>;
+
+  // Editor state
+  currentTemplate: Template | null;
+  isTemplateEditorOpen: boolean;
+  setCurrentTemplate: (template: Template | null) => void;
+  setTemplateEditorOpen: (isOpen: boolean) => void;
 };
 
 export const useTemplateStore = create<TemplateStore>(set => ({
@@ -85,5 +91,10 @@ export const useTemplateStore = create<TemplateStore>(set => ({
       set({ isLoading: false, error: String(error) });
       throw error;
     }
-  }
+  },
+
+  currentTemplate: null,
+  isTemplateEditorOpen: false,
+  setCurrentTemplate: template => set({ currentTemplate: template }),
+  setTemplateEditorOpen: isOpen => set({ isTemplateEditorOpen: isOpen })
 }));

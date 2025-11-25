@@ -18,7 +18,7 @@ export function CreateNoteButton({
 }: {
   onClick: () => void;
   disabled: boolean;
-  onTemplateSelect: (templateContent: string) => void;
+  onTemplateSelect: () => void;
 }) {
   const { templates, loadTemplates } = useTemplateStore();
 
@@ -55,14 +55,10 @@ export function CreateNoteButton({
           {templates.length > 0 && (
             <>
               <DropdownMenuSeparator />
-              {templates.map(template => (
-                <DropdownMenuItem
-                  key={template.id}
-                  onClick={() => onTemplateSelect(template.content)}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  {template.name}
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuItem onClick={onTemplateSelect}>
+                <FileText className="mr-2 h-4 w-4" />
+                テンプレートから作成
+              </DropdownMenuItem>
             </>
           )}
         </DropdownMenuContent>

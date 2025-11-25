@@ -128,3 +128,28 @@ pub struct UpdateTagInput {
   pub name: String,
   pub color: Option<String>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Template {
+  pub id: i64,
+  pub name: String,
+  pub content: String,
+  pub description: Option<String>,
+  pub created_at: String,
+  pub updated_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreateTemplateInput {
+  pub name: String,
+  pub content: String,
+  pub description: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateTemplateInput {
+  pub id: i64,
+  pub name: String,
+  pub content: String,
+  pub description: Option<String>,
+}

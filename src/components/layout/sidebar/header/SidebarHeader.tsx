@@ -7,6 +7,7 @@ import {
   CheckCheck,
   CheckSquare,
   Clock,
+  FileText,
   MoreHorizontal,
   Tags,
   Trash2,
@@ -45,6 +46,9 @@ type SidebarHeaderProps = {
   setShowTrash: (show: boolean) => void;
   showTags: boolean;
   setShowTags: (show: boolean) => void;
+  showTemplateManager: boolean;
+  setShowTemplateManager: (show: boolean) => void;
+  setShowTemplateSelect: (show: boolean) => void;
 };
 
 export function SidebarHeader({
@@ -60,7 +64,10 @@ export function SidebarHeader({
   showTrash,
   setShowTrash,
   showTags,
-  setShowTags
+  setShowTags,
+  showTemplateManager,
+  setShowTemplateManager,
+  setShowTemplateSelect
 }: SidebarHeaderProps) {
   const { sortBy, sortOrder, setSortBy, setSortOrder } = useFileStore();
 
@@ -68,37 +75,12 @@ export function SidebarHeader({
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
         <FileSearch />
-      </div>
-      <div className="px-2 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1">
-          {!selectionMode && (
-            <>
-              <CreateNoteButton
-                onClick={() => setIsCreatingNote(true)}
-                disabled={isNoteCreating || isCreatingNote}
-              />
-              <CreateFolderButton
-                onClick={() => setIsCreatingFolder(true)}
-                disabled={isFolderCreating || isCreatingFolder}
-              />
-            </>
-          )}
-          {selectionMode && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSelectAll}
-              title="全選択">
-              <CheckCheck className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8">
+              className="h-8 w-8 shrink-0">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -157,8 +139,39 @@ export function SidebarHeader({
               <Tags className="mr-2 h-4 w-4" />
               タグ一覧
             </DropdownMenuCheckboxItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setShowTemplateManager(!showTemplateManager)}>
+              <FileText className="mr-2 h-4 w-4" />
+              テンプレート管理
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
+      <div className="px-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1">
+          {!selectionMode && (
+            <>
+              <CreateNoteButton
+                onClick={() => setIsCreatingNote(true)}
+                disabled={isNoteCreating || isCreatingNote}
+                onTemplateSelect={() => setShowTemplateSelect(true)}
+              />
+              <CreateFolderButton
+                onClick={() => setIsCreatingFolder(true)}
+                disabled={isFolderCreating || isCreatingFolder}
+              />
+            </>
+          )}
+          {selectionMode && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSelectAll}
+              title="全選択">
+              <CheckCheck className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

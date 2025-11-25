@@ -138,6 +138,11 @@ pub fn run() {
       commands::notification::get_notification_settings,
       commands::notification::update_notification_settings,
       commands::assets::save_image,
+      commands::template::get_all_templates,
+      commands::template::get_template_by_id,
+      commands::template::create_template,
+      commands::template::update_template,
+      commands::template::delete_template,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

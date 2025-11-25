@@ -25,6 +25,8 @@ import { useFolderStore } from '@/stores/folders';
 import { useNoteStore } from '@/stores/notes';
 import { useSelectionStore } from '@/stores/selection';
 
+import { SelectTemplateDialog } from '@/components/templates/SelectTemplateDialog';
+import { TemplateManagerDialog } from '@/components/templates/TemplateManagerDialog';
 import { BulkActions } from './actions/BulkActions';
 import { SidebarHeader } from './header/SidebarHeader';
 import { TagList } from './TagList';
@@ -63,8 +65,9 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
   const folderInputRef = useRef<HTMLInputElement>(null);
   const { setCurrentFolder } = useCurrentFolder();
   const [showTrash, setShowTrash] = useState(false);
-
   const [showTags, setShowTags] = useState(false);
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
+  const [showTemplateSelect, setShowTemplateSelect] = useState(false);
 
   const {
     selectionMode,
@@ -339,6 +342,9 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             setShowTrash={setShowTrash}
             showTags={showTags}
             setShowTags={setShowTags}
+            showTemplateManager={showTemplateManager}
+            setShowTemplateManager={setShowTemplateManager}
+            setShowTemplateSelect={setShowTemplateSelect}
           />
 
           {/* 一括操作メニュー */}
@@ -421,6 +427,35 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
           )}
         </div>
       </aside>
+
+      {/* テンプレート管理ダイアログ */}
+      <TemplateManagerDialog
+        open={showTemplateManager}
+        onOpenChange={setShowTemplateManager}
+      />
+
+      {/* テンプレート選択ダイアログ */}
+      <SelectTemplateDialog
+        open={showTemplateSelect}
+        onOpenChange={setShowTemplateSelect}
+        onSelect={async content => {
+          try {
+            const untitledNotes = allNotes.filter(note => note.title.startsWith('無題'));
+            const newTitle = untitledNotes.length > 0 ? `無題 ${untitledNotes.length + 1}` : '無題';
+            await createNote(
+              newTitle,
+              content,
+              currentFolder?.folderPath ?? '',
+              currentFolder?.id ?? null
+            );
+            toast.success('テンプレートからノートを作成しました');
+          } catch (error) {
+            toast.error('ノートの作成に失敗しました', {
+              description: error as string
+            });
+          }
+        }}
+      />
     </>
   );
 }

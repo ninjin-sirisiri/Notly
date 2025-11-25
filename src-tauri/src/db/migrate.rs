@@ -159,6 +159,19 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     [],
   )?;
 
+  // Create templates table
+  conn.execute(
+    "CREATE TABLE IF NOT EXISTS templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    content TEXT NOT NULL,
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )",
+    [],
+  )?;
+
   Ok(())
 }
 

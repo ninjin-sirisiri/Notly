@@ -4,6 +4,7 @@ pub mod folder;
 pub mod note;
 pub mod notification;
 pub mod tags;
+pub mod template;
 
 pub mod assets;
 
@@ -13,3 +14,4 @@ pub use folder::FolderService;
 pub use note::NoteService;
 pub use notification::NotificationService;
 pub use tags::TagService;
+pub use template::TemplateService;

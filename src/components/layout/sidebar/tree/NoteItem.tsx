@@ -28,6 +28,7 @@ import { type Note } from '@/types/notes';
 
 import { NoteItemContextMenu } from './note-item/NoteItemContextMenu';
 import { NoteItemDeleteDialog } from './note-item/NoteItemDeleteDialog';
+import { NoteInfoDialog } from './note-item/NoteInfoDialog';
 import { NoteItemMoveMenu } from './note-item/NoteItemMoveMenu';
 
 type NoteItemProps = {
@@ -46,6 +47,7 @@ export function NoteItem({ note }: NoteItemProps) {
   const [title, setTitle] = useState(note.title);
   const [showMoveMenu, setShowMoveMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   const { selectionMode, isSelected, toggleSelection } = useSelectionStore();
   const selected = isSelected(note.id, 'note');
@@ -139,7 +141,8 @@ export function NoteItem({ note }: NoteItemProps) {
             onRename={() => setIsEditing(true)}
             onMove={() => setShowMoveMenu(true)}
             onDelete={() => setShowDeleteConfirm(true)}
-            onExport={handleExport}>
+            onExport={handleExport}
+            onInfo={() => setShowInfo(true)}>
             <HoverCardTrigger asChild>
               <div
                 ref={setNodeRef}
@@ -229,6 +232,12 @@ export function NoteItem({ note }: NoteItemProps) {
         onOpenChange={setShowDeleteConfirm}
         noteTitle={note.title}
         onConfirm={confirmDelete}
+      />
+
+      <NoteInfoDialog
+        noteId={note.id}
+        open={showInfo}
+        onOpenChange={setShowInfo}
       />
     </div>
   );

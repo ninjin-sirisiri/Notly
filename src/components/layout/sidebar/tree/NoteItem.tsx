@@ -20,6 +20,8 @@ import {
   useNotes,
   useToggleFavorite
 } from '@/hooks/useNote';
+import { loadNote as fetchNote } from '@/lib/api/notes';
+import { exportNote } from '@/lib/export';
 import { cn } from '@/lib/utils';
 import { useSelectionStore } from '@/stores/selection';
 import { type Note } from '@/types/notes';
@@ -104,6 +106,17 @@ export function NoteItem({ note }: NoteItemProps) {
     }
   }
 
+  async function handleExport(format: 'md' | 'html' | 'pdf') {
+    try {
+      const noteWithContent = await fetchNote(note.id);
+      await exportNote(noteWithContent, format);
+      toast.success('ノートをエクスポートしました');
+    } catch (error) {
+      console.error(error);
+      toast.error('エクスポートに失敗しました');
+    }
+  }
+
   return (
     <div className="relative">
       {isEditing ? (
@@ -125,7 +138,8 @@ export function NoteItem({ note }: NoteItemProps) {
           <NoteItemContextMenu
             onRename={() => setIsEditing(true)}
             onMove={() => setShowMoveMenu(true)}
-            onDelete={() => setShowDeleteConfirm(true)}>
+            onDelete={() => setShowDeleteConfirm(true)}
+            onExport={handleExport}>
             <HoverCardTrigger asChild>
               <div
                 ref={setNodeRef}

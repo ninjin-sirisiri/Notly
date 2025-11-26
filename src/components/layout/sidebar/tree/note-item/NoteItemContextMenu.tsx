@@ -1,10 +1,13 @@
-import { Edit2, FolderInput, Trash2 } from 'lucide-react';
+import { Download, Edit2, FolderInput, Trash2 } from 'lucide-react';
 
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
   ContextMenuTrigger
 } from '@/components/ui/context-menu';
 
@@ -13,13 +16,15 @@ type NoteItemContextMenuProps = {
   onRename: () => void;
   onMove: () => void;
   onDelete: () => void;
+  onExport: (format: 'md' | 'html' | 'pdf') => void;
 };
 
 export function NoteItemContextMenu({
   children,
   onRename,
   onMove,
-  onDelete
+  onDelete,
+  onExport
 }: NoteItemContextMenuProps) {
   return (
     <ContextMenu>
@@ -33,6 +38,17 @@ export function NoteItemContextMenu({
           <FolderInput className="mr-2 h-4 w-4" />
           移動
         </ContextMenuItem>
+        <ContextMenuSub>
+          <ContextMenuSubTrigger>
+            <Download className="mr-2 h-4 w-4" />
+            エクスポート
+          </ContextMenuSubTrigger>
+          <ContextMenuSubContent>
+            <ContextMenuItem onClick={() => onExport('md')}>Markdown (.md)</ContextMenuItem>
+            <ContextMenuItem onClick={() => onExport('html')}>HTML (.html)</ContextMenuItem>
+            <ContextMenuItem onClick={() => onExport('pdf')}>PDF (.pdf)</ContextMenuItem>
+          </ContextMenuSubContent>
+        </ContextMenuSub>
         <ContextMenuSeparator />
         <ContextMenuItem
           onClick={onDelete}

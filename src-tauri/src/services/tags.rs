@@ -112,6 +112,28 @@ impl TagService {
     Ok(())
   }
 
+  pub fn add_tag_to_notes(&self, note_ids: Vec<i64>, tag_id: i64) -> Result<(), String> {
+    let mut conn = self.db.conn.lock().unwrap();
+    let tx = conn
+      .transaction()
+      .map_err(|e| format!("Failed to start transaction: {}", e))?;
+
+    {
+      let mut stmt = tx
+        .prepare("INSERT OR IGNORE INTO note_tags (note_id, tag_id) VALUES (?, ?)")
+        .map_err(|e| e.to_string())?;
+      for note_id in note_ids {
+        stmt
+          .execute(params![note_id, tag_id])
+          .map_err(|e| format!("Failed to add tag to note: {}", e))?;
+      }
+    }
+
+    tx.commit()
+      .map_err(|e| format!("Failed to commit transaction: {}", e))?;
+    Ok(())
+  }
+
   pub fn remove_tag_from_note(&self, note_id: i64, tag_id: i64) -> Result<(), String> {
     let conn = self.db.conn.lock().unwrap();
     conn

@@ -692,23 +692,53 @@ impl NoteService {
       updated_at: note_with_content.updated_at,
       parent_id: note_with_content.parent_id,
       file_path: note_with_content.file_path,
-      preview: String::new(), // NoteWithContent doesn't have preview field usually exposed or it's empty?
-      // Wait, NoteWithContent struct definition in models.rs doesn't have preview field?
-      // Let's check models.rs. Note struct has preview. NoteWithContent has content.
-      // get_note_by_id returns NoteWithContent.
-      // I need to return Note.
-      // NoteWithContent has all fields of Note except preview might be missing if not mapped?
-      // Actually get_note_by_id implementation:
-      // let note = conn.query_row(..., |row| Ok(Note { ... preview: String::new() ... }))
-      // So preview is empty string in get_note_by_id.
-      // I should probably just fetch the note struct directly if I want preview, or just return empty preview as it's likely not used in the toggle response immediately for list view?
-      // But get_all_notes populates preview.
-      // Let's just use get_note_by_id and map it back to Note.
+      preview: String::new(),
       is_deleted: note_with_content.is_deleted,
       deleted_at: note_with_content.deleted_at,
       is_favorite: !exists, // Toggle result
       favorite_order: None,
     })
+  }
+
+  // 複数ノートのお気に入りトグル
+  pub fn toggle_favorite_notes(&self, ids: Vec<i64>) -> Result<(), String> {
+    let conn = self.db.conn.lock().unwrap();
+
+    let tag_id: i64 = conn
+      .query_row(
+        "SELECT id FROM tags WHERE name = 'お気に入り'",
+        [],
+        |row| row.get(0),
+      )
+      .map_err(|e| format!("'お気に入り'タグが見つかりません: {}", e))?;
+
+    let mut stmt_check = conn
+      .prepare("SELECT EXISTS(SELECT 1 FROM note_tags WHERE note_id = ? AND tag_id = ?)")
+      .map_err(|e| e.to_string())?;
+    let mut stmt_delete = conn
+      .prepare("DELETE FROM note_tags WHERE note_id = ? AND tag_id = ?")
+      .map_err(|e| e.to_string())?;
+    let mut stmt_insert = conn
+      .prepare("INSERT INTO note_tags (note_id, tag_id) VALUES (?, ?)")
+      .map_err(|e| e.to_string())?;
+
+    for id in ids {
+      let exists: bool = stmt_check
+        .query_row(params![id, tag_id], |row| row.get(0))
+        .unwrap_or(false);
+
+      if exists {
+        stmt_delete
+          .execute(params![id, tag_id])
+          .map_err(|e| e.to_string())?;
+      } else {
+        stmt_insert
+          .execute(params![id, tag_id])
+          .map_err(|e| e.to_string())?;
+      }
+    }
+
+    Ok(())
   }
 
   // お気に入りノート一覧を取得

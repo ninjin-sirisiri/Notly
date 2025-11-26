@@ -20,6 +20,8 @@ import {
   useDeleteFolder
 } from '@/hooks/useFolder';
 import { useCreateNote, useMoveNote, useDeleteNote } from '@/hooks/useNote';
+import { toggleFavoriteNotes } from '@/lib/api/notes';
+import { addTagToNotes } from '@/lib/api/tags';
 import { cn } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
 import { useNoteStore } from '@/stores/notes';
@@ -100,12 +102,9 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     'delete',
     () => {
       if (selectedItems.length > 0) {
-        // Don't prevent default if we are in an input/textarea (handled by enableOnFormTags: false by default)
-        // But if we are NOT in an input, we might want to prevent default if it does something else (like nav back)
         handleBulkDelete();
       }
     }
-    // Default enableOnFormTags is false, which is what we want for Delete
   );
 
   useHotkeys(
@@ -115,7 +114,6 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
       const { currentNote, currentContent } = useNoteStore.getState();
       if (currentNote && currentContent !== null) {
         try {
-          // Simple directory extraction
           const separator = currentNote.file_path.includes('\\') ? '\\' : '/';
           const folderPath = currentNote.file_path.slice(
             0,
@@ -253,7 +251,6 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     const folderIds = getSelectedByType('folder');
 
     try {
-      // 一括削除処理（ノートとフォルダ）
       await Promise.all([
         ...noteIds.map(id => deleteNote(id)),
         ...folderIds.map(id => deleteFolder(id))
@@ -287,8 +284,40 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     }
   }
 
+  async function handleBulkFavorite() {
+    if (selectedItems.length === 0) return;
+    const noteIds = getSelectedByType('note');
+    if (noteIds.length === 0) return;
+
+    try {
+      await toggleFavoriteNotes(noteIds);
+      toast.success('お気に入りを更新しました');
+      clearSelection();
+      useNoteStore.getState().loadNotes();
+    } catch (error) {
+      toast.error('お気に入りの更新に失敗しました', {
+        description: error as string
+      });
+    }
+  }
+
+  async function handleBulkTag(tagId: number) {
+    if (selectedItems.length === 0) return;
+    const noteIds = getSelectedByType('note');
+    if (noteIds.length === 0) return;
+
+    try {
+      await addTagToNotes(noteIds, tagId);
+      toast.success('タグを追加しました');
+      clearSelection();
+    } catch (error) {
+      toast.error('タグの追加に失敗しました', {
+        description: error as string
+      });
+    }
+  }
+
   function handleSelectAll() {
-    // filesから全てのノートとフォルダを再帰的に取得
     const allItems: { id: number; type: 'note' | 'folder' }[] = [];
 
     function collectItems(items: typeof files) {
@@ -347,13 +376,14 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             setShowTemplateSelect={setShowTemplateSelect}
           />
 
-          {/* 一括操作メニュー */}
           {selectionMode && selectedItems.length > 0 && (
             <BulkActions
               selectedCount={selectedItems.length}
               onClearSelection={clearSelection}
               onDelete={handleBulkDelete}
               onMove={handleBulkMove}
+              onFavorite={handleBulkFavorite}
+              onTag={handleBulkTag}
             />
           )}
 
@@ -428,13 +458,11 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         </div>
       </aside>
 
-      {/* テンプレート管理ダイアログ */}
       <TemplateManagerDialog
         open={showTemplateManager}
         onOpenChange={setShowTemplateManager}
       />
 
-      {/* テンプレート選択ダイアログ */}
       <SelectTemplateDialog
         open={showTemplateSelect}
         onOpenChange={setShowTemplateSelect}

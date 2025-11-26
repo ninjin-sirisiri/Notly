@@ -1,8 +1,9 @@
-import { FolderInput, Trash2, X } from 'lucide-react';
+import { FolderInput, Star, Tag, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useFolderStore } from '@/stores/folders';
+import { useTagStore } from '@/stores/tags';
 import { type FolderWithChildren } from '@/types/files';
 
 type BulkActionsProps = {
@@ -10,16 +11,22 @@ type BulkActionsProps = {
   onClearSelection: () => void;
   onDelete: () => void;
   onMove: (targetFolderId: number | null) => void;
+  onFavorite: () => void;
+  onTag: (tagId: number) => void;
 };
 
 export function BulkActions({
   selectedCount,
   onClearSelection,
   onDelete,
-  onMove
+  onMove,
+  onFavorite,
+  onTag
 }: BulkActionsProps) {
   const [showBulkMoveMenu, setShowBulkMoveMenu] = useState(false);
+  const [showBulkTagMenu, setShowBulkTagMenu] = useState(false);
   const { folders } = useFolderStore();
+  const { tags } = useTagStore();
 
   function buildTree(parentId: number | null): { folder: FolderWithChildren; depth: number }[] {
     const result: { folder: FolderWithChildren; depth: number }[] = [];
@@ -51,21 +58,13 @@ export function BulkActions({
           解除
         </Button>
       </div>
-      <div className="flex gap-2 relative">
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={onDelete}
-          className="flex-1 h-8">
-          <Trash2 className="h-3 w-3 mr-1" />
-          削除
-        </Button>
-        <div className="relative flex-1">
+      <div className="grid grid-cols-2 gap-2">
+        <div className="relative">
           <Button
             variant="secondary"
             size="sm"
             onClick={() => setShowBulkMoveMenu(!showBulkMoveMenu)}
-            className="w-full h-8">
+            className="w-full h-8 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600">
             <FolderInput className="h-3 w-3 mr-1" />
             移動
           </Button>
@@ -95,6 +94,57 @@ export function BulkActions({
             </div>
           )}
         </div>
+
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={onFavorite}
+          className="w-full h-8 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600">
+          <Star className="h-3 w-3 mr-1" />
+          お気に入り
+        </Button>
+
+        <div className="relative">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowBulkTagMenu(!showBulkTagMenu)}
+            className="w-full h-8 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600">
+            <Tag className="h-3 w-3 mr-1" />
+            タグ
+          </Button>
+          {showBulkTagMenu && (
+            <div className="absolute z-10 left-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg max-h-64 overflow-y-auto">
+              {tags.filter(tag => tag.name !== 'お気に入り').map(tag => (
+                <button
+                  key={tag.id}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                  onClick={() => {
+                    onTag(tag.id);
+                    setShowBulkTagMenu(false);
+                  }}>
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: tag.color || '#9ca3af' }}
+                  />
+                  {tag.name}
+                </button>
+              ))}
+              {tags.filter(tag => tag.name !== 'お気に入り').length === 0 && (
+                <div className="px-3 py-2 text-sm text-gray-500">タグがありません</div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={onDelete}
+          className="w-full h-8">
+          <Trash2 className="h-3 w-3 mr-1" />
+          削除
+        </Button>
       </div>
     </div>
   );

@@ -69,6 +69,10 @@ export function toggleFavorite(id: number): Promise<Note> {
   return safeInvoke<Note>('toggle_favorite', { id });
 }
 
+export function toggleFavoriteNotes(ids: number[]): Promise<void> {
+  return safeInvoke<void>('toggle_favorite_notes', { ids });
+}
+
 export function getFavoriteNotes(): Promise<Note[]> {
   return safeInvoke<Note[]>('get_favorite_notes');
 }

@@ -142,7 +142,33 @@ export async function exportNote(note: NoteWithContent, format: 'md' | 'html' | 
           x: 10,
           y: 10,
           width: 575, // A4 width (595) - padding
-          windowWidth: 595
+          windowWidth: 595,
+          html2canvas: {
+            onclone: (clonedDoc: Document) => {
+              const root = clonedDoc.documentElement;
+              root.style.setProperty('--background', '#ffffff');
+              root.style.setProperty('--foreground', '#000000');
+              root.style.setProperty('--card', '#ffffff');
+              root.style.setProperty('--card-foreground', '#000000');
+              root.style.setProperty('--popover', '#ffffff');
+              root.style.setProperty('--popover-foreground', '#000000');
+              root.style.setProperty('--primary', '#000000');
+              root.style.setProperty('--primary-foreground', '#ffffff');
+              root.style.setProperty('--secondary', '#f3f4f6');
+              root.style.setProperty('--secondary-foreground', '#111827');
+              root.style.setProperty('--muted', '#f3f4f6');
+              root.style.setProperty('--muted-foreground', '#6b7280');
+              root.style.setProperty('--accent', '#f3f4f6');
+              root.style.setProperty('--accent-foreground', '#111827');
+              root.style.setProperty('--destructive', '#ef4444');
+              root.style.setProperty('--destructive-foreground', '#ffffff');
+              root.style.setProperty('--border', '#e5e7eb');
+              root.style.setProperty('--input', '#e5e7eb');
+              root.style.setProperty('--ring', '#e5e7eb');
+              root.style.setProperty('--sidebar', '#f9fafb');
+              root.style.setProperty('--sidebar-foreground', '#111827');
+            }
+          }
         });
       } finally {
         container.remove();

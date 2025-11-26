@@ -1,25 +1,25 @@
-import { save } from '@tauri-apps/plugin-dialog';
-import { writeTextFile, writeFile } from '@tauri-apps/plugin-fs';
-import { marked } from 'marked';
 import { jsPDF } from 'jspdf';
-import { NoteWithContent } from '@/types/notes';
+import { marked } from 'marked';
+import { save } from '@tauri-apps/plugin-dialog';
+import { writeFile, writeTextFile } from '@tauri-apps/plugin-fs';
+
+import { type NoteWithContent } from '@/types/notes';
 
 export async function exportNote(note: NoteWithContent, format: 'md' | 'html' | 'pdf') {
-  let content = note.content || '';
+  const content = note.content || '';
   const suggestedName = `${note.title}`;
 
-  try {
-    if (format === 'md') {
-      const path = await save({
-        defaultPath: `${suggestedName}.md`,
-        filters: [{ name: 'Markdown', extensions: ['md'] }]
-      });
-      if (path) {
-        await writeTextFile(path, content);
-      }
-    } else if (format === 'html') {
-      const htmlContent = await marked.parse(content);
-      const fullHtml = `
+  if (format === 'md') {
+    const path = await save({
+      defaultPath: `${suggestedName}.md`,
+      filters: [{ name: 'Markdown', extensions: ['md'] }]
+    });
+    if (path) {
+      await writeTextFile(path, content);
+    }
+  } else if (format === 'html') {
+    const htmlContent = await marked.parse(content);
+    const fullHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -47,63 +47,59 @@ export async function exportNote(note: NoteWithContent, format: 'md' | 'html' | 
 </body>
 </html>
       `;
-      const path = await save({
-        defaultPath: `${suggestedName}.html`,
-        filters: [{ name: 'HTML', extensions: ['html'] }]
-      });
-      if (path) {
-        await writeTextFile(path, fullHtml);
-      }
-    } else if (format === 'pdf') {
-      const path = await save({
-        defaultPath: `${suggestedName}.pdf`,
-        filters: [{ name: 'PDF', extensions: ['pdf'] }]
-      });
-      
-      if (path) {
-        const htmlContent = await marked.parse(content);
-        
-        // Create a temporary container for PDF generation
-        const container = document.createElement('div');
-        container.style.width = '595px'; // A4 width in pixels (approx) at 72dpi
-        container.style.padding = '20px';
-        container.style.position = 'absolute';
-        container.style.left = '-9999px';
-        container.style.top = '0';
-        container.style.fontFamily = 'Arial, sans-serif';
-        container.style.fontSize = '12px';
-        
-        container.innerHTML = `
+    const path = await save({
+      defaultPath: `${suggestedName}.html`,
+      filters: [{ name: 'HTML', extensions: ['html'] }]
+    });
+    if (path) {
+      await writeTextFile(path, fullHtml);
+    }
+  } else if (format === 'pdf') {
+    const path = await save({
+      defaultPath: `${suggestedName}.pdf`,
+      filters: [{ name: 'PDF', extensions: ['pdf'] }]
+    });
+
+    if (path) {
+      const htmlContent = await marked.parse(content);
+
+      // Create a temporary container for PDF generation
+      const container = document.createElement('div');
+      container.style.width = '595px'; // A4 width in pixels (approx) at 72dpi
+      container.style.padding = '20px';
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.fontFamily = 'Arial, sans-serif';
+      container.style.fontSize = '12px';
+
+      container.innerHTML = `
           <h1 style="font-size: 24px; margin-bottom: 20px;">${note.title}</h1>
           <div>${htmlContent}</div>
         `;
-        
-        document.body.appendChild(container);
-        
-        const doc = new jsPDF({
-          unit: 'pt',
-          format: 'a4',
-          orientation: 'portrait'
-        });
 
-        try {
-          await doc.html(container, {
-            callback: async (doc) => {
-              const pdfData = doc.output('arraybuffer');
-              await writeFile(path, new Uint8Array(pdfData));
-            },
-            x: 10,
-            y: 10,
-            width: 575, // A4 width (595) - padding
-            windowWidth: 595
-          });
-        } finally {
-          document.body.removeChild(container);
-        }
+      document.body.append(container);
+
+      const doc = new jsPDF({
+        unit: 'pt',
+        format: 'a4',
+        orientation: 'portrait'
+      });
+
+      try {
+        await doc.html(container, {
+          callback: async doc => {
+            const pdfData = doc.output('arraybuffer');
+            await writeFile(path, new Uint8Array(pdfData));
+          },
+          x: 10,
+          y: 10,
+          width: 575, // A4 width (595) - padding
+          windowWidth: 595
+        });
+      } finally {
+        container.remove();
       }
     }
-  } catch (error) {
-    console.error('Export failed:', error);
-    throw error;
   }
 }

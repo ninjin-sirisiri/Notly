@@ -26,9 +26,9 @@ import { cn } from '@/lib/utils';
 import { useSelectionStore } from '@/stores/selection';
 import { type Note } from '@/types/notes';
 
+import { NoteInfoDialog } from './note-item/NoteInfoDialog';
 import { NoteItemContextMenu } from './note-item/NoteItemContextMenu';
 import { NoteItemDeleteDialog } from './note-item/NoteItemDeleteDialog';
-import { NoteInfoDialog } from './note-item/NoteInfoDialog';
 import { NoteItemMoveMenu } from './note-item/NoteItemMoveMenu';
 
 type NoteItemProps = {
@@ -114,8 +114,9 @@ export function NoteItem({ note }: NoteItemProps) {
       await exportNote(noteWithContent, format);
       toast.success('ノートをエクスポートしました');
     } catch (error) {
-      console.error(error);
-      toast.error('エクスポートに失敗しました');
+      toast.error('エクスポートに失敗しました', {
+        description: String(error)
+      });
     }
   }
 

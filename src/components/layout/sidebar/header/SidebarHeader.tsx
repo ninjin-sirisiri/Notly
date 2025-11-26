@@ -6,6 +6,8 @@ import {
   Check,
   CheckCheck,
   CheckSquare,
+  ChevronsDown,
+  ChevronsUp,
   Clock,
   FileText,
   MoreHorizontal,
@@ -27,6 +29,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { useFileStore } from '@/stores/files';
+import { useFolderStore } from '@/stores/folders';
 
 import { CreateFolderButton } from '../actions/CreateFolderButton';
 import { CreateNoteButton } from '../actions/CreateNoteButton';
@@ -84,7 +87,9 @@ export function SidebarHeader({
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-[200px]">
+          <DropdownMenuContent
+            align="end"
+            className="min-w-[200px]">
             <DropdownMenuCheckboxItem
               checked={selectionMode}
               onCheckedChange={toggleSelectionMode}
@@ -92,6 +97,15 @@ export function SidebarHeader({
               <CheckSquare className="mr-2 h-4 w-4" />
               選択モード
             </DropdownMenuCheckboxItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => useFolderStore.getState().expandAllFolders()}>
+              <ChevronsDown className="mr-2 h-4 w-4" />
+              すべて展開
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => useFolderStore.getState().collapseAllFolders()}>
+              <ChevronsUp className="mr-2 h-4 w-4" />
+              すべて折りたたむ
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuSub>
               <DropdownMenuSubTrigger className="pl-8">
@@ -143,7 +157,9 @@ export function SidebarHeader({
               タグ一覧
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setShowTemplateManager(!showTemplateManager)} className="pl-8">
+            <DropdownMenuItem
+              onClick={() => setShowTemplateManager(!showTemplateManager)}
+              className="pl-8">
               <FileText className="mr-2 h-4 w-4" />
               テンプレート管理
             </DropdownMenuItem>

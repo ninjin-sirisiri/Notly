@@ -22,6 +22,8 @@ type FolderStore = {
   openFolderIds: number[];
   toggleFolder: (folderId: number) => void;
   openFolders: (folderIds: number[]) => void;
+  expandAllFolders: () => void;
+  collapseAllFolders: () => void;
 
   createFolder: (name: string, parentPath: string, parentId?: number | null) => Promise<void>;
   loadFolders: () => Promise<void>;
@@ -53,6 +55,14 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
     set(state => ({
       openFolderIds: [...new Set([...state.openFolderIds, ...folderIds])]
     })),
+  expandAllFolders: () =>
+    set(state => ({
+      openFolderIds: state.folders.map(folder => folder.id)
+    })),
+  collapseAllFolders: () =>
+    set({
+      openFolderIds: []
+    }),
 
   createFolder: async (name: string, parentPath = '', parentId?: number | null) => {
     set({

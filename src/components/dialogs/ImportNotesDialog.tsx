@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { FileUp } from 'lucide-react';
-import { open as openDialog } from '@tauri-apps/plugin-dialog';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { open as openDialog } from '@tauri-apps/plugin-dialog';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -63,8 +63,7 @@ export function ImportNotesDialog({ open, onOpenChange, parentId = null }: Impor
         <DialogHeader>
           <DialogTitle>ノートをインポート</DialogTitle>
           <DialogDescription>
-            Markdownファイル (.md) を選択してインポートします。
-            複数のファイルを同時に選択できます。
+            Markdownファイル (.md) を選択してインポートします。 複数のファイルを同時に選択できます。
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -85,4 +84,3 @@ export function ImportNotesDialog({ open, onOpenChange, parentId = null }: Impor
     </Dialog>
   );
 }
-

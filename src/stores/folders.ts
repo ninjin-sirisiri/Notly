@@ -159,7 +159,14 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
     }
   },
 
-  updateFolder: async (id: number, name: string, parentPath = '', parentId?: number | null, icon?: string | null, color?: string | null) => {
+  updateFolder: async (
+    id: number,
+    name: string,
+    parentPath = '',
+    parentId?: number | null,
+    icon?: string | null,
+    color?: string | null
+  ) => {
     set({
       isLoading: true,
       error: null

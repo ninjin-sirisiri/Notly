@@ -19,9 +19,9 @@ export function getContrastColor(hexcolor: string) {
   const color = hexcolor.startsWith('#') ? hexcolor.slice(1) : hexcolor;
 
   // RGB値を取得
-  const r = parseInt(color.substring(0, 2), 16);
-  const g = parseInt(color.substring(2, 4), 16);
-  const b = parseInt(color.substring(4, 6), 16);
+  const r = Number.parseInt(color.slice(0, 2), 16);
+  const g = Number.parseInt(color.slice(2, 4), 16);
+  const b = Number.parseInt(color.slice(4, 6), 16);
 
   // 輝度を計算
   const y = (r * 299 + g * 587 + b * 114) / 1000;

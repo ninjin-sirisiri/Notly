@@ -1,4 +1,15 @@
-import { ChevronRight, Edit2, Folder, FolderInput, Heart, MoreHorizontal, Palette, Settings2, Trash2, User } from 'lucide-react';
+import {
+  ChevronRight,
+  Edit2,
+  Folder,
+  FolderInput,
+  Heart,
+  MoreHorizontal,
+  Palette,
+  Settings2,
+  Trash2,
+  User
+} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 
@@ -25,10 +36,10 @@ import { FolderItemMoveMenu } from './folder-item/FolderItemMoveMenu';
 import { getAllDescendants } from './folder-item/utils';
 
 // lucide-reactアイコンと文字列のマッピング
-const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
   folder: Folder,
   heart: Heart,
-  user: User,
+  user: User
   // 必要に応じて他のアイコンも追加
   // ... etc.
 };
@@ -118,37 +129,61 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
     setShowMoveMenu(false);
   }
 
-  const handleIconChange = () => {
+  function handleIconChange() {
     setShowIconDialog(true);
-  };
+  }
 
-  const handleColorChange = () => {
+  function handleColorChange() {
     setShowColorPicker(true);
-  };
+  }
 
-  const confirmIconChange = (icon: string) => {
+  function confirmIconChange(icon: string) {
     updateFolder(folder.id, folder.name, folder.folderPath, folder.parentId, icon, folder.color);
     setShowIconDialog(false);
-  };
+  }
 
-  const confirmColorChange = () => {
-    updateFolder(folder.id, folder.name, folder.folderPath, folder.parentId, folder.icon, selectedColor);
+  function confirmColorChange() {
+    updateFolder(
+      folder.id,
+      folder.name,
+      folder.folderPath,
+      folder.parentId,
+      folder.icon,
+      selectedColor
+    );
     setShowColorPicker(false);
-  };
+  }
 
-  const IconComponent = ({ iconColor }: { iconColor: string }) => {
+  function IconComponent({ iconColor }: { iconColor: string }) {
     if (folder.icon && folder.icon.startsWith('data:image/')) {
       // 画像URLの場合
-      return <img src={folder.icon} className="h-4 w-4" alt="Folder Icon" style={{ color: iconColor }} />;
-    } else if (folder.icon && iconMap[folder.icon]) {
+      return (
+        <img
+          src={folder.icon}
+          className="h-4 w-4"
+          alt="Folder Icon"
+          style={{ color: iconColor }}
+        />
+      );
+    }
+    if (folder.icon && iconMap[folder.icon]) {
       // iconMapに登録されたアイコンの場合
       const Icon = iconMap[folder.icon];
-      return <Icon className="h-4 w-4" style={{ color: iconColor }} />;
-    } else {
-      // デフォルトのFolderアイコン
-      return <Folder className="h-4 w-4" style={{ color: iconColor }} />;
+      return (
+        <Icon
+          className="h-4 w-4"
+          style={{ color: iconColor }}
+        />
+      );
     }
-  };
+    // デフォルトのFolderアイコン
+    return (
+      <Folder
+        className="h-4 w-4"
+        style={{ color: iconColor }}
+      />
+    );
+  }
 
   const iconColor = folder.color ? getContrastColor(folder.color) : '#000000'; // フォルダの色がある場合はコントラスト色を、ない場合は黒を使用
 
@@ -223,7 +258,9 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
               )}
               onClick={handleToggleFolder}
             />
-            <span className="rounded-full p-1" style={{ backgroundColor: folder.color ? folder.color : undefined }}>
+            <span
+              className="rounded-full p-1"
+              style={{ backgroundColor: folder.color || undefined }}>
               <IconComponent iconColor={iconColor} />
             </span>
             <p className="text-sm font-medium flex-1 truncate">{folder.name}</p>
@@ -273,7 +310,9 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
         />
       )}
       {/* アイコン選択ダイアログ */}
-      <Dialog open={showIconDialog} onOpenChange={setShowIconDialog}>
+      <Dialog
+        open={showIconDialog}
+        onOpenChange={setShowIconDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>アイコンを選択</DialogTitle>
@@ -293,7 +332,9 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
         </DialogContent>
       </Dialog>
       {/* カラーピッカー */}
-      <Dialog open={showColorPicker} onOpenChange={setShowColorPicker}>
+      <Dialog
+        open={showColorPicker}
+        onOpenChange={setShowColorPicker}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>色を選択</DialogTitle>

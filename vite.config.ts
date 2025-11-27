@@ -16,10 +16,10 @@ export default defineConfig(async () => ({
     }
   },
   define: {
-    global: 'globalThis',
+    global: 'globalThis'
   },
   ssr: {
-    noExternal: ['@tailwindcss/vite'],
+    noExternal: ['@tailwindcss/vite']
   },
   build: {
     rollupOptions: {
@@ -75,29 +75,16 @@ export default defineConfig(async () => ({
           ],
 
           // UI and styling related
-          ui: [
-            'lucide-react',
-            'class-variance-authority',
-            'clsx',
-            'tailwind-merge'
-          ],
+          ui: ['lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge'],
 
           // PDF generation
-          pdf: [
-            'jspdf',
-            'html2canvas'
-          ],
+          pdf: ['jspdf', 'html2canvas'],
 
           // Markdown processing
-          markdown: [
-            'marked'
-          ],
+          markdown: ['marked'],
 
           // Hotkeys
-          hotkeys: [
-            'react-hotkeys-hook',
-            'tippy.js'
-          ],
+          hotkeys: ['react-hotkeys-hook', 'tippy.js'],
 
           // Tauri related
           tauri: [
@@ -108,9 +95,7 @@ export default defineConfig(async () => ({
           ],
 
           // DnD functionality
-          dnd: [
-            '@dnd-kit/core'
-          ]
+          dnd: ['@dnd-kit/core']
         }
       }
     }

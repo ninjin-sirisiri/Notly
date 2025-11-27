@@ -1,6 +1,6 @@
+import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { marked } from 'marked';
-import html2canvas from 'html2canvas';
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeFile, writeTextFile } from '@tauri-apps/plugin-fs';
 
@@ -80,7 +80,7 @@ export async function exportNote(note: NoteWithContent, format: 'md' | 'html' | 
 
       try {
         const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-        
+
         if (!iframeDoc) {
           throw new Error('Could not access iframe document');
         }
@@ -116,7 +116,7 @@ export async function exportNote(note: NoteWithContent, format: 'md' | 'html' | 
             a { color: #2563eb; text-decoration: underline; }
           </style>
         `;
-        
+
         iframeDoc.body.innerHTML = `
           <h1>${note.title}</h1>
           <div>${htmlContent}</div>
@@ -156,7 +156,6 @@ export async function exportNote(note: NoteWithContent, format: 'md' | 'html' | 
 
         const pdfData = doc.output('arraybuffer');
         await writeFile(path, new Uint8Array(pdfData));
-
       } finally {
         iframe.remove();
       }

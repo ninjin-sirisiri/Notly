@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   ArrowDown,
   ArrowUp,
@@ -17,6 +16,7 @@ import {
   Trash2,
   Type
 } from 'lucide-react';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -33,10 +33,10 @@ import {
 import { useFileStore } from '@/stores/files';
 import { useFolderStore } from '@/stores/folders';
 
+import { ImportNotesDialog } from '@/components/dialogs/ImportNotesDialog';
 import { CreateFolderButton } from '../actions/CreateFolderButton';
 import { CreateNoteButton } from '../actions/CreateNoteButton';
 import { FileSearch } from './FileSearch';
-import { ImportNotesDialog } from '@/components/dialogs/ImportNotesDialog';
 
 type SidebarHeaderProps = {
   selectionMode: boolean;

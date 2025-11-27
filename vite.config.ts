@@ -22,6 +22,7 @@ export default defineConfig(async () => ({
     noExternal: ['@tailwindcss/vite']
   },
   build: {
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       // Exclude binary files that can't be processed by Vite
       external: [

@@ -76,6 +76,28 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     )
     .ok();
 
+  // Add icon and color columns to folders for customization
+  conn
+    .execute("ALTER TABLE folders ADD COLUMN icon TEXT DEFAULT NULL", [])
+    .ok();
+  conn
+    .execute("ALTER TABLE folders ADD COLUMN color TEXT DEFAULT NULL", [])
+    .ok();
+
+  // Add sort_by and sort_order columns to folders for per-folder sorting
+  conn
+    .execute(
+      "ALTER TABLE folders ADD COLUMN sort_by TEXT DEFAULT NULL",
+      [],
+    )
+    .ok();
+  conn
+    .execute(
+      "ALTER TABLE folders ADD COLUMN sort_order TEXT DEFAULT NULL",
+      [],
+    )
+    .ok();
+
   conn.execute(
     "CREATE TABLE IF NOT EXISTS activity_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -156,6 +178,19 @@ pub fn migrate(conn: &Connection) -> Result<()> {
   // Insert default notification settings if not exists
   conn.execute(
     "INSERT OR IGNORE INTO notification_settings (id, enabled, notification_time, message) VALUES (1, TRUE, '09:00', 'ノートを書く時間です!')",
+    [],
+  )?;
+
+  // Create templates table
+  conn.execute(
+    "CREATE TABLE IF NOT EXISTS templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    content TEXT NOT NULL,
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )",
     [],
   )?;
 

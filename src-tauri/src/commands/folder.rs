@@ -73,7 +73,15 @@ pub async fn update_folder<R: tauri::Runtime>(
 
   tauri::async_runtime::spawn_blocking(move || {
     let folder_service = FolderService::new(db, notes_dir);
-    folder_service.update_folder(input.id, input.name, input.parent_id)
+    folder_service.update_folder(
+      input.id,
+      input.name,
+      input.parent_id,
+      input.icon,
+      input.color,
+      input.sort_by,
+      input.sort_order,
+    )
   })
   .await
   .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?

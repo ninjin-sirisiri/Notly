@@ -69,6 +69,22 @@ pub async fn add_tag_to_note(
 }
 
 #[tauri::command]
+pub async fn add_tag_to_notes(
+  note_ids: Vec<i64>,
+  tag_id: i64,
+  state: State<'_, AppState>,
+) -> Result<(), String> {
+  let context = state.get_context().map_err(|e| e.to_string())?;
+  let db = Arc::clone(&context.db);
+  tauri::async_runtime::spawn_blocking(move || {
+    let tag_service = TagService::new(db);
+    tag_service.add_tag_to_notes(note_ids, tag_id)
+  })
+  .await
+  .map_err(|e| format!("Background task error: {}", e))?
+}
+
+#[tauri::command]
 pub async fn remove_tag_from_note(
   note_id: i64,
   tag_id: i64,

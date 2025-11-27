@@ -63,6 +63,10 @@ pub struct Folder {
   #[serde(default)]
   pub is_deleted: bool,
   pub deleted_at: Option<String>,
+  pub icon: Option<String>,
+  pub color: Option<String>,
+  pub sort_by: Option<String>,
+  pub sort_order: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -77,6 +81,10 @@ pub struct UpdateFolderInput {
   pub id: i64,
   pub name: String,
   pub parent_id: Option<i64>,
+  pub icon: Option<String>,
+  pub color: Option<String>,
+  pub sort_by: Option<String>,
+  pub sort_order: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -105,6 +113,10 @@ pub struct FolderWithChildren {
   #[serde(default)]
   pub is_deleted: bool,
   pub deleted_at: Option<String>,
+  pub icon: Option<String>,
+  pub color: Option<String>,
+  pub sort_by: Option<String>,
+  pub sort_order: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -127,4 +139,29 @@ pub struct UpdateTagInput {
   pub id: i64,
   pub name: String,
   pub color: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Template {
+  pub id: i64,
+  pub name: String,
+  pub content: String,
+  pub description: Option<String>,
+  pub created_at: String,
+  pub updated_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreateTemplateInput {
+  pub name: String,
+  pub content: String,
+  pub description: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateTemplateInput {
+  pub id: i64,
+  pub name: String,
+  pub content: String,
+  pub description: Option<String>,
 }

@@ -12,6 +12,7 @@ export function CreateFolderButton({
   return (
     <Button
       variant="secondary"
+      size="sm"
       onClick={onClick}
       disabled={disabled}>
       <FolderPlus className="h-4 w-4" />

@@ -1,8 +1,60 @@
-import { ChevronRight, Edit2, Folder, FolderInput, MoreHorizontal, Trash2 } from 'lucide-react';
+import {
+  Archive,
+  ArrowUpDown,
+  Book,
+  Briefcase,
+  Calendar,
+  ChevronRight,
+  Cloud,
+  Code,
+  Coffee,
+  Database,
+  DollarSign,
+  Edit2,
+  File,
+  Folder,
+  FolderInput,
+  Gift,
+  Globe,
+  Headphones,
+  Heart,
+  Home,
+  Image,
+  Layout,
+  Link,
+  Lock,
+  Mail,
+  Map,
+  Monitor,
+  Moon,
+  MoreHorizontal,
+  Music,
+  Package,
+  Palette,
+  Phone,
+  Printer,
+  Settings,
+  Settings2,
+  ShoppingCart,
+  Smile,
+  Star,
+  Sun,
+  Tag,
+  Trash2,
+  Truck,
+  Umbrella,
+  User,
+  Video,
+  Watch,
+  Wifi,
+  Zap
+} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +62,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useDeleteFolder, useMoveFolder, useUpdateFolder } from '@/hooks/useFolder';
-import { cn } from '@/lib/utils';
+import { cn, getContrastColor } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
 import { useSelectionStore } from '@/stores/selection';
 import { type FileItem as FileItemType, type FolderWithChildren } from '@/types/files';
@@ -20,6 +74,54 @@ import { FolderItemContextMenu } from './folder-item/FolderItemContextMenu';
 import { FolderItemDeleteDialog } from './folder-item/FolderItemDeleteDialog';
 import { FolderItemMoveMenu } from './folder-item/FolderItemMoveMenu';
 import { getAllDescendants } from './folder-item/utils';
+
+// lucide-reactアイコンと文字列のマッピング
+const iconMap: Record<
+  string,
+  React.ComponentType<{ className?: string; style?: React.CSSProperties }>
+> = {
+  folder: Folder,
+  archive: Archive,
+  book: Book,
+  briefcase: Briefcase,
+  calendar: Calendar,
+  cloud: Cloud,
+  code: Code,
+  coffee: Coffee,
+  database: Database,
+  dollar: DollarSign,
+  file: File,
+  gift: Gift,
+  globe: Globe,
+  headphones: Headphones,
+  heart: Heart,
+  home: Home,
+  image: Image,
+  layout: Layout,
+  link: Link,
+  lock: Lock,
+  mail: Mail,
+  map: Map,
+  monitor: Monitor,
+  moon: Moon,
+  music: Music,
+  package: Package,
+  phone: Phone,
+  printer: Printer,
+  settings: Settings,
+  shopping: ShoppingCart,
+  smile: Smile,
+  star: Star,
+  sun: Sun,
+  tag: Tag,
+  truck: Truck,
+  umbrella: Umbrella,
+  user: User,
+  video: Video,
+  watch: Watch,
+  wifi: Wifi,
+  zap: Zap
+};
 
 type FolderItemProps = {
   folder: FolderWithChildren;
@@ -35,6 +137,15 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
   const [name, setName] = useState(folder.name);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showMoveMenu, setShowMoveMenu] = useState(false);
+  const [showIconDialog, setShowIconDialog] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showSortSettings, setShowSortSettings] = useState(false);
+  const [selectedColor, setSelectedColor] = useState(folder.color || '#ffffff'); // folder.colorがundefinedの場合のデフォルト値
+
+  // Local state for sort settings dialog
+  const [tempSortBy, setTempSortBy] = useState<string | null>(folder.sortBy || null);
+  const [tempSortOrder, setTempSortOrder] = useState<string | null>(folder.sortOrder || null);
+
   const { updateFolder } = useUpdateFolder();
   const { deleteFolder } = useDeleteFolder();
   const { moveFolder } = useMoveFolder();
@@ -58,7 +169,16 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
 
   useEffect(() => {
     setName(folder.name);
-  }, [folder.name]);
+    setSelectedColor(folder.color || '#ffffff'); // folder.colorが変更されたらstateも更新
+  }, [folder.name, folder.color]);
+
+  // Reset temp sort state when dialog opens or folder changes
+  useEffect(() => {
+    if (showSortSettings) {
+      setTempSortBy(folder.sortBy || null);
+      setTempSortOrder(folder.sortOrder || null);
+    }
+  }, [showSortSettings, folder.sortBy, folder.sortOrder]);
 
   function handleClick(e: React.MouseEvent<HTMLDivElement>) {
     e.stopPropagation();
@@ -87,7 +207,16 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
       setIsEditing(false);
       setName(folder.name);
     } else {
-      updateFolder(folder.id, name, folder.folderPath, folder.parentId);
+      updateFolder(
+        folder.id,
+        name,
+        folder.folderPath,
+        folder.parentId,
+        folder.icon,
+        folder.color,
+        folder.sortBy,
+        folder.sortOrder
+      );
       setIsEditing(false);
     }
   }
@@ -101,6 +230,93 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
     moveFolder(folder.id, parentId);
     setShowMoveMenu(false);
   }
+
+  function handleIconChange() {
+    setShowIconDialog(true);
+  }
+
+  function handleColorChange() {
+    setShowColorPicker(true);
+  }
+
+  function handleSortSettings() {
+    setShowSortSettings(true);
+  }
+
+  function confirmIconChange(icon: string) {
+    updateFolder(
+      folder.id,
+      folder.name,
+      folder.folderPath,
+      folder.parentId,
+      icon,
+      folder.color,
+      folder.sortBy,
+      folder.sortOrder
+    );
+    setShowIconDialog(false);
+  }
+
+  function confirmColorChange() {
+    updateFolder(
+      folder.id,
+      folder.name,
+      folder.folderPath,
+      folder.parentId,
+      folder.icon,
+      selectedColor,
+      folder.sortBy,
+      folder.sortOrder
+    );
+    setShowColorPicker(false);
+  }
+
+  function confirmSortChange() {
+    updateFolder(
+      folder.id,
+      folder.name,
+      folder.folderPath,
+      folder.parentId,
+      folder.icon,
+      folder.color,
+      tempSortBy,
+      tempSortOrder
+    );
+    setShowSortSettings(false);
+  }
+
+  function IconComponent({ iconColor }: { iconColor: string }) {
+    if (folder.icon && folder.icon.startsWith('data:image/')) {
+      // 画像URLの場合
+      return (
+        <img
+          src={folder.icon}
+          className="h-4 w-4"
+          alt="Folder Icon"
+          style={{ color: iconColor }}
+        />
+      );
+    }
+    if (folder.icon && iconMap[folder.icon]) {
+      // iconMapに登録されたアイコンの場合
+      const Icon = iconMap[folder.icon];
+      return (
+        <Icon
+          className="h-4 w-4"
+          style={{ color: iconColor }}
+        />
+      );
+    }
+    // デフォルトのFolderアイコン
+    return (
+      <Folder
+        className="h-4 w-4"
+        style={{ color: iconColor }}
+      />
+    );
+  }
+
+  const iconColor = folder.color ? getContrastColor(folder.color) : '#000000'; // フォルダの色がある場合はコントラスト色を、ない場合は黒を使用
 
   return (
     <div>
@@ -135,7 +351,10 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
         <FolderItemContextMenu
           onRename={() => setIsEditing(true)}
           onMove={() => setShowMoveMenu(true)}
-          onDelete={() => setShowDeleteConfirm(true)}>
+          onDelete={() => setShowDeleteConfirm(true)}
+          onIconChange={handleIconChange}
+          onColorChange={handleColorChange}
+          onSortSettings={handleSortSettings}>
           <div
             ref={node => {
               setDroppableRef(node);
@@ -171,7 +390,11 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
               )}
               onClick={handleToggleFolder}
             />
-            <Folder className="h-4 w-4" />
+            <span
+              className="rounded-full p-1"
+              style={{ backgroundColor: folder.color || undefined }}>
+              <IconComponent iconColor={iconColor} />
+            </span>
             <p className="text-sm font-medium flex-1 truncate">{folder.name}</p>
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
               <DropdownMenu>
@@ -190,6 +413,18 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
                   <DropdownMenuItem onClick={() => setShowMoveMenu(true)}>
                     <FolderInput className="mr-2 h-4 w-4" />
                     移動
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleIconChange}>
+                    <Settings2 className="mr-2 h-4 w-4" />
+                    アイコン変更
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleColorChange}>
+                    <Palette className="mr-2 h-4 w-4" />
+                    色変更
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSortSettings}>
+                    <ArrowUpDown className="mr-2 h-4 w-4" />
+                    並び替え設定
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -210,6 +445,116 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
           onMove={handleMoveToFolder}
         />
       )}
+      {/* アイコン選択ダイアログ */}
+      <Dialog
+        open={showIconDialog}
+        onOpenChange={setShowIconDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>アイコンを選択</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-6 gap-2">
+            {Object.entries(iconMap).map(([iconKey, IconComponent]) => (
+              <Button
+                key={iconKey}
+                variant={folder.icon === iconKey ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => confirmIconChange(iconKey)}
+                className="p-2">
+                <IconComponent className="h-4 w-4" />
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* カラーピッカー */}
+      <Dialog
+        open={showColorPicker}
+        onOpenChange={setShowColorPicker}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>色を選択</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4">
+            <Input
+              type="color"
+              value={selectedColor}
+              onChange={e => setSelectedColor(e.target.value)}
+              className="h-10 w-10 p-1 cursor-pointer"
+            />
+            <Button onClick={confirmColorChange}>適用</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 並び替え設定ダイアログ */}
+      <Dialog
+        open={showSortSettings}
+        onOpenChange={setShowSortSettings}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>並び替え設定</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>並び順</Label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                <Button
+                  variant={tempSortBy === 'name' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTempSortBy('name')}>
+                  名前
+                </Button>
+                <Button
+                  variant={tempSortBy === 'createdAt' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTempSortBy('createdAt')}>
+                  作成日時
+                </Button>
+                <Button
+                  variant={tempSortBy === 'updatedAt' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTempSortBy('updatedAt')}>
+                  更新日時
+                </Button>
+                <Button
+                  variant={tempSortBy === null ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTempSortBy(null)}>
+                  デフォルト
+                </Button>
+              </div>
+            </div>
+            <div>
+              <Label>順序</Label>
+              <div className="flex gap-2 mt-1">
+                <Button
+                  variant={tempSortOrder === 'asc' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTempSortOrder('asc')}>
+                  昇順
+                </Button>
+                <Button
+                  variant={tempSortOrder === 'desc' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTempSortOrder('desc')}>
+                  降順
+                </Button>
+                <Button
+                  variant={tempSortOrder === null ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTempSortOrder(null)}>
+                  デフォルト
+                </Button>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button onClick={confirmSortChange}>適用</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {isOpen && folder.children && folder.children.length > 0 && (
         <div className="pl-4 relative">
           <div className="space-y-0.5 relative">

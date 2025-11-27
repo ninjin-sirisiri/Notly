@@ -5,8 +5,10 @@ import { exit } from '@tauri-apps/plugin-process';
 
 import { checkInitialization } from '@/lib/api/app';
 import { useNoteStore } from '@/stores/notes';
+import { useTemplateStore } from '@/stores/templates';
 
 import { Editor } from '@/components/editor';
+import { TemplateEditor } from '@/components/editor/TemplateEditor';
 import { InitializationScreen } from '@/components/InitializationScreen';
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
@@ -22,6 +24,7 @@ export default function App() {
   const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { setCurrentNote } = useNoteStore();
+  const { isTemplateEditorOpen } = useTemplateStore();
 
   useEffect(() => {
     async function checkInit() {
@@ -98,7 +101,11 @@ export default function App() {
               isOpen={isSidebarOpen}
               onClose={() => setIsSidebarOpen(false)}
             />
-            {isSettingsOpen ? <SettingsPage /> : <Editor />}
+            {(() => {
+              if (isSettingsOpen) return <SettingsPage />;
+              if (isTemplateEditorOpen) return <TemplateEditor />;
+              return <Editor />;
+            })()}
           </div>
         </div>
         <Toaster />

@@ -30,14 +30,22 @@ export function updateFolder(
   id: number,
   name: string,
   parentPath = '',
-  parentId: number | null = null
+  parentId: number | null = null,
+  icon?: string | null,
+  color?: string | null,
+  sortBy?: string | null,
+  sortOrder?: string | null
 ): Promise<Folder> {
   return safeInvoke<Folder>('update_folder', {
     input: {
       id,
       name,
       parent_path: parentPath,
-      parent_id: parentId
+      parent_id: parentId,
+      icon,
+      color,
+      sort_by: sortBy,
+      sort_order: sortOrder
     }
   });
 }

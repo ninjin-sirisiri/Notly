@@ -35,6 +35,7 @@ impl AppState {
 pub fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_notification::init())
     .setup(|app| {
       let app_dir = app.path().app_data_dir()?;
@@ -113,7 +114,10 @@ pub fn run() {
       commands::note::permanently_delete_note,
       commands::note::get_deleted_notes,
       commands::note::toggle_favorite,
+      commands::note::toggle_favorite_notes,
       commands::note::get_favorite_notes,
+      commands::note::import_note,
+      commands::note::import_notes,
       commands::note::update_favorite_order,
       commands::folder::get_all_folders,
       commands::folder::get_folder_by_id,
@@ -132,11 +136,18 @@ pub fn run() {
       commands::tags::delete_tag,
       commands::tags::get_all_tags,
       commands::tags::add_tag_to_note,
+      commands::tags::add_tag_to_notes,
       commands::tags::remove_tag_from_note,
       commands::tags::get_notes_by_tag,
       commands::tags::get_tags_by_note,
       commands::notification::get_notification_settings,
       commands::notification::update_notification_settings,
+      commands::assets::save_image,
+      commands::template::get_all_templates,
+      commands::template::get_template_by_id,
+      commands::template::create_template,
+      commands::template::update_template,
+      commands::template::delete_template,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

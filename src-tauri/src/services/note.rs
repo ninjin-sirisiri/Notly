@@ -190,12 +190,70 @@ impl NoteService {
   }
 
   pub fn search_notes(&self, query: &str) -> Result<Vec<Note>, String> {
-    let all_notes = self.get_all_notes()?;
-    let query_lower = query.to_lowercase();
+    // 1. Parse Query
+    let mut text_parts = Vec::new();
+    let mut tags = Vec::new();
+    let mut is_favorite = None;
 
+    for part in query.split_whitespace() {
+      if let Some(tag_name) = part.strip_prefix("tag:") {
+        tags.push(tag_name.to_string());
+      } else if part == "is:favorite" {
+        is_favorite = Some(true);
+      } else if part == "-is:favorite" {
+        is_favorite = Some(false);
+      } else {
+        text_parts.push(part);
+      }
+    }
+    let text_query = text_parts.join(" ");
+
+    // 2. Fetch all notes (base candidates)
+    let mut candidates = self.get_all_notes()?;
+
+    // 3. Filter by is_favorite
+    if let Some(fav) = is_favorite {
+      candidates.retain(|n| n.is_favorite == fav);
+    }
+
+    // 4. Filter by tags
+    if !tags.is_empty() {
+      let conn = self.db.conn.lock().unwrap();
+      // Construct SQL to find IDs that have ALL tags
+      let placeholders = tags.iter().map(|_| "?").collect::<Vec<_>>().join(",");
+      let sql = format!(
+        "SELECT nt.note_id FROM note_tags nt
+              JOIN tags t ON nt.tag_id = t.id
+              WHERE t.name IN ({})
+              GROUP BY nt.note_id
+              HAVING COUNT(DISTINCT t.name) = ?",
+        placeholders
+      );
+
+      let mut params: Vec<&dyn rusqlite::ToSql> =
+        tags.iter().map(|t| t as &dyn rusqlite::ToSql).collect();
+      let count = tags.len() as i64;
+      params.push(&count);
+
+      let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
+      let valid_ids: std::collections::HashSet<i64> = stmt
+        .query_map(params.as_slice(), |row| row.get(0))
+        .map_err(|e| e.to_string())?
+        .collect::<SqlResult<_>>()
+        .map_err(|e| e.to_string())?;
+
+      candidates.retain(|n| valid_ids.contains(&n.id));
+    }
+
+    // 5. Text Search
+    if text_query.is_empty() {
+      return Ok(candidates);
+    }
+
+    let query_lower = text_query.to_lowercase();
     let mut matched_notes = Vec::new();
 
-    for note in all_notes {
+    for note in candidates {
       let title_matches = note.title.to_lowercase().contains(&query_lower);
 
       let content_matches = if !title_matches {
@@ -362,10 +420,47 @@ impl NoteService {
     })
   }
 
-  // ノートの削除 (論理削除)
+  // ノートの削除 (論理削除 + trashフォルダに移動)
   pub fn delete_note(&self, id: i64) -> Result<(), String> {
-    let conn = self.db.conn.lock().unwrap();
+    // ノート情報を取得
+    let file_path: String = {
+      let conn = self.db.conn.lock().unwrap();
+      conn
+        .query_row(
+          "SELECT file_path FROM notes WHERE id = ?",
+          params![id],
+          |row| row.get(0),
+        )
+        .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?
+    };
 
+    let note_path = PathBuf::from(&file_path);
+
+    // ファイルが存在する場合、trashフォルダに移動
+    if note_path.exists() {
+      // trashフォルダのパスを作成
+      let trash_base = self.base_path.join(".trash");
+
+      // 相対パスを取得
+      let relative_path = note_path
+        .strip_prefix(&self.base_path)
+        .unwrap_or(&note_path);
+
+      let trash_path = trash_base.join(relative_path);
+
+      // trash内の親ディレクトリを作成
+      if let Some(parent) = trash_path.parent() {
+        fs::create_dir_all(parent)
+          .map_err(|e| format!("trashディレクトリの作成に失敗しました: {}", e))?;
+      }
+
+      // ファイルを移動
+      fs::rename(&note_path, &trash_path)
+        .map_err(|e| format!("ファイルのtrashへの移動に失敗しました: {}", e))?;
+    }
+
+    // データベースで論理削除
+    let conn = self.db.conn.lock().unwrap();
     conn
       .execute(
         "UPDATE notes SET is_deleted = TRUE, deleted_at = CURRENT_TIMESTAMP WHERE id = ?",
@@ -388,8 +483,18 @@ impl NoteService {
       )
       .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?;
 
-    if PathBuf::from(&file_path).exists() {
-      fs::remove_file(&file_path)
+    // trashフォルダからファイルを削除
+    let note_path = PathBuf::from(&file_path);
+    let trash_base = self.base_path.join(".trash");
+
+    let relative_path = note_path
+      .strip_prefix(&self.base_path)
+      .unwrap_or(&note_path);
+
+    let trash_path = trash_base.join(relative_path);
+
+    if trash_path.exists() {
+      fs::remove_file(&trash_path)
         .map_err(|e| format!("ノートファイルの削除に失敗しました: {}", e))?;
     }
 
@@ -404,15 +509,16 @@ impl NoteService {
   pub fn restore_note(&self, id: i64) -> Result<(), String> {
     let conn = self.db.conn.lock().unwrap();
 
-    // 親フォルダが存在し、削除されていないか確認
-    let parent_id: Option<i64> = conn
+    // ノート情報を取得
+    let (parent_id, file_path): (Option<i64>, String) = conn
       .query_row(
-        "SELECT parent_id FROM notes WHERE id = ?",
+        "SELECT parent_id, file_path FROM notes WHERE id = ?",
         params![id],
-        |row| row.get(0),
+        |row| Ok((row.get(0)?, row.get(1)?)),
       )
       .map_err(|e| format!("ノートの取得に失敗しました: {}", e))?;
 
+    // 親フォルダが存在し、削除されていないか確認
     let new_parent_id = if let Some(pid) = parent_id {
       let parent_exists: bool = conn
         .query_row(
@@ -426,12 +532,37 @@ impl NoteService {
       None
     };
 
+    // データベースで復元
     conn
       .execute(
         "UPDATE notes SET is_deleted = FALSE, deleted_at = NULL, parent_id = ? WHERE id = ?",
         params![new_parent_id, id],
       )
       .map_err(|e| format!("ノートの復元に失敗しました: {}", e))?;
+
+    drop(conn);
+
+    // ファイルをtrashから元の場所に戻す
+    let note_path = PathBuf::from(&file_path);
+    let trash_base = self.base_path.join(".trash");
+
+    let relative_path = note_path
+      .strip_prefix(&self.base_path)
+      .unwrap_or(&note_path);
+
+    let trash_path = trash_base.join(relative_path);
+
+    if trash_path.exists() {
+      // 元の場所の親ディレクトリを作成
+      if let Some(parent) = note_path.parent() {
+        fs::create_dir_all(parent)
+          .map_err(|e| format!("ディレクトリの作成に失敗しました: {}", e))?;
+      }
+
+      // ファイルを戻す
+      fs::rename(&trash_path, &note_path)
+        .map_err(|e| format!("ファイルの復元に失敗しました: {}", e))?;
+    }
 
     Ok(())
   }
@@ -619,23 +750,53 @@ impl NoteService {
       updated_at: note_with_content.updated_at,
       parent_id: note_with_content.parent_id,
       file_path: note_with_content.file_path,
-      preview: String::new(), // NoteWithContent doesn't have preview field usually exposed or it's empty?
-      // Wait, NoteWithContent struct definition in models.rs doesn't have preview field?
-      // Let's check models.rs. Note struct has preview. NoteWithContent has content.
-      // get_note_by_id returns NoteWithContent.
-      // I need to return Note.
-      // NoteWithContent has all fields of Note except preview might be missing if not mapped?
-      // Actually get_note_by_id implementation:
-      // let note = conn.query_row(..., |row| Ok(Note { ... preview: String::new() ... }))
-      // So preview is empty string in get_note_by_id.
-      // I should probably just fetch the note struct directly if I want preview, or just return empty preview as it's likely not used in the toggle response immediately for list view?
-      // But get_all_notes populates preview.
-      // Let's just use get_note_by_id and map it back to Note.
+      preview: String::new(),
       is_deleted: note_with_content.is_deleted,
       deleted_at: note_with_content.deleted_at,
       is_favorite: !exists, // Toggle result
       favorite_order: None,
     })
+  }
+
+  // 複数ノートのお気に入りトグル
+  pub fn toggle_favorite_notes(&self, ids: Vec<i64>) -> Result<(), String> {
+    let conn = self.db.conn.lock().unwrap();
+
+    let tag_id: i64 = conn
+      .query_row(
+        "SELECT id FROM tags WHERE name = 'お気に入り'",
+        [],
+        |row| row.get(0),
+      )
+      .map_err(|e| format!("'お気に入り'タグが見つかりません: {}", e))?;
+
+    let mut stmt_check = conn
+      .prepare("SELECT EXISTS(SELECT 1 FROM note_tags WHERE note_id = ? AND tag_id = ?)")
+      .map_err(|e| e.to_string())?;
+    let mut stmt_delete = conn
+      .prepare("DELETE FROM note_tags WHERE note_id = ? AND tag_id = ?")
+      .map_err(|e| e.to_string())?;
+    let mut stmt_insert = conn
+      .prepare("INSERT INTO note_tags (note_id, tag_id) VALUES (?, ?)")
+      .map_err(|e| e.to_string())?;
+
+    for id in ids {
+      let exists: bool = stmt_check
+        .query_row(params![id, tag_id], |row| row.get(0))
+        .unwrap_or(false);
+
+      if exists {
+        stmt_delete
+          .execute(params![id, tag_id])
+          .map_err(|e| e.to_string())?;
+      } else {
+        stmt_insert
+          .execute(params![id, tag_id])
+          .map_err(|e| e.to_string())?;
+      }
+    }
+
+    Ok(())
   }
 
   // お気に入りノート一覧を取得
@@ -675,6 +836,74 @@ impl NoteService {
       .map_err(|e| format!("お気に入りノートの取得に失敗しました: {}", e))?;
 
     Ok(notes)
+  }
+
+  // ノートのインポート
+  pub fn import_note(
+    &self,
+    file_path: String,
+    parent_id: Option<i64>,
+  ) -> Result<NoteWithContent, String> {
+    // ファイルの存在確認
+    let source_path = PathBuf::from(&file_path);
+    if !source_path.exists() {
+      return Err("ファイルが存在しません".to_string());
+    }
+
+    // ファイル名からタイトルを取得
+    let title = source_path
+      .file_stem()
+      .and_then(|s| s.to_str())
+      .ok_or_else(|| "ファイル名の取得に失敗しました".to_string())?
+      .to_string();
+
+    // ファイルの内容を読み込む
+    let content = fs::read_to_string(&source_path)
+      .map_err(|e| format!("ファイルの読み込みに失敗しました: {}", e))?;
+
+    // フォルダパスを取得
+    let folder_path = if let Some(parent_id) = parent_id {
+      let conn = self.db.conn.lock().unwrap();
+      let path: String = conn
+        .query_row(
+          "SELECT folder_path FROM folders WHERE id = ?",
+          params![parent_id],
+          |row| row.get(0),
+        )
+        .map_err(|e| format!("親フォルダの取得に失敗しました: {}", e))?;
+      Some(path)
+    } else {
+      None
+    };
+
+    // create_noteを使用してノートを作成
+    self.create_note(title, content, parent_id, folder_path)
+  }
+
+  // 複数ノートのインポート
+  pub fn import_notes(
+    &self,
+    file_paths: Vec<String>,
+    parent_id: Option<i64>,
+  ) -> Result<Vec<NoteWithContent>, String> {
+    let mut imported_notes = Vec::new();
+    let mut errors = Vec::new();
+
+    for file_path in file_paths {
+      match self.import_note(file_path.clone(), parent_id) {
+        Ok(note) => imported_notes.push(note),
+        Err(e) => errors.push(format!("{}: {}", file_path, e)),
+      }
+    }
+
+    if !errors.is_empty() {
+      return Err(format!(
+        "一部のファイルのインポートに失敗しました:\n{}",
+        errors.join("\n")
+      ));
+    }
+
+    Ok(imported_notes)
   }
 
   // お気に入りの並び順を更新

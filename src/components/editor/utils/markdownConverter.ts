@@ -9,6 +9,10 @@ export function processNode(node: JSONContent): string {
     return `[[${noteName}]]`;
   }
 
+  if (node.type === 'image') {
+    return `![${node.attrs?.alt || ''}](${node.attrs?.src})`;
+  }
+
   if (node.type === 'text') {
     return node.text || '';
   }
@@ -87,40 +91,64 @@ export function parseMarkdownWithNoteLinks(content: string): JSONContent {
 
     const paragraphContent: JSONContent[] = [];
     let remaining = line;
-    const regex = /\[\[([^\]]+)\]\]/g;
-    let lastIndex = 0;
-    let match;
 
-    while ((match = regex.exec(remaining)) !== null) {
-      // マッチの前のテキスト
-      if (match.index > lastIndex) {
-        const beforeText = remaining.slice(lastIndex, match.index);
-        if (beforeText) {
-          paragraphContent.push({
-            type: 'text',
-            text: beforeText
-          });
+    while (remaining.length > 0) {
+      const imageMatch = /!\[([^\]]*)\]\(([^)]+)\)/.exec(remaining);
+      const linkMatch = /\[\[([^\]]+)\]\]/.exec(remaining);
+
+      let matchType = 'none';
+      let matchIndex = -1;
+      let matchLength = 0;
+      let matchData: { alt?: string; src?: string; name?: string } = {};
+
+      if (imageMatch && linkMatch) {
+        if (imageMatch.index < linkMatch.index) {
+          matchType = 'image';
+          matchIndex = imageMatch.index;
+          matchLength = imageMatch[0].length;
+          matchData = { alt: imageMatch[1], src: imageMatch[2] };
+        } else {
+          matchType = 'link';
+          matchIndex = linkMatch.index;
+          matchLength = linkMatch[0].length;
+          matchData = { name: linkMatch[1] };
         }
+      } else if (imageMatch) {
+        matchType = 'image';
+        matchIndex = imageMatch.index;
+        matchLength = imageMatch[0].length;
+        matchData = { alt: imageMatch[1], src: imageMatch[2] };
+      } else if (linkMatch) {
+        matchType = 'link';
+        matchIndex = linkMatch.index;
+        matchLength = linkMatch[0].length;
+        matchData = { name: linkMatch[1] };
+      } else {
+        // No matches
+        paragraphContent.push({ type: 'text', text: remaining });
+        remaining = '';
+        break;
       }
 
-      // NoteLinkノード
-      paragraphContent.push({
-        type: 'noteLink',
-        attrs: { noteName: match[1] }
-      });
+      // Add text before match
+      if (matchIndex > 0) {
+        paragraphContent.push({ type: 'text', text: remaining.slice(0, matchIndex) });
+      }
 
-      lastIndex = match.index + match[0].length;
-    }
-
-    // 残りのテキスト
-    if (lastIndex < remaining.length) {
-      const afterText = remaining.slice(lastIndex);
-      if (afterText) {
+      // Add match
+      if (matchType === 'image') {
         paragraphContent.push({
-          type: 'text',
-          text: afterText
+          type: 'image',
+          attrs: { src: matchData.src, alt: matchData.alt }
+        });
+      } else if (matchType === 'link') {
+        paragraphContent.push({
+          type: 'noteLink',
+          attrs: { noteName: matchData.name }
         });
       }
+
+      remaining = remaining.slice(matchIndex + matchLength);
     }
 
     if (paragraphContent.length > 0) {

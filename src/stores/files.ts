@@ -73,8 +73,8 @@ async function filterFilesWithContent(files: FileItem[], query: string): Promise
   return filterRecursive(files);
 }
 
-function sortFiles(files: FileItem[], sortBy: SortBy, sortOrder: SortOrder): FileItem[] {
-  return [...files].toSorted((a, b) => {
+function getComparator(sortBy: SortBy, sortOrder: SortOrder) {
+  return (a: FileItem, b: FileItem) => {
     const aIsFolder = 'folder' in a;
     const bIsFolder = 'folder' in b;
 
@@ -100,6 +100,26 @@ function sortFiles(files: FileItem[], sortBy: SortBy, sortOrder: SortOrder): Fil
     }
 
     return sortOrder === 'asc' ? comparison : -comparison;
+  };
+}
+
+function sortFiles(files: FileItem[], sortBy: SortBy, sortOrder: SortOrder): FileItem[] {
+  const comparator = getComparator(sortBy, sortOrder);
+  const sortedFiles = [...files].toSorted(comparator);
+
+  return sortedFiles.map(item => {
+    if ('folder' in item) {
+      const folderSortBy = (item.folder.sortBy as SortBy) || sortBy;
+      const folderSortOrder = (item.folder.sortOrder as SortOrder) || sortOrder;
+
+      return {
+        folder: {
+          ...item.folder,
+          children: sortFiles(item.folder.children, folderSortBy, folderSortOrder)
+        }
+      };
+    }
+    return item;
   });
 }
 

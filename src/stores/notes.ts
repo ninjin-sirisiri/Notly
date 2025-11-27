@@ -1,11 +1,13 @@
 import { create } from 'zustand';
 
-import { createNote, deleteNote, loadNote, loadNotes, moveNote, updateNote } from '@/lib/api/notes';
+import { createNote, deleteNote, getFavoriteNotes, loadNote, loadNotes, moveNote, toggleFavorite, updateNote } from '@/lib/api/notes';
 import { type Note, type NoteWithContent } from '@/types/notes';
 
 import { useFileStore } from './files';
 import { useFolderStore } from './folders';
 import { useStreakStore } from './streak';
+import { useTemplateStore } from './templates';
+import { useTrashStore } from './trash';
 
 type NoteStore = {
   notes: Note[];
@@ -69,6 +71,7 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         isLoading: false
       });
       useFileStore.getState().loadFiles();
+      useTemplateStore.getState().setTemplateEditorOpen(false);
 
       // Record activity for streak tracking
       useStreakStore.getState().recordActivity();
@@ -95,6 +98,7 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
         currentContent: note.content,
         isLoading: false
       });
+      useTemplateStore.getState().setTemplateEditorOpen(false);
     } catch (error) {
       set({
         isLoading: false,
@@ -168,7 +172,6 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
       });
       useFileStore.getState().loadFiles();
       // Refresh trash items
-      const { useTrashStore } = await import('./trash');
       useTrashStore.getState().loadDeletedItems();
     } catch (error) {
       set({
@@ -218,7 +221,6 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
       error: null
     });
     try {
-      const { toggleFavorite } = await import('@/lib/api/notes');
       const updatedNote = await toggleFavorite(id);
       set(state => ({
         notes: state.notes.map(note => (note.id === id ? updatedNote : note)),
@@ -236,7 +238,6 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
 
   loadFavoriteNotes: async () => {
     try {
-      const { getFavoriteNotes } = await import('@/lib/api/notes');
       const favoriteNotes = await getFavoriteNotes();
       return favoriteNotes;
     } catch (error) {

@@ -1,4 +1,4 @@
-import { Edit2, FolderInput, Trash2 } from 'lucide-react';
+import { ArrowUpDown, Edit2, FolderInput, Palette, Settings2, Trash2 } from 'lucide-react';
 
 import {
   ContextMenu,
@@ -13,13 +13,19 @@ type FolderItemContextMenuProps = {
   onRename: () => void;
   onMove: () => void;
   onDelete: () => void;
+  onIconChange: () => void;
+  onColorChange: () => void;
+  onSortSettings: () => void;
 };
 
 export function FolderItemContextMenu({
   children,
   onRename,
   onMove,
-  onDelete
+  onDelete,
+  onIconChange,
+  onColorChange,
+  onSortSettings
 }: FolderItemContextMenuProps) {
   return (
     <ContextMenu>
@@ -40,6 +46,30 @@ export function FolderItemContextMenu({
           }}>
           <FolderInput className="mr-2 h-4 w-4" />
           移動
+        </ContextMenuItem>
+        <ContextMenuItem
+          onClick={e => {
+            e.stopPropagation();
+            onIconChange();
+          }}>
+          <Settings2 className="mr-2 h-4 w-4" />
+          アイコン変更
+        </ContextMenuItem>
+        <ContextMenuItem
+          onClick={e => {
+            e.stopPropagation();
+            onColorChange();
+          }}>
+          <Palette className="mr-2 h-4 w-4" />
+          色変更
+        </ContextMenuItem>
+        <ContextMenuItem
+          onClick={e => {
+            e.stopPropagation();
+            onSortSettings();
+          }}>
+          <ArrowUpDown className="mr-2 h-4 w-4" />
+          並び替え設定
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem

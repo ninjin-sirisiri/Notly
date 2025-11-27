@@ -34,6 +34,10 @@ export function addTagToNote(noteId: number, tagId: number): Promise<void> {
   return safeInvoke<void>('add_tag_to_note', { noteId, tagId });
 }
 
+export function addTagToNotes(noteIds: number[], tagId: number): Promise<void> {
+  return safeInvoke<void>('add_tag_to_notes', { noteIds, tagId });
+}
+
 export function removeTagFromNote(noteId: number, tagId: number): Promise<void> {
   return safeInvoke<void>('remove_tag_from_note', { noteId, tagId });
 }

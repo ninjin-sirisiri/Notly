@@ -780,6 +780,74 @@ impl NoteService {
     Ok(notes)
   }
 
+  // ノートのインポート
+  pub fn import_note(
+    &self,
+    file_path: String,
+    parent_id: Option<i64>,
+  ) -> Result<NoteWithContent, String> {
+    // ファイルの存在確認
+    let source_path = PathBuf::from(&file_path);
+    if !source_path.exists() {
+      return Err("ファイルが存在しません".to_string());
+    }
+
+    // ファイル名からタイトルを取得
+    let title = source_path
+      .file_stem()
+      .and_then(|s| s.to_str())
+      .ok_or_else(|| "ファイル名の取得に失敗しました".to_string())?
+      .to_string();
+
+    // ファイルの内容を読み込む
+    let content = fs::read_to_string(&source_path)
+      .map_err(|e| format!("ファイルの読み込みに失敗しました: {}", e))?;
+
+    // フォルダパスを取得
+    let folder_path = if let Some(parent_id) = parent_id {
+      let conn = self.db.conn.lock().unwrap();
+      let path: String = conn
+        .query_row(
+          "SELECT folder_path FROM folders WHERE id = ?",
+          params![parent_id],
+          |row| row.get(0),
+        )
+        .map_err(|e| format!("親フォルダの取得に失敗しました: {}", e))?;
+      Some(path)
+    } else {
+      None
+    };
+
+    // create_noteを使用してノートを作成
+    self.create_note(title, content, parent_id, folder_path)
+  }
+
+  // 複数ノートのインポート
+  pub fn import_notes(
+    &self,
+    file_paths: Vec<String>,
+    parent_id: Option<i64>,
+  ) -> Result<Vec<NoteWithContent>, String> {
+    let mut imported_notes = Vec::new();
+    let mut errors = Vec::new();
+
+    for file_path in file_paths {
+      match self.import_note(file_path.clone(), parent_id) {
+        Ok(note) => imported_notes.push(note),
+        Err(e) => errors.push(format!("{}: {}", file_path, e)),
+      }
+    }
+
+    if !errors.is_empty() {
+      return Err(format!(
+        "一部のファイルのインポートに失敗しました:\n{}",
+        errors.join("\n")
+      ));
+    }
+
+    Ok(imported_notes)
+  }
+
   // お気に入りの並び順を更新
   pub fn update_favorite_order(&self, _id: i64, _order: i64) -> Result<(), String> {
     // タグベースの実装では順序はサポートしない

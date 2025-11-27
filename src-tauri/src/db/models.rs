@@ -63,6 +63,8 @@ pub struct Folder {
   #[serde(default)]
   pub is_deleted: bool,
   pub deleted_at: Option<String>,
+  pub icon: Option<String>,
+  pub color: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -77,6 +79,8 @@ pub struct UpdateFolderInput {
   pub id: i64,
   pub name: String,
   pub parent_id: Option<i64>,
+  pub icon: Option<String>,
+  pub color: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -105,6 +109,8 @@ pub struct FolderWithChildren {
   #[serde(default)]
   pub is_deleted: bool,
   pub deleted_at: Option<String>,
+  pub icon: Option<String>,
+  pub color: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

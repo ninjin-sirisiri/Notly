@@ -7,4 +7,6 @@ export type Folder = {
   folder_path: string;
   isDeleted?: boolean;
   deletedAt?: string | null;
+  icon?: string | null;
+  color?: string | null;
 };

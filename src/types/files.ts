@@ -8,6 +8,8 @@ export type FolderWithChildren = {
   parentId: number | null;
   folderPath: string;
   children: FileItem[];
+  icon?: string;
+  color?: string;
 };
 
 export type FileItem = { folder: FolderWithChildren } | { note: Note };

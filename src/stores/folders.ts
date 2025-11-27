@@ -32,7 +32,9 @@ type FolderStore = {
     id: number,
     name: string,
     parentPath: string,
-    parentId?: number | null
+    parentId?: number | null,
+    icon?: string | null,
+    color?: string | null
   ) => Promise<void>;
   deleteFolder: (id: number) => Promise<void>;
   moveFolder: (id: number, newParentId: number | null) => Promise<void>;
@@ -157,13 +159,13 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
     }
   },
 
-  updateFolder: async (id: number, name: string, parentPath = '', parentId?: number | null) => {
+  updateFolder: async (id: number, name: string, parentPath = '', parentId?: number | null, icon?: string | null, color?: string | null) => {
     set({
       isLoading: true,
       error: null
     });
     try {
-      const updatedFolder = await updateFolder(id, name, parentPath, parentId);
+      const updatedFolder = await updateFolder(id, name, parentPath, parentId, icon, color);
       const updatedFolderWithChildren: FolderWithChildren = {
         id: updatedFolder.id,
         name: updatedFolder.name,
@@ -171,6 +173,8 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
         updatedAt: updatedFolder.updated_at as unknown as string,
         parentId: updatedFolder.parent_id ?? null,
         folderPath: updatedFolder.folder_path,
+        icon: updatedFolder.icon ?? undefined,
+        color: updatedFolder.color ?? undefined,
         children: []
       };
       set(state => ({

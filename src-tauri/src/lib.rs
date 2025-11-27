@@ -116,6 +116,8 @@ pub fn run() {
       commands::note::toggle_favorite,
       commands::note::toggle_favorite_notes,
       commands::note::get_favorite_notes,
+      commands::note::import_note,
+      commands::note::import_notes,
       commands::note::update_favorite_order,
       commands::folder::get_all_folders,
       commands::folder::get_folder_by_id,

@@ -76,6 +76,14 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     )
     .ok();
 
+  // Add icon and color columns to folders for customization
+  conn
+    .execute("ALTER TABLE folders ADD COLUMN icon TEXT DEFAULT NULL", [])
+    .ok();
+  conn
+    .execute("ALTER TABLE folders ADD COLUMN color TEXT DEFAULT NULL", [])
+    .ok();
+
   conn.execute(
     "CREATE TABLE IF NOT EXISTS activity_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

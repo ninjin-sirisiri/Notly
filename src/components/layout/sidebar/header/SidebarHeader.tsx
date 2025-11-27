@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   ArrowDown,
   ArrowUp,
@@ -10,6 +11,7 @@ import {
   ChevronsUp,
   Clock,
   FileText,
+  FileUp,
   MoreHorizontal,
   Tags,
   Trash2,
@@ -34,6 +36,7 @@ import { useFolderStore } from '@/stores/folders';
 import { CreateFolderButton } from '../actions/CreateFolderButton';
 import { CreateNoteButton } from '../actions/CreateNoteButton';
 import { FileSearch } from './FileSearch';
+import { ImportNotesDialog } from '@/components/dialogs/ImportNotesDialog';
 
 type SidebarHeaderProps = {
   selectionMode: boolean;
@@ -73,6 +76,7 @@ export function SidebarHeader({
   setShowTemplateSelect
 }: SidebarHeaderProps) {
   const { sortBy, sortOrder, setSortBy, setSortOrder } = useFileStore();
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   return (
     <div className="flex flex-col gap-4">
@@ -163,9 +167,20 @@ export function SidebarHeader({
               <FileText className="mr-2 h-4 w-4" />
               テンプレート管理
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => setShowImportDialog(true)}
+              className="pl-8">
+              <FileUp className="mr-2 h-4 w-4" />
+              ノートをインポート
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      <ImportNotesDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+      />
       <div className="px-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1">
           {!selectionMode && (

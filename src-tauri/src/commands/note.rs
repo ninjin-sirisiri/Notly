@@ -243,6 +243,44 @@ pub async fn get_favorite_notes<R: tauri::Runtime>(
 }
 
 #[tauri::command]
+pub async fn import_note<R: tauri::Runtime>(
+  file_path: String,
+  parent_id: Option<i64>,
+  state: State<'_, AppState>,
+  _app: tauri::AppHandle<R>,
+) -> Result<NoteWithContent, String> {
+  let context = state.get_context().map_err(|e| e.to_string())?;
+  let notes_dir = std::path::PathBuf::from(&context.config.data_dir).join("notes");
+  let db = Arc::clone(&context.db);
+
+  tauri::async_runtime::spawn_blocking(move || {
+    let note_service = NoteService::new(db, notes_dir);
+    note_service.import_note(file_path, parent_id)
+  })
+  .await
+  .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
+}
+
+#[tauri::command]
+pub async fn import_notes<R: tauri::Runtime>(
+  file_paths: Vec<String>,
+  parent_id: Option<i64>,
+  state: State<'_, AppState>,
+  _app: tauri::AppHandle<R>,
+) -> Result<Vec<NoteWithContent>, String> {
+  let context = state.get_context().map_err(|e| e.to_string())?;
+  let notes_dir = std::path::PathBuf::from(&context.config.data_dir).join("notes");
+  let db = Arc::clone(&context.db);
+
+  tauri::async_runtime::spawn_blocking(move || {
+    let note_service = NoteService::new(db, notes_dir);
+    note_service.import_notes(file_paths, parent_id)
+  })
+  .await
+  .map_err(|e| format!("バックグラウンド処理エラー: {}", e))?
+}
+
+#[tauri::command]
 pub async fn update_favorite_order<R: tauri::Runtime>(
   id: i64,
   order: i64,

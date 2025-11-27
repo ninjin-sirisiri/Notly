@@ -58,9 +58,7 @@ impl FolderService {
 
       conn
         .execute(
-          "
-    INSERT INTO folders (name, folder_path, parent_id) VALUES (?, ?, ?)
-    ",
+          "\n    INSERT INTO folders (name, folder_path, parent_id) VALUES (?, ?, ?)\n    ",
           params![name, folder_path_str, parent_id],
         )
         .map_err(|e| format!("フォルダの作成に失敗しました: {}", e))?;
@@ -77,9 +75,7 @@ impl FolderService {
     let conn = self.db.conn.lock().unwrap();
     let folder = conn
       .query_row(
-        "
-    SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color FROM folders WHERE id = ?
-    ",
+        "\n    SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color, sort_by, sort_order FROM folders WHERE id = ?\n    ",
         params![id],
         |row| {
           Ok(Folder {
@@ -93,6 +89,8 @@ impl FolderService {
             deleted_at: row.get(7)?,
             icon: row.get(8)?,
             color: row.get(9)?,
+            sort_by: row.get(10)?,
+            sort_order: row.get(11)?,
           })
         },
       )
@@ -105,7 +103,7 @@ impl FolderService {
     let conn = self.db.conn.lock().unwrap();
 
     let mut stmt = conn
-      .prepare("SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color FROM folders WHERE is_deleted = FALSE")
+      .prepare("SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color, sort_by, sort_order FROM folders WHERE is_deleted = FALSE")
       .map_err(|e| format!("Failed to prepare statement: {}", e))?;
 
     let folders = stmt
@@ -121,6 +119,8 @@ impl FolderService {
           deleted_at: row.get(7)?,
           icon: row.get(8)?,
           color: row.get(9)?,
+          sort_by: row.get(10)?,
+          sort_order: row.get(11)?,
         })
       })
       .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?
@@ -138,12 +138,14 @@ impl FolderService {
     parent_id: Option<i64>,
     icon: Option<String>,
     color: Option<String>,
+    sort_by: Option<String>,
+    sort_order: Option<String>,
   ) -> Result<Folder, String> {
     let conn = self.db.conn.lock().unwrap();
 
     let old_folder: Folder = conn
       .query_row(
-        "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color FROM folders WHERE id = ?",
+        "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color, sort_by, sort_order FROM folders WHERE id = ?",
         params![folder_id],
         |row| {
           Ok(Folder {
@@ -157,6 +159,8 @@ impl FolderService {
             deleted_at: row.get(7)?,
             icon: row.get(8)?,
             color: row.get(9)?,
+            sort_by: row.get(10)?,
+            sort_order: row.get(11)?,
           })
         },
       )
@@ -194,8 +198,8 @@ impl FolderService {
     // icon と color も更新
     conn
       .execute(
-        "UPDATE folders SET name = ?, parent_id = ?, icon = ?, color = ? WHERE id = ?",
-        params![name.clone(), parent_id, icon, color, folder_id],
+        "UPDATE folders SET name = ?, parent_id = ?, icon = ?, color = ?, sort_by = ?, sort_order = ? WHERE id = ?",
+        params![name.clone(), parent_id, icon, color, sort_by, sort_order, folder_id],
       )
       .map_err(|e| format!("フォルダの更新に失敗しました: {}", e))?;
 
@@ -204,7 +208,7 @@ impl FolderService {
 
     let updated_folder = conn
       .query_row(
-        "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color FROM folders WHERE id = ?",
+        "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color, sort_by, sort_order FROM folders WHERE id = ?",
         params![folder_id],
         |row| {
           Ok(Folder {
@@ -218,6 +222,8 @@ impl FolderService {
             deleted_at: row.get(7)?,
             icon: row.get(8)?,
             color: row.get(9)?,
+            sort_by: row.get(10)?,
+            sort_order: row.get(11)?,
           })
         },
       )
@@ -584,7 +590,7 @@ impl FolderService {
     let conn = self.db.conn.lock().unwrap();
 
     let mut stmt = conn
-      .prepare("SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color FROM folders WHERE is_deleted = TRUE ORDER BY deleted_at DESC")
+      .prepare("SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color, sort_by, sort_order FROM folders WHERE is_deleted = TRUE ORDER BY deleted_at DESC")
       .map_err(|e| format!("Failed to prepare statement: {}", e))?;
 
     let folders = stmt
@@ -600,6 +606,8 @@ impl FolderService {
           deleted_at: row.get(7)?,
           icon: row.get(8)?,
           color: row.get(9)?,
+          sort_by: row.get(10)?,
+          sort_order: row.get(11)?,
         })
       })
       .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?
@@ -641,7 +649,7 @@ impl FolderService {
     let notes = {
       let conn = self.db.conn.lock().unwrap();
       let mut stmt = conn
-        .prepare("SELECT id, title, file_path FROM notes")
+        .prepare("SELECT id, title, file_path FROM notes ")
         .map_err(|e| format!("Failed to prepare statement: {}", e))?;
 
       stmt
@@ -675,7 +683,7 @@ impl FolderService {
             "UPDATE notes SET preview = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
             params![preview, id],
           )
-          .map_err(|e| format!("プレビューの更新に失敗しました ({}): {}", title, e))?;
+          .map_err(|e| format!("プレビューの更新に失敗しました: {}", e))?;
       }
     }
 
@@ -688,7 +696,7 @@ impl FolderService {
       let conn = self.db.conn.lock().unwrap();
       conn
         .query_row(
-          "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color FROM folders WHERE id = ?",
+          "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color, sort_by, sort_order FROM folders WHERE id = ?",
           params![id],
           |row| {
             Ok(Folder {
@@ -702,6 +710,8 @@ impl FolderService {
               deleted_at: row.get(7)?,
               icon: row.get(8)?,
               color: row.get(9)?,
+              sort_by: row.get(10)?,
+              sort_order: row.get(11)?,
             })
           },
         )

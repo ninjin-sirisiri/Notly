@@ -190,12 +190,70 @@ impl NoteService {
   }
 
   pub fn search_notes(&self, query: &str) -> Result<Vec<Note>, String> {
-    let all_notes = self.get_all_notes()?;
-    let query_lower = query.to_lowercase();
+    // 1. Parse Query
+    let mut text_parts = Vec::new();
+    let mut tags = Vec::new();
+    let mut is_favorite = None;
 
+    for part in query.split_whitespace() {
+      if let Some(tag_name) = part.strip_prefix("tag:") {
+        tags.push(tag_name.to_string());
+      } else if part == "is:favorite" {
+        is_favorite = Some(true);
+      } else if part == "-is:favorite" {
+        is_favorite = Some(false);
+      } else {
+        text_parts.push(part);
+      }
+    }
+    let text_query = text_parts.join(" ");
+
+    // 2. Fetch all notes (base candidates)
+    let mut candidates = self.get_all_notes()?;
+
+    // 3. Filter by is_favorite
+    if let Some(fav) = is_favorite {
+      candidates.retain(|n| n.is_favorite == fav);
+    }
+
+    // 4. Filter by tags
+    if !tags.is_empty() {
+      let conn = self.db.conn.lock().unwrap();
+      // Construct SQL to find IDs that have ALL tags
+      let placeholders = tags.iter().map(|_| "?").collect::<Vec<_>>().join(",");
+      let sql = format!(
+        "SELECT nt.note_id FROM note_tags nt
+              JOIN tags t ON nt.tag_id = t.id
+              WHERE t.name IN ({})
+              GROUP BY nt.note_id
+              HAVING COUNT(DISTINCT t.name) = ?",
+        placeholders
+      );
+
+      let mut params: Vec<&dyn rusqlite::ToSql> =
+        tags.iter().map(|t| t as &dyn rusqlite::ToSql).collect();
+      let count = tags.len() as i64;
+      params.push(&count);
+
+      let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
+      let valid_ids: std::collections::HashSet<i64> = stmt
+        .query_map(params.as_slice(), |row| row.get(0))
+        .map_err(|e| e.to_string())?
+        .collect::<SqlResult<_>>()
+        .map_err(|e| e.to_string())?;
+
+      candidates.retain(|n| valid_ids.contains(&n.id));
+    }
+
+    // 5. Text Search
+    if text_query.is_empty() {
+      return Ok(candidates);
+    }
+
+    let query_lower = text_query.to_lowercase();
     let mut matched_notes = Vec::new();
 
-    for note in all_notes {
+    for note in candidates {
       let title_matches = note.title.to_lowercase().contains(&query_lower);
 
       let content_matches = if !title_matches {

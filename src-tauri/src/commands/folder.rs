@@ -79,6 +79,8 @@ pub async fn update_folder<R: tauri::Runtime>(
       input.parent_id,
       input.icon,
       input.color,
+      input.sort_by,
+      input.sort_order,
     )
   })
   .await

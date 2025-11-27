@@ -17,7 +17,7 @@ impl FileService {
     let conn = self.db.conn.lock().unwrap();
 
     let mut folder_stmt = conn
-      .prepare("SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color FROM folders WHERE is_deleted = FALSE")
+      .prepare("SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color, sort_by, sort_order FROM folders WHERE is_deleted = FALSE")
       .map_err(|e| format!("Failed to prepare statement: {}", e))?;
     let folders = folder_stmt
       .query_map([], |row| {
@@ -33,6 +33,8 @@ impl FileService {
           deleted_at: row.get(7)?,
           icon: row.get(8)?,
           color: row.get(9)?,
+          sort_by: row.get(10)?,
+          sort_order: row.get(11)?,
         })
       })
       .map_err(|e| format!("フォルダの取得に失敗しました: {}", e))?

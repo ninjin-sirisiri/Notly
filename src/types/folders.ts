@@ -9,4 +9,6 @@ export type Folder = {
   deletedAt?: string | null;
   icon?: string | null;
   color?: string | null;
+  sortBy?: string | null;
+  sortOrder?: string | null;
 };

@@ -84,6 +84,20 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     .execute("ALTER TABLE folders ADD COLUMN color TEXT DEFAULT NULL", [])
     .ok();
 
+  // Add sort_by and sort_order columns to folders for per-folder sorting
+  conn
+    .execute(
+      "ALTER TABLE folders ADD COLUMN sort_by TEXT DEFAULT NULL",
+      [],
+    )
+    .ok();
+  conn
+    .execute(
+      "ALTER TABLE folders ADD COLUMN sort_order TEXT DEFAULT NULL",
+      [],
+    )
+    .ok();
+
   conn.execute(
     "CREATE TABLE IF NOT EXISTS activity_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

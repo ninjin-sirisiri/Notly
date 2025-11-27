@@ -34,7 +34,9 @@ type FolderStore = {
     parentPath: string,
     parentId?: number | null,
     icon?: string | null,
-    color?: string | null
+    color?: string | null,
+    sortBy?: string | null,
+    sortOrder?: string | null
   ) => Promise<void>;
   deleteFolder: (id: number) => Promise<void>;
   moveFolder: (id: number, newParentId: number | null) => Promise<void>;
@@ -80,6 +82,10 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
         updatedAt: newFolder.updated_at as unknown as string,
         parentId: newFolder.parent_id ?? null,
         folderPath: newFolder.folder_path,
+        icon: newFolder.icon ?? undefined,
+        color: newFolder.color ?? undefined,
+        sortBy: newFolder.sortBy,
+        sortOrder: newFolder.sortOrder,
         children: []
       };
       set(state => {
@@ -118,6 +124,10 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
         updatedAt: folder.updated_at as unknown as string,
         parentId: folder.parent_id ?? null,
         folderPath: folder.folder_path,
+        icon: folder.icon ?? undefined,
+        color: folder.color ?? undefined,
+        sortBy: folder.sortBy,
+        sortOrder: folder.sortOrder,
         children: []
       }));
       set({
@@ -144,6 +154,10 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
         updatedAt: folder.updated_at as unknown as string,
         parentId: folder.parent_id ?? null,
         folderPath: folder.folder_path,
+        icon: folder.icon ?? undefined,
+        color: folder.color ?? undefined,
+        sortBy: folder.sortBy,
+        sortOrder: folder.sortOrder,
         children: []
       };
       set({
@@ -165,14 +179,25 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
     parentPath = '',
     parentId?: number | null,
     icon?: string | null,
-    color?: string | null
+    color?: string | null,
+    sortBy?: string | null,
+    sortOrder?: string | null
   ) => {
     set({
       isLoading: true,
       error: null
     });
     try {
-      const updatedFolder = await updateFolder(id, name, parentPath, parentId, icon, color);
+      const updatedFolder = await updateFolder(
+        id,
+        name,
+        parentPath,
+        parentId,
+        icon,
+        color,
+        sortBy,
+        sortOrder
+      );
       const updatedFolderWithChildren: FolderWithChildren = {
         id: updatedFolder.id,
         name: updatedFolder.name,
@@ -182,6 +207,8 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
         folderPath: updatedFolder.folder_path,
         icon: updatedFolder.icon ?? undefined,
         color: updatedFolder.color ?? undefined,
+        sortBy: updatedFolder.sortBy,
+        sortOrder: updatedFolder.sortOrder,
         children: []
       };
       set(state => ({
@@ -240,7 +267,7 @@ export const useFolderStore = create<FolderStore>()((set, get) => ({
           else if (currentPath.startsWith(deletedPath)) {
             // Make sure it's actually a subdirectory, not just a partial match
             const remainder = currentPath.slice(deletedPath.length);
-            if (remainder.startsWith('/') || remainder.startsWith('\\')) {
+            if (remainder.startsWith('/') || remainder.startsWith('\\\\')) {
               shouldClearCurrentFolder = true;
             }
           }

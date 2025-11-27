@@ -65,6 +65,8 @@ pub struct Folder {
   pub deleted_at: Option<String>,
   pub icon: Option<String>,
   pub color: Option<String>,
+  pub sort_by: Option<String>,
+  pub sort_order: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -81,6 +83,8 @@ pub struct UpdateFolderInput {
   pub parent_id: Option<i64>,
   pub icon: Option<String>,
   pub color: Option<String>,
+  pub sort_by: Option<String>,
+  pub sort_order: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -111,6 +115,8 @@ pub struct FolderWithChildren {
   pub deleted_at: Option<String>,
   pub icon: Option<String>,
   pub color: Option<String>,
+  pub sort_by: Option<String>,
+  pub sort_order: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -10,6 +10,8 @@ export type FolderWithChildren = {
   children: FileItem[];
   icon?: string;
   color?: string;
+  sortBy?: string | null;
+  sortOrder?: string | null;
 };
 
 export type FileItem = { folder: FolderWithChildren } | { note: Note };

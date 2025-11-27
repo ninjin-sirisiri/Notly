@@ -7,3 +7,4 @@ pub mod note;
 pub mod notification;
 pub mod tags;
 pub mod template;
+pub mod hotkeys;

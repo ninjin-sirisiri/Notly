@@ -5,6 +5,7 @@ pub mod note;
 pub mod notification;
 pub mod tags;
 pub mod template;
+pub mod hotkeys;
 
 pub mod assets;
 
@@ -15,3 +16,4 @@ pub use note::NoteService;
 pub use notification::NotificationService;
 pub use tags::TagService;
 pub use template::TemplateService;
+pub use hotkeys::HotkeyService;

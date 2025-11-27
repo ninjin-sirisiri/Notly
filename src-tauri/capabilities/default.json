@@ -17,6 +17,9 @@
     "fs:default",
     "fs:allow-write-text-file",
     "fs:allow-write-file",
-    "fs:allow-home-write-recursive"
+    "fs:allow-home-write-recursive",
+    "global-shortcut:allow-is-registered",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister"
   ]
 }

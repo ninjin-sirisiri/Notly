@@ -8,7 +8,9 @@ use std::sync::{Arc, Mutex};
 
 use config::AppConfig;
 use db::{Database, migrate};
-use tauri::Manager;
+use std::str::FromStr;
+use tauri::{Emitter, Manager};
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 use tauri_plugin_notification::NotificationExt;
 
 pub struct AppContext {
@@ -34,6 +36,54 @@ impl AppState {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
+    .plugin(
+      tauri_plugin_global_shortcut::Builder::new()
+        .with_handler(|app, shortcut, event| {
+          if event.state == ShortcutState::Pressed {
+            let app_handle = app.clone();
+            let shortcut_cloned = *shortcut;
+
+            tauri::async_runtime::spawn(async move {
+              let state: tauri::State<AppState> = app_handle.state();
+              if let Ok(context) = state.get_context() {
+                let hotkeys = {
+                  let conn = context.db.conn.lock().unwrap();
+                  services::HotkeyService::get_all_hotkeys(&conn).unwrap_or_default()
+                };
+
+                for h in hotkeys {
+                  if h.enabled
+                    && let Ok(s) = Shortcut::from_str(&h.shortcut)
+                    && s == shortcut_cloned
+                  {
+                    match h.action.as_str() {
+                      "quick_note" => {
+                        if let Some(window) = app_handle.get_webview_window("main") {
+                          let _ = window.show();
+                          let _ = window.set_focus();
+                          let _ = app_handle.emit("open-quick-note", ());
+                        }
+                      }
+                      "toggle_window" => {
+                        if let Some(window) = app_handle.get_webview_window("main") {
+                          if window.is_visible().unwrap_or(false) {
+                            let _ = window.hide();
+                          } else {
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                          }
+                        }
+                      }
+                      _ => {}
+                    }
+                  }
+                }
+              }
+            });
+          }
+        })
+        .build(),
+    )
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_notification::init())
@@ -72,6 +122,24 @@ pub fn run() {
       // Start notification checker
       if let Some(ctx) = context {
         let app_handle = app.handle().clone();
+
+        // Register hotkeys
+        let ctx_for_hotkeys = ctx.clone();
+        let app_handle_for_hotkeys = app_handle.clone();
+        tauri::async_runtime::spawn(async move {
+          let conn = ctx_for_hotkeys.db.conn.lock().unwrap();
+          if let Ok(hotkeys) = services::HotkeyService::get_all_hotkeys(&conn) {
+            let shortcut_manager = app_handle_for_hotkeys.global_shortcut();
+            for h in hotkeys {
+              if h.enabled
+                && let Ok(shortcut) = Shortcut::from_str(&h.shortcut)
+              {
+                let _ = shortcut_manager.register(shortcut);
+              }
+            }
+          }
+        });
+
         std::thread::spawn(move || {
           let mut last_notified_minute = None;
           loop {
@@ -142,6 +210,8 @@ pub fn run() {
       commands::tags::get_tags_by_note,
       commands::notification::get_notification_settings,
       commands::notification::update_notification_settings,
+      commands::hotkeys::get_hotkeys,
+      commands::hotkeys::update_hotkey,
       commands::assets::save_image,
       commands::template::get_all_templates,
       commands::template::get_template_by_id,

@@ -133,20 +133,14 @@ impl FolderService {
   // フォルダの更新
   pub fn update_folder(
     &self,
-    folder_id: i64,
-    name: String,
-    parent_id: Option<i64>,
-    icon: Option<String>,
-    color: Option<String>,
-    sort_by: Option<String>,
-    sort_order: Option<String>,
+    input: crate::db::models::UpdateFolderInput,
   ) -> Result<Folder, String> {
     let conn = self.db.conn.lock().unwrap();
 
     let old_folder: Folder = conn
       .query_row(
         "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color, sort_by, sort_order FROM folders WHERE id = ?",
-        params![folder_id],
+        params![input.id],
         |row| {
           Ok(Folder {
             id: row.get(0)?,
@@ -168,9 +162,9 @@ impl FolderService {
 
     let old_path = PathBuf::from(&old_folder.folder_path);
     let new_path = if let Some(parent) = old_path.parent() {
-      parent.join(&name)
+      parent.join(&input.name)
     } else {
-      PathBuf::from(&name)
+      PathBuf::from(&input.name)
     };
     let new_path_str = new_path.to_str().unwrap_or_default();
 
@@ -199,7 +193,7 @@ impl FolderService {
     conn
       .execute(
         "UPDATE folders SET name = ?, parent_id = ?, icon = ?, color = ?, sort_by = ?, sort_order = ? WHERE id = ?",
-        params![name.clone(), parent_id, icon, color, sort_by, sort_order, folder_id],
+        params![input.name.clone(), input.parent_id, input.icon, input.color, input.sort_by, input.sort_order, input.id],
       )
       .map_err(|e| format!("フォルダの更新に失敗しました: {}", e))?;
 
@@ -209,7 +203,7 @@ impl FolderService {
     let updated_folder = conn
       .query_row(
         "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color, sort_by, sort_order FROM folders WHERE id = ?",
-        params![folder_id],
+        params![input.id],
         |row| {
           Ok(Folder {
             id: row.get(0)?,

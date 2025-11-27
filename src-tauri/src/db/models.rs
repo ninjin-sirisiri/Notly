@@ -165,3 +165,20 @@ pub struct UpdateTemplateInput {
   pub content: String,
   pub description: Option<String>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Hotkey {
+  pub id: i64,
+  pub action: String,
+  pub shortcut: String,
+  pub enabled: bool,
+  pub created_at: String,
+  pub updated_at: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateHotkeyInput {
+  pub action: String,
+  pub shortcut: String,
+  pub enabled: bool,
+}

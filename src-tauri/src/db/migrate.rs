@@ -194,6 +194,27 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     [],
   )?;
 
+  // Create hotkeys table
+  conn.execute(
+    "CREATE TABLE IF NOT EXISTS hotkeys (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    action TEXT UNIQUE NOT NULL,
+    shortcut TEXT NOT NULL,
+    enabled BOOLEAN DEFAULT TRUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )",
+    [],
+  )?;
+
+  // Insert default hotkeys
+  conn.execute(
+    "INSERT OR IGNORE INTO hotkeys (action, shortcut) VALUES 
+    ('quick_note', 'CommandOrControl+Shift+N'),
+    ('toggle_window', 'CommandOrControl+Shift+Space')",
+    [],
+  )?;
+
   Ok(())
 }
 

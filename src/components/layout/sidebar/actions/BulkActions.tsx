@@ -115,21 +115,23 @@ export function BulkActions({
           </Button>
           {showBulkTagMenu && (
             <div className="absolute z-10 left-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg max-h-64 overflow-y-auto">
-              {tags.filter(tag => tag.name !== 'お気に入り').map(tag => (
-                <button
-                  key={tag.id}
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
-                  onClick={() => {
-                    onTag(tag.id);
-                    setShowBulkTagMenu(false);
-                  }}>
-                  <div
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: tag.color || '#9ca3af' }}
-                  />
-                  {tag.name}
-                </button>
-              ))}
+              {tags
+                .filter(tag => tag.name !== 'お気に入り')
+                .map(tag => (
+                  <button
+                    key={tag.id}
+                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                    onClick={() => {
+                      onTag(tag.id);
+                      setShowBulkTagMenu(false);
+                    }}>
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: tag.color || '#9ca3af' }}
+                    />
+                    {tag.name}
+                  </button>
+                ))}
               {tags.filter(tag => tag.name !== 'お気に入り').length === 0 && (
                 <div className="px-3 py-2 text-sm text-gray-500">タグがありません</div>
               )}

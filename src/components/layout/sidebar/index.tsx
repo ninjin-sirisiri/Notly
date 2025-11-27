@@ -98,14 +98,11 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     { enableOnFormTags: true }
   );
 
-  useHotkeys(
-    'delete',
-    () => {
-      if (selectedItems.length > 0) {
-        handleBulkDelete();
-      }
+  useHotkeys('delete', () => {
+    if (selectedItems.length > 0) {
+      handleBulkDelete();
     }
-  );
+  });
 
   useHotkeys(
     'ctrl+d, cmd+d',

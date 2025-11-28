@@ -1,4 +1,5 @@
 pub mod activity;
+pub mod backup;
 pub mod files;
 pub mod folder;
 pub mod hotkeys;
@@ -10,6 +11,7 @@ pub mod template;
 pub mod assets;
 
 pub use assets::AssetService;
+pub use backup::BackupService;
 pub use files::FileService;
 pub use folder::FolderService;
 pub use hotkeys::HotkeyService;

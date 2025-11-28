@@ -1,6 +1,7 @@
 pub mod activity;
 pub mod app;
 pub mod assets;
+pub mod backup;
 pub mod files;
 pub mod folder;
 pub mod hotkeys;

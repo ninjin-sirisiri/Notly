@@ -153,6 +153,15 @@ pub fn run() {
         context: Mutex::new(context.clone()),
       });
 
+      // Manage BackupService
+      if let Some(ctx) = context.as_ref() {
+        let backup_service = Arc::new(services::BackupService::new(
+          ctx.db.clone(),
+          std::path::PathBuf::from(&ctx.config.data_dir),
+        ));
+        app.manage(backup_service);
+      }
+
       // Start notification checker
       if let Some(ctx) = context {
         let app_handle = app.handle().clone();
@@ -251,6 +260,9 @@ pub fn run() {
       commands::template::create_template,
       commands::template::update_template,
       commands::template::delete_template,
+      commands::backup::create_backup,
+      commands::backup::restore_backup,
+      commands::backup::read_backup_metadata,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

@@ -13,6 +13,7 @@
     "windows": [
       {
         "title": "notly",
+        "label": "main",
         "width": 800,
         "height": 600,
         "maximized": true,

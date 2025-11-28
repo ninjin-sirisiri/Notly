@@ -1,16 +1,18 @@
 import { Keyboard, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { useHotkeyStore } from '../../stores/hotkeys';
 import { HOTKEY_ACTION_LABELS } from '../../types/hotkeys';
 
 export function HotkeySettings() {
   const { hotkeys, isLoading, loadHotkeys, updateHotkey } = useHotkeyStore();
-  const [editingHotkeys, setEditingHotkeys] = useState<Record<string, { shortcut: string; enabled: boolean }>>({});
+  const [editingHotkeys, setEditingHotkeys] = useState<
+    Record<string, { shortcut: string; enabled: boolean }>
+  >({});
 
   useEffect(() => {
     loadHotkeys();
@@ -76,24 +78,31 @@ export function HotkeySettings() {
 
       <div className="space-y-4 rounded-lg border bg-card p-6">
         {hotkeys.map(hotkey => {
-          const editing = editingHotkeys[hotkey.action] || { shortcut: hotkey.shortcut, enabled: hotkey.enabled };
-          
+          const editing = editingHotkeys[hotkey.action] || {
+            shortcut: hotkey.shortcut,
+            enabled: hotkey.enabled
+          };
+
           return (
-            <div key={hotkey.id} className="flex items-end gap-4 border-b pb-4 last:border-0 last:pb-0">
+            <div
+              key={hotkey.id}
+              className="flex items-end gap-4 border-b pb-4 last:border-0 last:pb-0">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor={`hotkey-${hotkey.action}`} className="text-base">
+                  <Label
+                    htmlFor={`hotkey-${hotkey.action}`}
+                    className="text-base">
                     {HOTKEY_ACTION_LABELS[hotkey.action] || hotkey.action}
                   </Label>
                   <Switch
                     checked={editing.enabled}
-                    onCheckedChange={(checked) => handleChange(hotkey.action, 'enabled', checked)}
+                    onCheckedChange={checked => handleChange(hotkey.action, 'enabled', checked)}
                   />
                 </div>
                 <Input
                   id={`hotkey-${hotkey.action}`}
                   value={editing.shortcut}
-                  onChange={(e) => handleChange(hotkey.action, 'shortcut', e.target.value)}
+                  onChange={e => handleChange(hotkey.action, 'shortcut', e.target.value)}
                   disabled={!editing.enabled}
                   placeholder="例: CommandOrControl+Shift+N"
                 />
@@ -105,8 +114,7 @@ export function HotkeySettings() {
                 onClick={() => handleSave(hotkey.action)}
                 disabled={isLoading}
                 size="icon"
-                className="mb-0.5"
-              >
+                className="mb-0.5">
                 <Save className="h-4 w-4" />
               </Button>
             </div>

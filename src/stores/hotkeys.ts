@@ -33,8 +33,8 @@ export const useHotkeyStore = create<HotkeyStore>((set, get) => ({
     try {
       await updateHotkey(input);
       const currentHotkeys = get().hotkeys;
-      const updatedHotkeys = currentHotkeys.map(h => 
-          h.action === input.action ? { ...h, ...input } : h
+      const updatedHotkeys = currentHotkeys.map(h =>
+        h.action === input.action ? { ...h, ...input } : h
       );
       set({ hotkeys: updatedHotkeys, isLoading: false });
     } catch (error) {

@@ -59,19 +59,53 @@ pub fn run() {
                     match h.action.as_str() {
                       "quick_note" => {
                         if let Some(window) = app_handle.get_webview_window("main") {
-                          let _ = window.show();
+                          // Force window to appear
+                          if window.is_minimized().unwrap_or(false) {
+                            let _ = window.unminimize();
+                          }
+                          if !window.is_visible().unwrap_or(false) {
+                            let _ = window.show();
+                          }
                           let _ = window.set_focus();
-                          let _ = app_handle.emit("open-quick-note", ());
+                          let _ = window.set_always_on_top(true);
+                          let _ = window.set_always_on_top(false);
+
+                          // Emit to the specific window instead of global app handle
+                          if let Err(e) = window.emit("open-quick-note", ()) {
+                            eprintln!("Failed to emit event: {}", e);
+                          } else {
+                            println!("Emitted open-quick-note event to main window");
+                          }
+                        } else {
+                          eprintln!("Main window not found");
                         }
                       }
                       "toggle_window" => {
                         if let Some(window) = app_handle.get_webview_window("main") {
-                          if window.is_visible().unwrap_or(false) {
+                          let is_visible = window.is_visible().unwrap_or(false);
+                          let is_minimized = window.is_minimized().unwrap_or(false);
+                          println!(
+                            "Toggle window requested. Visible: {}, Minimized: {}",
+                            is_visible, is_minimized
+                          );
+
+                          if is_visible && !is_minimized {
                             let _ = window.hide();
+                            println!("Window hidden");
                           } else {
-                            let _ = window.show();
+                            if is_minimized {
+                              let _ = window.unminimize();
+                            }
+                            if !is_visible {
+                              let _ = window.show();
+                            }
                             let _ = window.set_focus();
+                            let _ = window.set_always_on_top(true);
+                            let _ = window.set_always_on_top(false);
+                            println!("Window shown and focused");
                           }
+                        } else {
+                          eprintln!("Main window not found for toggle_window");
                         }
                       }
                       _ => {}
@@ -122,7 +156,6 @@ pub fn run() {
       // Start notification checker
       if let Some(ctx) = context {
         let app_handle = app.handle().clone();
-
         // Register hotkeys
         let ctx_for_hotkeys = ctx.clone();
         let app_handle_for_hotkeys = app_handle.clone();

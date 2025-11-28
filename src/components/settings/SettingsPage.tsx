@@ -1,5 +1,5 @@
-import { NotificationSettings } from './NotificationSettings';
 import { HotkeySettings } from './HotkeySettings';
+import { NotificationSettings } from './NotificationSettings';
 
 export function SettingsPage() {
   return (

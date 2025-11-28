@@ -19,11 +19,13 @@ import './App.css';
 import { ThemeProvider } from './components/theme/theme-provider';
 import { Toaster } from './components/ui/sonner';
 
+import { listen } from '@tauri-apps/api/event';
+
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const { setCurrentNote } = useNoteStore();
+  const { setCurrentNote, createNote } = useNoteStore();
   const { isTemplateEditorOpen } = useTemplateStore();
 
   useEffect(() => {
@@ -37,6 +39,36 @@ export default function App() {
     }
     checkInit();
   }, []);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let ignore = false;
+
+    async function setupListener() {
+      const unlistenFn = await listen('open-quick-note', () => {
+        toast.success('Quick Note Shortcut Detected');
+        createNote('Untitled', '', '', null);
+        // Ensure settings and template editor are closed
+        setIsSettingsOpen(false);
+        useTemplateStore.getState().setTemplateEditorOpen(false);
+      });
+
+      if (ignore) {
+        unlistenFn();
+      } else {
+        unlisten = unlistenFn;
+      }
+    }
+
+    setupListener();
+
+    return () => {
+      ignore = true;
+      if (unlisten) {
+        unlisten();
+      }
+    };
+  }, [createNote]);
 
   useHotkeys('ctrl+b, cmd+b', e => {
     e.preventDefault();

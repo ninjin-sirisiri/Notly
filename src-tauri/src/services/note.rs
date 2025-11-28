@@ -30,12 +30,12 @@ impl NoteService {
 
     let file_path_str = full_path.to_str().unwrap_or_default().to_string();
 
-    // 同じパスのノートが既に存在するかチェック
+    // 同じパスのノートが既に存在するかチェック（削除されていないもののみ）
     {
       let conn = self.db.conn.lock().unwrap();
       let exists: bool = conn
         .query_row(
-          "SELECT EXISTS(SELECT 1 FROM notes WHERE file_path = ?)",
+          "SELECT EXISTS(SELECT 1 FROM notes WHERE file_path = ? AND is_deleted = FALSE)",
           params![file_path_str],
           |row| row.get(0),
         )

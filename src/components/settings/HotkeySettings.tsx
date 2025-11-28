@@ -1,18 +1,61 @@
-import { Keyboard, Save } from 'lucide-react';
+import { Keyboard, Pencil, Save, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Kbd, KbdGroup } from '@/components/ui/kbd';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useHotkeyStore } from '../../stores/hotkeys';
 import { HOTKEY_ACTION_LABELS } from '../../types/hotkeys';
+
+function parseHotkey(shortcut: string): string[] {
+  // プラットフォームを検出
+  const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+
+  // CommandOrControl をプラットフォームに応じて変換
+  let normalized = shortcut.replaceAll('CommandOrControl', isMac ? 'Cmd' : 'Ctrl');
+  normalized = normalized.replaceAll('Command', 'Cmd');
+
+  // macOSの場合、Altを⌥（Option）に変換
+  if (isMac) {
+    normalized = normalized.replaceAll('Alt', '⌥');
+  }
+
+  // + で分割
+  return normalized.split('+').map(key => key.trim());
+}
+
+// キーコードを Tauri のキー名にマッピング
+function mapKeyToTauriFormat(key: string): string {
+  const keyMap: Record<string, string> = {
+    ' ': 'Space',
+    ArrowUp: 'Up',
+    ArrowDown: 'Down',
+    ArrowLeft: 'Left',
+    ArrowRight: 'Right',
+    Escape: 'Escape',
+    Enter: 'Return',
+    Backspace: 'Backspace',
+    Delete: 'Delete',
+    Tab: 'Tab',
+    Insert: 'Insert',
+    Home: 'Home',
+    End: 'End',
+    PageUp: 'PageUp',
+    PageDown: 'PageDown'
+  };
+
+  return keyMap[key] || key.toUpperCase();
+}
 
 export function HotkeySettings() {
   const { hotkeys, isLoading, loadHotkeys, updateHotkey } = useHotkeyStore();
   const [editingHotkeys, setEditingHotkeys] = useState<
     Record<string, { shortcut: string; enabled: boolean }>
   >({});
+  const [editingAction, setEditingAction] = useState<string | null>(null);
+  const [recordingKeys, setRecordingKeys] = useState<string[]>([]);
 
   useEffect(() => {
     loadHotkeys();
@@ -38,6 +81,57 @@ export function HotkeySettings() {
     }));
   }
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>, action: string) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Escape キーで録音をキャンセル
+    if (e.key === 'Escape') {
+      setRecordingKeys([]);
+      return;
+    }
+
+    // 修飾キーのみの場合は無視
+    if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) {
+      return;
+    }
+
+    const keys: string[] = [];
+
+    // 修飾キーを追加
+    if (e.ctrlKey || e.metaKey) {
+      keys.push('CommandOrControl');
+    }
+    if (e.shiftKey) {
+      keys.push('Shift');
+    }
+    if (e.altKey) {
+      keys.push('Alt');
+    }
+
+    // メインキーを追加
+    const mainKey = mapKeyToTauriFormat(e.key);
+    keys.push(mainKey);
+
+    // ショートカット文字列を生成
+    const shortcut = keys.join('+');
+
+    // 録音中のキーを表示用に保存
+    setRecordingKeys(keys);
+
+    // ショートカットを更新
+    handleChange(action, 'shortcut', shortcut);
+  }
+
+  function handleKeyUp() {
+    // キーが離されたら録音中の表示をクリア
+    setRecordingKeys([]);
+  }
+
+  function handleInputFocus() {
+    setRecordingKeys([]);
+  }
+
   async function handleSave(action: string) {
     const current = editingHotkeys[action];
     if (!current) return;
@@ -49,9 +143,24 @@ export function HotkeySettings() {
         enabled: current.enabled
       });
       toast.success('ショートカットキーを保存しました');
+      setEditingAction(null);
     } catch {
       toast.error('ショートカットキーの保存に失敗しました');
     }
+  }
+
+  function handleCancel(action: string) {
+    const original = hotkeys.find(h => h.action === action);
+    if (original) {
+      setEditingHotkeys(prev => ({
+        ...prev,
+        [action]: {
+          shortcut: original.shortcut,
+          enabled: original.enabled
+        }
+      }));
+    }
+    setEditingAction(null);
   }
 
   if (isLoading && hotkeys.length === 0) {
@@ -82,6 +191,8 @@ export function HotkeySettings() {
             shortcut: hotkey.shortcut,
             enabled: hotkey.enabled
           };
+          const isEditing = editingAction === hotkey.action;
+          const keys = parseHotkey(editing.shortcut);
 
           return (
             <div
@@ -99,24 +210,76 @@ export function HotkeySettings() {
                     onCheckedChange={checked => handleChange(hotkey.action, 'enabled', checked)}
                   />
                 </div>
-                <Input
-                  id={`hotkey-${hotkey.action}`}
-                  value={editing.shortcut}
-                  onChange={e => handleChange(hotkey.action, 'shortcut', e.target.value)}
-                  disabled={!editing.enabled}
-                  placeholder="例: CommandOrControl+Shift+N"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Tauriのショートカット形式で入力してください (例: CommandOrControl+Shift+N)
-                </p>
+
+                {isEditing ? (
+                  <div className="space-y-2">
+                    <Input
+                      id={`hotkey-${hotkey.action}`}
+                      value={
+                        recordingKeys.length > 0 ? recordingKeys.join(' + ') : editing.shortcut
+                      }
+                      readOnly
+                      onKeyDown={e => handleKeyDown(e, hotkey.action)}
+                      onKeyUp={handleKeyUp}
+                      onFocus={handleInputFocus}
+                      disabled={!editing.enabled}
+                      placeholder="キーを押してください..."
+                      autoFocus
+                      className="cursor-text"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {recordingKeys.length > 0
+                        ? '録音中... キーを離すと確定されます。Escでキャンセル。'
+                        : 'フィールドにフォーカスして、設定したいキーの組み合わせを押してください。Escでキャンセル。'}
+                    </p>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 cursor-pointer hover:bg-muted transition-colors w-full text-left"
+                    onClick={() => editing.enabled && setEditingAction(hotkey.action)}
+                    disabled={!editing.enabled}
+                    tabIndex={editing.enabled ? 0 : -1}>
+                    <KbdGroup>
+                      {keys.map(key => (
+                        <Kbd key={`${hotkey.action}-${key}`}>{key}</Kbd>
+                      ))}
+                    </KbdGroup>
+                    {editing.enabled && (
+                      <Pencil className="ml-auto h-3 w-3 text-muted-foreground" />
+                    )}
+                  </button>
+                )}
               </div>
-              <Button
-                onClick={() => handleSave(hotkey.action)}
-                disabled={isLoading}
-                size="icon"
-                className="mb-0.5">
-                <Save className="h-4 w-4" />
-              </Button>
+
+              {isEditing ? (
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => handleSave(hotkey.action)}
+                    disabled={isLoading}
+                    size="icon"
+                    className="mb-0.5">
+                    <Save className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    onClick={() => handleCancel(hotkey.action)}
+                    disabled={isLoading}
+                    size="icon"
+                    variant="outline"
+                    className="mb-0.5">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => setEditingAction(hotkey.action)}
+                  disabled={isLoading || !editing.enabled}
+                  size="icon"
+                  variant="ghost"
+                  className="mb-0.5">
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           );
         })}

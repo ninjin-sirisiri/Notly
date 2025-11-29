@@ -968,3 +968,170 @@ impl NoteService {
     Ok(())
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::db::migrate;
+  use std::sync::Arc;
+  use tempfile::TempDir;
+
+  fn setup_test_db() -> (Arc<Database>, TempDir) {
+    let temp_dir = TempDir::new().unwrap();
+    let db_path = temp_dir.path().join("test.db");
+    let db = Database::new(db_path.to_str().unwrap()).unwrap();
+    {
+      let conn = db.conn.lock().unwrap();
+      migrate(&conn).unwrap();
+    }
+    (Arc::new(db), temp_dir)
+  }
+
+  #[test]
+  fn test_create_note() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db, temp_dir.path().to_path_buf());
+
+    let result = service.create_note(
+      "テストノート".to_string(),
+      "# テスト\nこれはテストです。".to_string(),
+      None,
+      None,
+    );
+
+    assert!(result.is_ok());
+    let note = result.unwrap();
+    assert_eq!(note.title, "テストノート");
+    assert_eq!(note.content, "# テスト\nこれはテストです。");
+    assert!(!note.is_deleted);
+  }
+
+  #[test]
+  fn test_get_note_by_id() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let created = service
+      .create_note("取得テスト".to_string(), "内容".to_string(), None, None)
+      .unwrap();
+
+    let result = service.get_note_by_id(created.id);
+    assert!(result.is_ok());
+    let note = result.unwrap();
+    assert_eq!(note.id, created.id);
+    assert_eq!(note.title, "取得テスト");
+    assert_eq!(note.content, "内容");
+  }
+
+  #[test]
+  fn test_get_all_notes() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    service
+      .create_note("ノート1".to_string(), "内容1".to_string(), None, None)
+      .unwrap();
+    service
+      .create_note("ノート2".to_string(), "内容2".to_string(), None, None)
+      .unwrap();
+
+    let notes = service.get_all_notes().unwrap();
+    assert_eq!(notes.len(), 2);
+  }
+
+  #[test]
+  fn test_update_note() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let created = service
+      .create_note(
+        "元のタイトル".to_string(),
+        "元の内容".to_string(),
+        None,
+        None,
+      )
+      .unwrap();
+
+    let result = service.update_note(
+      created.id,
+      "新しいタイトル".to_string(),
+      "新しい内容".to_string(),
+    );
+
+    assert!(result.is_ok());
+    let updated = result.unwrap();
+    assert_eq!(updated.title, "新しいタイトル");
+    assert_eq!(updated.content, "新しい内容");
+  }
+
+  #[test]
+  fn test_delete_note() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let created = service
+      .create_note("削除テスト".to_string(), "内容".to_string(), None, None)
+      .unwrap();
+
+    let result = service.delete_note(created.id);
+    assert!(result.is_ok());
+
+    let notes = service.get_all_notes().unwrap();
+    assert_eq!(notes.len(), 0);
+
+    let deleted_notes = service.get_deleted_notes().unwrap();
+    assert_eq!(deleted_notes.len(), 1);
+  }
+
+  #[test]
+  fn test_restore_note() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let created = service
+      .create_note("復元テスト".to_string(), "内容".to_string(), None, None)
+      .unwrap();
+
+    service.delete_note(created.id).unwrap();
+    assert_eq!(service.get_all_notes().unwrap().len(), 0);
+
+    service.restore_note(created.id).unwrap();
+    assert_eq!(service.get_all_notes().unwrap().len(), 1);
+  }
+
+  #[test]
+  fn test_generate_preview() {
+    let content = "# タイトル\n\nこれは**太字**のテストです。\n\n- リスト1\n- リスト2";
+    let preview = NoteService::generate_preview(content);
+    assert!(!preview.is_empty());
+    assert!(preview.len() <= 103); // 100文字 + "..."
+  }
+
+  #[test]
+  fn test_search_notes() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    service
+      .create_note(
+        "SearchTest1".to_string(),
+        "This is a test note for search".to_string(),
+        None,
+        None,
+      )
+      .unwrap();
+    service
+      .create_note(
+        "SearchTest2".to_string(),
+        "Different content".to_string(),
+        None,
+        None,
+      )
+      .unwrap();
+
+    // FTS検索は英語の方が確実に動作する
+    let results = service.search_notes("test").unwrap();
+    assert!(results.len() >= 1);
+  }
+}

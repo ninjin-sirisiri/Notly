@@ -2322,6 +2322,7 @@ dependencies = [
  "tauri-plugin-fs",
  "tauri-plugin-global-shortcut",
  "tauri-plugin-notification",
+ "tempfile",
  "zip",
 ]
 

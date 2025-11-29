@@ -207,3 +207,148 @@ impl TagService {
     Ok(tags)
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::db::migrate;
+  use std::sync::Arc;
+  use tempfile::TempDir;
+
+  fn setup_test_db() -> (Arc<Database>, TempDir) {
+    let temp_dir = TempDir::new().unwrap();
+    let db_path = temp_dir.path().join("test.db");
+    let db = Database::new(db_path.to_str().unwrap()).unwrap();
+    {
+      let conn = db.conn.lock().unwrap();
+      migrate(&conn).unwrap();
+    }
+    (Arc::new(db), temp_dir)
+  }
+
+  #[test]
+  fn test_create_tag() {
+    let (db, _temp_dir) = setup_test_db();
+    let service = TagService::new(db);
+
+    let result = service.create_tag("テストタグ".to_string(), Some("#FF0000".to_string()));
+
+    assert!(result.is_ok());
+    let tag = result.unwrap();
+    assert_eq!(tag.name, "テストタグ");
+    assert_eq!(tag.color, Some("#FF0000".to_string()));
+  }
+
+  #[test]
+  fn test_get_all_tags() {
+    let (db, _temp_dir) = setup_test_db();
+    let service = TagService::new(db);
+
+    service.create_tag("タグ1".to_string(), None).unwrap();
+    service.create_tag("タグ2".to_string(), None).unwrap();
+
+    let tags = service.get_all_tags().unwrap();
+    // デフォルトで「お気に入り」タグが存在するため、3つになる
+    assert!(tags.len() >= 2);
+  }
+
+  #[test]
+  fn test_update_tag() {
+    let (db, _temp_dir) = setup_test_db();
+    let service = TagService::new(db);
+
+    let created = service.create_tag("元の名前".to_string(), None).unwrap();
+
+    let result = service.update_tag(
+      created.id,
+      "新しい名前".to_string(),
+      Some("#00FF00".to_string()),
+    );
+    assert!(result.is_ok());
+    let updated = result.unwrap();
+    assert_eq!(updated.name, "新しい名前");
+    assert_eq!(updated.color, Some("#00FF00".to_string()));
+  }
+
+  #[test]
+  fn test_delete_tag() {
+    let (db, _temp_dir) = setup_test_db();
+    let service = TagService::new(db);
+
+    let created = service.create_tag("削除テスト".to_string(), None).unwrap();
+
+    let result = service.delete_tag(created.id);
+    assert!(result.is_ok());
+
+    let tags = service.get_all_tags().unwrap();
+    // 削除されたタグは含まれない（デフォルトの「お気に入り」タグは残る）
+    assert!(!tags.iter().any(|t| t.id == created.id));
+  }
+
+  #[test]
+  fn test_add_tag_to_note() {
+    let (db, temp_dir) = setup_test_db();
+    let tag_service = TagService::new(db.clone());
+    let note_service =
+      crate::services::note::NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let tag = tag_service
+      .create_tag("テストタグ".to_string(), None)
+      .unwrap();
+    let note = note_service
+      .create_note("ノート".to_string(), "内容".to_string(), None, None)
+      .unwrap();
+
+    let result = tag_service.add_tag_to_note(note.id, tag.id);
+    assert!(result.is_ok());
+
+    let tags = tag_service.get_tags_by_note(note.id).unwrap();
+    assert!(tags.iter().any(|t| t.id == tag.id));
+  }
+
+  #[test]
+  fn test_remove_tag_from_note() {
+    let (db, temp_dir) = setup_test_db();
+    let tag_service = TagService::new(db.clone());
+    let note_service =
+      crate::services::note::NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let tag = tag_service
+      .create_tag("テストタグ".to_string(), None)
+      .unwrap();
+    let note = note_service
+      .create_note("ノート".to_string(), "内容".to_string(), None, None)
+      .unwrap();
+
+    tag_service.add_tag_to_note(note.id, tag.id).unwrap();
+    let result = tag_service.remove_tag_from_note(note.id, tag.id);
+    assert!(result.is_ok());
+
+    let tags = tag_service.get_tags_by_note(note.id).unwrap();
+    assert!(!tags.iter().any(|t| t.id == tag.id));
+  }
+
+  #[test]
+  fn test_get_notes_by_tag() {
+    let (db, temp_dir) = setup_test_db();
+    let tag_service = TagService::new(db.clone());
+    let note_service =
+      crate::services::note::NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let tag = tag_service
+      .create_tag("テストタグ".to_string(), None)
+      .unwrap();
+    let note1 = note_service
+      .create_note("ノート1".to_string(), "内容1".to_string(), None, None)
+      .unwrap();
+    let note2 = note_service
+      .create_note("ノート2".to_string(), "内容2".to_string(), None, None)
+      .unwrap();
+
+    tag_service.add_tag_to_note(note1.id, tag.id).unwrap();
+    tag_service.add_tag_to_note(note2.id, tag.id).unwrap();
+
+    let notes = tag_service.get_notes_by_tag(tag.id).unwrap();
+    assert_eq!(notes.len(), 2);
+  }
+}

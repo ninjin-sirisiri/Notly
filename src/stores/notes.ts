@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 
-import { createNote, deleteNote, getFavoriteNotes, loadNote, loadNotes, moveNote, toggleFavorite, updateNote } from '@/lib/api/notes';
+import {
+  createNote,
+  deleteNote,
+  getFavoriteNotes,
+  loadNote,
+  loadNotes,
+  moveNote,
+  toggleFavorite,
+  updateNote
+} from '@/lib/api/notes';
 import { type Note, type NoteWithContent } from '@/types/notes';
 
 import { useFileStore } from './files';

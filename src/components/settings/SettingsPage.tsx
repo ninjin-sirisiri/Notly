@@ -1,8 +1,11 @@
+import { AutoBackupSettings } from './AutoBackupSettings';
+import { BackupSettings } from './BackupSettings';
+import { HotkeySettings } from './HotkeySettings';
 import { NotificationSettings } from './NotificationSettings';
 
 export function SettingsPage() {
   return (
-    <div className="h-full overflow-auto">
+    <div className="w-full h-full overflow-auto">
       <div className="mx-auto max-w-4xl space-y-8 p-8">
         <div>
           <h1 className="text-3xl font-bold">設定</h1>
@@ -10,6 +13,9 @@ export function SettingsPage() {
         </div>
 
         <NotificationSettings />
+        <HotkeySettings />
+        <BackupSettings />
+        <AutoBackupSettings />
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
 pub mod activity;
 pub mod app;
 pub mod assets;
+pub mod backup;
 pub mod files;
 pub mod folder;
+pub mod hotkeys;
 pub mod note;
 pub mod notification;
 pub mod tags;

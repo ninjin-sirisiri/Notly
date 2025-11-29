@@ -1,11 +1,12 @@
+import { memo } from 'react';
 import { useFolderStore } from '@/stores/folders';
 import { type FileItem as FileItemType } from '@/types/files';
 
 import { FolderItem } from './FolderItem';
 import { NoteItem } from './NoteItem';
 
-export function FileItem({ item }: { item: FileItemType }) {
-  const { setCurrentFolder, currentFolder } = useFolderStore();
+export const FileItem = memo(function FileItem({ item }: { item: FileItemType }) {
+  const setCurrentFolder = useFolderStore(state => state.setCurrentFolder);
 
   if ('folder' in item) {
     return (
@@ -13,7 +14,7 @@ export function FileItem({ item }: { item: FileItemType }) {
         folder={item.folder}
         FileItemComponent={FileItem}
         onClick={() => setCurrentFolder(item.folder)}
-        isActive={currentFolder?.id === item.folder.id}
+        isVirtualized
       />
     );
   }
@@ -21,4 +22,4 @@ export function FileItem({ item }: { item: FileItemType }) {
     return <NoteItem note={item.note} />;
   }
   return null;
-}
+});

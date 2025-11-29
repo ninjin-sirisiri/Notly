@@ -24,9 +24,14 @@ export function MarkdownEditor({ content, setContent, handleSave, isNewNote, not
   // When opening an empty note, ensure no text is selected.
   useEffect(() => {
     if (editor && content === '') {
-      editor.commands.focus();
-      // Move cursor to the start (position 0) without selection.
-      editor.commands.setTextSelection(0);
+      const timer = setTimeout(() => {
+        if (editor.isFocused) {
+          editor.commands.focus();
+          editor.commands.setTextSelection(0);
+        }
+      }, 50);
+
+      return () => clearTimeout(timer);
     }
   }, [editor, content]);
 

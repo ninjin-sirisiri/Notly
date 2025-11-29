@@ -30,12 +30,12 @@ impl NoteService {
 
     let file_path_str = full_path.to_str().unwrap_or_default().to_string();
 
-    // 同じパスのノートが既に存在するかチェック
+    // 同じパスのノートが既に存在するかチェック（削除されていないもののみ）
     {
       let conn = self.db.conn.lock().unwrap();
       let exists: bool = conn
         .query_row(
-          "SELECT EXISTS(SELECT 1 FROM notes WHERE file_path = ?)",
+          "SELECT EXISTS(SELECT 1 FROM notes WHERE file_path = ? AND is_deleted = FALSE)",
           params![file_path_str],
           |row| row.get(0),
         )
@@ -68,7 +68,17 @@ impl NoteService {
           params![title, parent_id, file_path_str, preview],
         )
         .map_err(|e| format!("ノートの作成に失敗しました: {}", e))?;
-      conn.last_insert_rowid()
+      let id = conn.last_insert_rowid();
+
+      // Update FTS index
+      conn
+        .execute(
+          "INSERT INTO notes_fts (id, title, content) VALUES (?, ?, ?)",
+          params![id, title, content],
+        )
+        .map_err(|e| format!("検索インデックスの更新に失敗しました: {}", e))?;
+
+      id
     };
 
     fs::write(&full_path, content.clone())
@@ -250,26 +260,35 @@ impl NoteService {
       return Ok(candidates);
     }
 
-    let query_lower = text_query.to_lowercase();
-    let mut matched_notes = Vec::new();
+    // Use FTS for text search
+    let conn = self.db.conn.lock().unwrap();
 
-    for note in candidates {
-      let title_matches = note.title.to_lowercase().contains(&query_lower);
+    // Construct FTS query: treat spaces as AND
+    let fts_query = text_query
+      .split_whitespace()
+      .map(|s| format!("\"{}\"", s.replace("\"", ""))) // Simple quote escaping
+      .collect::<Vec<_>>()
+      .join(" AND ");
 
-      let content_matches = if !title_matches {
-        fs::read_to_string(&note.file_path)
-          .map(|content| content.to_lowercase().contains(&query_lower))
-          .unwrap_or(false)
-      } else {
-        false
-      };
-
-      if title_matches || content_matches {
-        matched_notes.push(note);
-      }
+    // If query became empty after processing (e.g. only quotes), return empty
+    if fts_query.is_empty() {
+      return Ok(Vec::new());
     }
 
-    Ok(matched_notes)
+    let mut stmt = conn
+      .prepare("SELECT id FROM notes_fts WHERE notes_fts MATCH ? ORDER BY rank")
+      .map_err(|e| e.to_string())?;
+
+    let fts_ids: std::collections::HashSet<i64> = stmt
+      .query_map(params![fts_query], |row| row.get(0))
+      .map_err(|e| e.to_string())?
+      .filter_map(Result::ok)
+      .collect();
+
+    // Filter candidates by FTS results
+    candidates.retain(|n| fts_ids.contains(&n.id));
+
+    Ok(candidates)
   }
 
   fn get_relative_link_path(&self, path: &std::path::Path) -> String {
@@ -392,6 +411,14 @@ impl NoteService {
         )
         .map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
 
+      // Update FTS index
+      conn
+        .execute(
+          "UPDATE notes_fts SET title = ?, content = ? WHERE id = ?",
+          params![title, content, id],
+        )
+        .map_err(|e| format!("検索インデックスの更新に失敗しました: {}", e))?;
+
       conn
         .query_row(
           "SELECT updated_at FROM notes WHERE id = ?",
@@ -468,6 +495,11 @@ impl NoteService {
       )
       .map_err(|e| format!("ノートの削除に失敗しました: {}", e))?;
 
+    // FTSから削除
+    conn
+      .execute("DELETE FROM notes_fts WHERE id = ?", params![id])
+      .ok();
+
     Ok(())
   }
 
@@ -501,6 +533,11 @@ impl NoteService {
     conn
       .execute("DELETE FROM notes WHERE id = ?", params![id])
       .map_err(|e| format!("ノートの削除に失敗しました: {}", e))?;
+
+    // FTSから削除
+    conn
+      .execute("DELETE FROM notes_fts WHERE id = ?", params![id])
+      .ok();
 
     Ok(())
   }
@@ -562,6 +599,25 @@ impl NoteService {
       // ファイルを戻す
       fs::rename(&trash_path, &note_path)
         .map_err(|e| format!("ファイルの復元に失敗しました: {}", e))?;
+
+      // FTSに再登録
+      if let Ok(content) = fs::read_to_string(&note_path) {
+        let conn = self.db.conn.lock().unwrap();
+        // titleを取得する必要があるが、ここでは簡易的にファイル名から推測するか、
+        // あるいはDBから再取得する。DBから再取得が確実。
+        let title: String = conn
+          .query_row("SELECT title FROM notes WHERE id = ?", params![id], |row| {
+            row.get(0)
+          })
+          .unwrap_or_default();
+
+        conn
+          .execute(
+            "INSERT INTO notes_fts (id, title, content) VALUES (?, ?, ?)",
+            params![id, title, content],
+          )
+          .ok();
+      }
     }
 
     Ok(())
@@ -910,5 +966,172 @@ impl NoteService {
   pub fn update_favorite_order(&self, _id: i64, _order: i64) -> Result<(), String> {
     // タグベースの実装では順序はサポートしない
     Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::db::migrate;
+  use std::sync::Arc;
+  use tempfile::TempDir;
+
+  fn setup_test_db() -> (Arc<Database>, TempDir) {
+    let temp_dir = TempDir::new().unwrap();
+    let db_path = temp_dir.path().join("test.db");
+    let db = Database::new(db_path.to_str().unwrap()).unwrap();
+    {
+      let conn = db.conn.lock().unwrap();
+      migrate(&conn).unwrap();
+    }
+    (Arc::new(db), temp_dir)
+  }
+
+  #[test]
+  fn test_create_note() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db, temp_dir.path().to_path_buf());
+
+    let result = service.create_note(
+      "テストノート".to_string(),
+      "# テスト\nこれはテストです。".to_string(),
+      None,
+      None,
+    );
+
+    assert!(result.is_ok());
+    let note = result.unwrap();
+    assert_eq!(note.title, "テストノート");
+    assert_eq!(note.content, "# テスト\nこれはテストです。");
+    assert!(!note.is_deleted);
+  }
+
+  #[test]
+  fn test_get_note_by_id() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let created = service
+      .create_note("取得テスト".to_string(), "内容".to_string(), None, None)
+      .unwrap();
+
+    let result = service.get_note_by_id(created.id);
+    assert!(result.is_ok());
+    let note = result.unwrap();
+    assert_eq!(note.id, created.id);
+    assert_eq!(note.title, "取得テスト");
+    assert_eq!(note.content, "内容");
+  }
+
+  #[test]
+  fn test_get_all_notes() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    service
+      .create_note("ノート1".to_string(), "内容1".to_string(), None, None)
+      .unwrap();
+    service
+      .create_note("ノート2".to_string(), "内容2".to_string(), None, None)
+      .unwrap();
+
+    let notes = service.get_all_notes().unwrap();
+    assert_eq!(notes.len(), 2);
+  }
+
+  #[test]
+  fn test_update_note() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let created = service
+      .create_note(
+        "元のタイトル".to_string(),
+        "元の内容".to_string(),
+        None,
+        None,
+      )
+      .unwrap();
+
+    let result = service.update_note(
+      created.id,
+      "新しいタイトル".to_string(),
+      "新しい内容".to_string(),
+    );
+
+    assert!(result.is_ok());
+    let updated = result.unwrap();
+    assert_eq!(updated.title, "新しいタイトル");
+    assert_eq!(updated.content, "新しい内容");
+  }
+
+  #[test]
+  fn test_delete_note() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let created = service
+      .create_note("削除テスト".to_string(), "内容".to_string(), None, None)
+      .unwrap();
+
+    let result = service.delete_note(created.id);
+    assert!(result.is_ok());
+
+    let notes = service.get_all_notes().unwrap();
+    assert_eq!(notes.len(), 0);
+
+    let deleted_notes = service.get_deleted_notes().unwrap();
+    assert_eq!(deleted_notes.len(), 1);
+  }
+
+  #[test]
+  fn test_restore_note() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let created = service
+      .create_note("復元テスト".to_string(), "内容".to_string(), None, None)
+      .unwrap();
+
+    service.delete_note(created.id).unwrap();
+    assert_eq!(service.get_all_notes().unwrap().len(), 0);
+
+    service.restore_note(created.id).unwrap();
+    assert_eq!(service.get_all_notes().unwrap().len(), 1);
+  }
+
+  #[test]
+  fn test_generate_preview() {
+    let content = "# タイトル\n\nこれは**太字**のテストです。\n\n- リスト1\n- リスト2";
+    let preview = NoteService::generate_preview(content);
+    assert!(!preview.is_empty());
+    assert!(preview.len() <= 103); // 100文字 + "..."
+  }
+
+  #[test]
+  fn test_search_notes() {
+    let (db, temp_dir) = setup_test_db();
+    let service = NoteService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    service
+      .create_note(
+        "SearchTest1".to_string(),
+        "This is a test note for search".to_string(),
+        None,
+        None,
+      )
+      .unwrap();
+    service
+      .create_note(
+        "SearchTest2".to_string(),
+        "Different content".to_string(),
+        None,
+        None,
+      )
+      .unwrap();
+
+    // FTS検索は英語の方が確実に動作する
+    let results = service.search_notes("test").unwrap();
+    assert!(results.len() >= 1);
   }
 }

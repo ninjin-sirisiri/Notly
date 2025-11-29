@@ -16,7 +16,9 @@
     "src/main.tsx",
     "src-tauri/**",
     "node_modules/**",
-    "dist/**"
+    "dist/**",
+    "**/*.test.ts",
+    "**/*.test.tsx"
   ],
   "categories": {
     "correctness": "error",

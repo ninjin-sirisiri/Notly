@@ -1,12 +1,13 @@
 import { Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { Virtuoso } from 'react-virtuoso';
 
 import { useTrashStore } from '@/stores/trash';
 
 import { TrashDialogs } from './TrashDialogs';
 import { TrashHeader } from './TrashHeader';
 import { TrashItem } from './TrashItem';
-import { buildTrashTree, findNode, getAllDescendantKeys } from './utils';
+import { buildTrashTree, findNode, flattenTrashNodes, getAllDescendantKeys } from './utils';
 
 export function TrashView() {
   const {
@@ -27,14 +28,30 @@ export function TrashView() {
   } | null>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [confirmDeleteSelected, setConfirmDeleteSelected] = useState(false);
+  const [expandedFolderIds, setExpandedFolderIds] = useState<Set<number>>(new Set());
 
   const trashTree = useMemo(
     () => buildTrashTree(deletedNotes, deletedFolders),
     [deletedNotes, deletedFolders]
   );
 
+  const flattenedItems = useMemo(
+    () => flattenTrashNodes(trashTree, expandedFolderIds),
+    [trashTree, expandedFolderIds]
+  );
+
   const totalItems = deletedNotes.length + deletedFolders.length;
   const selectedCount = selectedItems.size;
+
+  function toggleFolder(id: number) {
+    const newSet = new Set(expandedFolderIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setExpandedFolderIds(newSet);
+  }
 
   function handleCheck(type: 'note' | 'folder', id: number) {
     const targetNode = findNode(trashTree, type, id);
@@ -154,7 +171,7 @@ export function TrashView() {
         onEmptyTrash={() => setConfirmEmptyTrash(true)}
       />
 
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className="flex-1 overflow-hidden px-2 pb-2">
         {isLoading && (
           <div className="flex h-full items-center justify-center">
             <p className="text-muted-foreground text-sm">読み込み中...</p>
@@ -169,18 +186,26 @@ export function TrashView() {
           </div>
         )}
         {!isLoading && totalItems > 0 && (
-          <div className="space-y-0.5">
-            {trashTree.map(node => (
-              <TrashItem
-                key={`${node.type}-${node.type === 'folder' ? node.data.id : node.data.id}`}
-                node={node}
-                selectedItems={selectedItems}
-                onCheck={handleCheck}
-                onRestore={handleRestore}
-                onDelete={handleDeleteRequest}
-              />
-            ))}
-          </div>
+          <Virtuoso
+            style={{ height: '100%' }}
+            totalCount={flattenedItems.length}
+            itemContent={index => {
+              const { node, depth } = flattenedItems[index];
+              const id = node.type === 'folder' ? node.data.id : node.data.id;
+              return (
+                <TrashItem
+                  node={node}
+                  depth={depth}
+                  selectedItems={selectedItems}
+                  onCheck={handleCheck}
+                  onRestore={handleRestore}
+                  onDelete={handleDeleteRequest}
+                  isExpanded={node.type === 'folder' ? expandedFolderIds.has(id) : undefined}
+                  onToggle={node.type === 'folder' ? () => toggleFolder(id) : undefined}
+                />
+              );
+            }}
+          />
         )}
       </div>
 

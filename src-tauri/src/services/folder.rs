@@ -133,20 +133,14 @@ impl FolderService {
   // フォルダの更新
   pub fn update_folder(
     &self,
-    folder_id: i64,
-    name: String,
-    parent_id: Option<i64>,
-    icon: Option<String>,
-    color: Option<String>,
-    sort_by: Option<String>,
-    sort_order: Option<String>,
+    input: crate::db::models::UpdateFolderInput,
   ) -> Result<Folder, String> {
     let conn = self.db.conn.lock().unwrap();
 
     let old_folder: Folder = conn
       .query_row(
         "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color, sort_by, sort_order FROM folders WHERE id = ?",
-        params![folder_id],
+        params![input.id],
         |row| {
           Ok(Folder {
             id: row.get(0)?,
@@ -168,9 +162,9 @@ impl FolderService {
 
     let old_path = PathBuf::from(&old_folder.folder_path);
     let new_path = if let Some(parent) = old_path.parent() {
-      parent.join(&name)
+      parent.join(&input.name)
     } else {
-      PathBuf::from(&name)
+      PathBuf::from(&input.name)
     };
     let new_path_str = new_path.to_str().unwrap_or_default();
 
@@ -199,7 +193,7 @@ impl FolderService {
     conn
       .execute(
         "UPDATE folders SET name = ?, parent_id = ?, icon = ?, color = ?, sort_by = ?, sort_order = ? WHERE id = ?",
-        params![name.clone(), parent_id, icon, color, sort_by, sort_order, folder_id],
+        params![input.name.clone(), input.parent_id, input.icon, input.color, input.sort_by, input.sort_order, input.id],
       )
       .map_err(|e| format!("フォルダの更新に失敗しました: {}", e))?;
 
@@ -209,7 +203,7 @@ impl FolderService {
     let updated_folder = conn
       .query_row(
         "SELECT id, name, created_at, updated_at, parent_id, folder_path, is_deleted, deleted_at, icon, color, sort_by, sort_order FROM folders WHERE id = ?",
-        params![folder_id],
+        params![input.id],
         |row| {
           Ok(Folder {
             id: row.get(0)?,
@@ -803,5 +797,150 @@ impl FolderService {
     let updated_folder = self.get_folder_by_id(id)?;
 
     Ok(updated_folder)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::db::migrate;
+  use std::sync::Arc;
+  use tempfile::TempDir;
+
+  fn setup_test_db() -> (Arc<Database>, TempDir) {
+    let temp_dir = TempDir::new().unwrap();
+    let db_path = temp_dir.path().join("test.db");
+    let db = Database::new(db_path.to_str().unwrap()).unwrap();
+    {
+      let conn = db.conn.lock().unwrap();
+      migrate(&conn).unwrap();
+    }
+    (Arc::new(db), temp_dir)
+  }
+
+  #[test]
+  fn test_create_folder() {
+    let (db, temp_dir) = setup_test_db();
+    let service = FolderService::new(db, temp_dir.path().to_path_buf());
+
+    let result = service.create_folder("テストフォルダ".to_string(), None, None);
+
+    assert!(result.is_ok());
+    let folder = result.unwrap();
+    assert_eq!(folder.name, "テストフォルダ");
+    assert!(!folder.is_deleted);
+  }
+
+  #[test]
+  fn test_get_folder_by_id() {
+    let (db, temp_dir) = setup_test_db();
+    let service = FolderService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let created = service
+      .create_folder("取得テスト".to_string(), None, None)
+      .unwrap();
+
+    let result = service.get_folder_by_id(created.id);
+    assert!(result.is_ok());
+    let folder = result.unwrap();
+    assert_eq!(folder.id, created.id);
+    assert_eq!(folder.name, "取得テスト");
+  }
+
+  #[test]
+  fn test_get_all_folders() {
+    let (db, temp_dir) = setup_test_db();
+    let service = FolderService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    service
+      .create_folder("フォルダ1".to_string(), None, None)
+      .unwrap();
+    service
+      .create_folder("フォルダ2".to_string(), None, None)
+      .unwrap();
+
+    let folders = service.get_all_folders().unwrap();
+    assert_eq!(folders.len(), 2);
+  }
+
+  #[test]
+  fn test_update_folder() {
+    let (db, temp_dir) = setup_test_db();
+    let service = FolderService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let created = service
+      .create_folder("元の名前".to_string(), None, None)
+      .unwrap();
+
+    // フォルダ名を変更しない場合、update_backlinksが呼ばれない
+    let update_input = crate::db::models::UpdateFolderInput {
+      id: created.id,
+      name: "元の名前".to_string(), // 同じ名前なので、パスが変わらない
+      parent_id: None,
+      icon: Some("📁".to_string()),
+      color: Some("#FF0000".to_string()),
+      sort_by: None,
+      sort_order: None,
+    };
+
+    let result = service.update_folder(update_input);
+    assert!(result.is_ok());
+    let updated = result.unwrap();
+    assert_eq!(updated.name, "元の名前");
+    assert_eq!(updated.icon, Some("📁".to_string()));
+    assert_eq!(updated.color, Some("#FF0000".to_string()));
+  }
+
+  #[test]
+  fn test_delete_folder() {
+    let (db, temp_dir) = setup_test_db();
+    let service = FolderService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let created = service
+      .create_folder("削除テスト".to_string(), None, None)
+      .unwrap();
+
+    let result = service.delete_folder(created.id);
+    assert!(result.is_ok());
+
+    let folders = service.get_all_folders().unwrap();
+    assert_eq!(folders.len(), 0);
+
+    let deleted_folders = service.get_deleted_folders().unwrap();
+    assert_eq!(deleted_folders.len(), 1);
+  }
+
+  #[test]
+  fn test_restore_folder() {
+    let (db, temp_dir) = setup_test_db();
+    let service = FolderService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let created = service
+      .create_folder("復元テスト".to_string(), None, None)
+      .unwrap();
+
+    service.delete_folder(created.id).unwrap();
+    assert_eq!(service.get_all_folders().unwrap().len(), 0);
+
+    service.restore_folder(created.id).unwrap();
+    assert_eq!(service.get_all_folders().unwrap().len(), 1);
+  }
+
+  #[test]
+  fn test_move_folder() {
+    let (db, temp_dir) = setup_test_db();
+    let service = FolderService::new(db.clone(), temp_dir.path().to_path_buf());
+
+    let parent = service
+      .create_folder("親フォルダ".to_string(), None, None)
+      .unwrap();
+    let child = service
+      .create_folder("子フォルダ".to_string(), None, None)
+      .unwrap();
+
+    let result = service.move_folder(child.id, Some(parent.id));
+    assert!(result.is_ok());
+    let moved = result.unwrap();
+    assert_eq!(moved.parent_id, Some(parent.id));
   }
 }

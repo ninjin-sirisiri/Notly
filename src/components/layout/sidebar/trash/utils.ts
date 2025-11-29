@@ -68,3 +68,29 @@ export function getAllDescendantKeys(node: TrashNode): string[] {
   }
   return keys;
 }
+
+export type TrashFlattenedItem = {
+  node: TrashNode;
+  depth: number;
+  index: number;
+};
+
+export function flattenTrashNodes(
+  nodes: TrashNode[],
+  expandedFolderIds: Set<number>,
+  depth = 0,
+  result: TrashFlattenedItem[] = []
+): TrashFlattenedItem[] {
+  for (const node of nodes) {
+    result.push({
+      node,
+      depth,
+      index: result.length
+    });
+
+    if (node.type === 'folder' && expandedFolderIds.has(node.data.id) && node.children.length > 0) {
+      flattenTrashNodes(node.children, expandedFolderIds, depth + 1, result);
+    }
+  }
+  return result;
+}

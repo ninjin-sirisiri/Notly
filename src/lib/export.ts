@@ -1,6 +1,3 @@
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
-import { marked } from 'marked';
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeFile, writeTextFile } from '@tauri-apps/plugin-fs';
 
@@ -20,6 +17,7 @@ export async function exportNote(note: NoteWithContent, format: 'md' | 'html' | 
       await writeTextFile(path, content);
     }
   } else if (format === 'html') {
+    const { marked } = await import('marked');
     const htmlContent = await marked.parse(content);
     const fullHtml = `
 <!DOCTYPE html>
@@ -57,6 +55,13 @@ export async function exportNote(note: NoteWithContent, format: 'md' | 'html' | 
       await writeTextFile(path, fullHtml);
     }
   } else if (format === 'pdf') {
+    const markedModule = await import('marked');
+    const { marked } = markedModule;
+    const html2canvasModule = await import('html2canvas');
+    const html2canvas = html2canvasModule.default;
+    const jspdfModule = await import('jspdf');
+    const { jsPDF } = jspdfModule;
+
     const path = await save({
       defaultPath: `${suggestedName}.pdf`,
       filters: [{ name: 'PDF', extensions: ['pdf'] }]

@@ -49,7 +49,7 @@ import {
   Wifi,
   Zap
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 
 import { Button } from '@/components/ui/button';
@@ -125,14 +125,20 @@ const iconMap: Record<
 
 type FolderItemProps = {
   folder: FolderWithChildren;
-  isActive?: boolean;
   FileItemComponent: React.ComponentType<{ item: FileItemType }>;
   onClick: () => void;
 };
 
-export function FolderItem({ folder, isActive, FileItemComponent, onClick }: FolderItemProps) {
-  const { openFolderIds, toggleFolder } = useFolderStore();
-  const isOpen = openFolderIds.includes(folder.id);
+export const FolderItem = memo(function FolderItem({
+  folder,
+  FileItemComponent,
+  onClick
+}: FolderItemProps) {
+  // Optimized folder store selectors
+  const isOpen = useFolderStore(state => state.openFolderIds.includes(folder.id));
+  const isActive = useFolderStore(state => state.currentFolder?.id === folder.id);
+  const toggleFolder = useFolderStore(state => state.toggleFolder);
+
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(folder.name);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -150,8 +156,12 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
   const { deleteFolder } = useDeleteFolder();
   const { moveFolder } = useMoveFolder();
 
-  const { selectionMode, isSelected, toggleSelectionWithChildren } = useSelectionStore();
-  const selected = isSelected(folder.id, 'folder');
+  // Optimized selection store selectors
+  const selectionMode = useSelectionStore(state => state.selectionMode);
+  const selected = useSelectionStore(state =>
+    state.selectedItems.some(item => item.id === folder.id && item.type === 'folder')
+  );
+  const toggleSelectionWithChildren = useSelectionStore(state => state.toggleSelectionWithChildren);
 
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({
     id: folder.id
@@ -576,4 +586,4 @@ export function FolderItem({ folder, isActive, FileItemComponent, onClick }: Fol
       />
     </div>
   );
-}
+});

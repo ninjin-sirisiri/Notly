@@ -54,7 +54,7 @@ impl BackupService {
     // ノートファイルをバックアップ
     let notes_dir = self.base_path.join("notes");
     if notes_dir.exists() {
-      self.add_directory_to_zip(&mut zip, &notes_dir, "notes")?;
+      Self::add_directory_to_zip(&mut zip, &notes_dir, "notes")?;
     }
 
     // メタデータを作成
@@ -84,7 +84,6 @@ impl BackupService {
 
   /// ディレクトリをZIPに追加
   fn add_directory_to_zip(
-    &self,
     zip: &mut ZipWriter<fs::File>,
     dir: &Path,
     prefix: &str,
@@ -108,7 +107,7 @@ impl BackupService {
         std::io::Write::write_all(zip, &content)
           .map_err(|e| format!("Failed to write file to zip: {}", e))?;
       } else if path.is_dir() {
-        self.add_directory_to_zip(zip, &path, &zip_path)?;
+        Self::add_directory_to_zip(zip, &path, &zip_path)?;
       }
     }
 
@@ -164,7 +163,7 @@ impl BackupService {
         .map_err(|e| format!("Failed to backup existing database: {}", e))?;
     }
     if notes_dir.exists() {
-      self.copy_directory(&notes_dir, &temp_backup_dir.join("notes"))?;
+      Self::copy_directory(&notes_dir, &temp_backup_dir.join("notes"))?;
     }
 
     // ZIPファイルを解凍
@@ -212,7 +211,7 @@ impl BackupService {
   }
 
   /// ディレクトリをコピー
-  fn copy_directory(&self, src: &Path, dst: &Path) -> Result<(), String> {
+  fn copy_directory(src: &Path, dst: &Path) -> Result<(), String> {
     fs::create_dir_all(dst).map_err(|e| format!("Failed to create directory {:?}: {}", dst, e))?;
 
     let entries =
@@ -226,7 +225,7 @@ impl BackupService {
       if path.is_file() {
         fs::copy(&path, &dest_path).map_err(|e| format!("Failed to copy file: {}", e))?;
       } else if path.is_dir() {
-        self.copy_directory(&path, &dest_path)?;
+        Self::copy_directory(&path, &dest_path)?;
       }
     }
 

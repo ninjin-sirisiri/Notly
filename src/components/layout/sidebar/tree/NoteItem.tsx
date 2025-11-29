@@ -1,5 +1,5 @@
 import { Copy, Edit2, FileText, FolderInput, MoreHorizontal, Star, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 
 import { toast } from 'sonner';
@@ -14,7 +14,6 @@ import {
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import {
   useCreateNote,
-  useCurrentNote,
   useDeleteNote,
   useMoveNote,
   useNotes,
@@ -23,6 +22,7 @@ import {
 import { loadNote as fetchNote } from '@/lib/api/notes';
 import { exportNote } from '@/lib/export';
 import { cn } from '@/lib/utils';
+import { useNoteStore } from '@/stores/notes';
 import { useSelectionStore } from '@/stores/selection';
 import { type Note } from '@/types/notes';
 
@@ -35,13 +35,16 @@ type NoteItemProps = {
   note: Note;
 };
 
-export function NoteItem({ note }: NoteItemProps) {
+export const NoteItem = memo(function NoteItem({ note }: NoteItemProps) {
   const { loadNote } = useNotes();
-  const { currentNote, currentContent, updateNote } = useCurrentNote();
   const { deleteNote } = useDeleteNote();
   const { moveNote } = useMoveNote();
   const { createNote } = useCreateNote();
   const { toggleFavorite } = useToggleFavorite();
+  const updateNote = useNoteStore(state => state.updateNote);
+
+  // Selector to check if this note is the current one
+  const isCurrentNote = useNoteStore(state => state.currentNote?.id === note.id);
 
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(note.title);
@@ -49,8 +52,12 @@ export function NoteItem({ note }: NoteItemProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
-  const { selectionMode, isSelected, toggleSelection } = useSelectionStore();
-  const selected = isSelected(note.id, 'note');
+  // Optimized selection store selectors
+  const selectionMode = useSelectionStore(state => state.selectionMode);
+  const selected = useSelectionStore(state =>
+    state.selectedItems.some(item => item.id === note.id && item.type === 'note')
+  );
+  const toggleSelection = useSelectionStore(state => state.toggleSelection);
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: note.id,
@@ -59,18 +66,18 @@ export function NoteItem({ note }: NoteItemProps) {
 
   useEffect(() => {
     setTitle(note.title);
-  }, [note]);
+  }, [note.title]);
 
   function handleSave() {
     if (title.trim() === '') {
       setIsEditing(false);
-      setTitle('');
+      setTitle(note.title);
     } else {
       loadNote(note.id);
-      const content = currentContent;
+      // Use getState to avoid subscribing to content changes
+      const content = useNoteStore.getState().currentContent;
       updateNote(note.id, title, content || '');
       setIsEditing(false);
-      setTitle('');
     }
   }
 
@@ -97,8 +104,12 @@ export function NoteItem({ note }: NoteItemProps) {
       const folderPath = note.file_path.slice(0, note.file_path.lastIndexOf(separator));
 
       let contentToCopy = '';
-      if (currentNote?.id === note.id && currentContent) {
-        contentToCopy = currentContent;
+      const state = useNoteStore.getState();
+      if (state.currentNote?.id === note.id && state.currentContent) {
+        contentToCopy = state.currentContent;
+      } else if (state.currentNote?.id !== note.id) {
+        const noteData = await fetchNote(note.id);
+        contentToCopy = noteData.content;
       }
 
       await createNote(`${note.title} (Copy)`, contentToCopy, folderPath, note.parent_id);
@@ -151,7 +162,7 @@ export function NoteItem({ note }: NoteItemProps) {
                 {...listeners}
                 className={cn(
                   'flex items-center gap-2 pl-6 pr-2 py-1.5 rounded text-primary dark:text-white group relative cursor-pointer',
-                  currentNote?.id === note.id
+                  isCurrentNote
                     ? 'bg-gray-300/50 dark:bg-gray-600/50'
                     : 'hover:bg-gray-200 dark:hover:bg-gray-700/50',
                   isDragging && 'opacity-50',
@@ -242,4 +253,4 @@ export function NoteItem({ note }: NoteItemProps) {
       />
     </div>
   );
-}
+});

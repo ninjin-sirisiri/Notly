@@ -237,6 +237,57 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     [],
   )?;
 
+  // Create FTS table for full-text search
+  // id is unindexed to allow mapping back to notes table
+  conn.execute(
+    "CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(id UNINDEXED, title, content, tokenize='trigram')",
+    [],
+  ).or_else(|_| {
+    // Fallback if trigram tokenizer is not available (though it should be in modern sqlite)
+    conn.execute(
+      "CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(id UNINDEXED, title, content)",
+      [],
+    )
+  })?;
+
+  // Check if FTS table needs population
+  let fts_count: i64 = conn
+    .query_row("SELECT count(*) FROM notes_fts", [], |row| row.get(0))
+    .unwrap_or(0);
+
+  let notes_count: i64 = conn
+    .query_row(
+      "SELECT count(*) FROM notes WHERE is_deleted = FALSE",
+      [],
+      |row| row.get(0),
+    )
+    .unwrap_or(0);
+
+  // If FTS is empty or significantly out of sync, repopulate
+  // Note: This is a simple check. Ideally we'd have a more robust sync mechanism.
+  if fts_count == 0 && notes_count > 0 {
+    let mut stmt =
+      conn.prepare("SELECT id, title, file_path FROM notes WHERE is_deleted = FALSE")?;
+    let notes_iter = stmt.query_map([], |row| {
+      Ok((
+        row.get::<_, i64>(0)?,
+        row.get::<_, String>(1)?,
+        row.get::<_, String>(2)?,
+      ))
+    })?;
+
+    for (id, title, file_path) in notes_iter.flatten() {
+      if let Ok(content) = fs::read_to_string(&file_path) {
+        conn
+          .execute(
+            "INSERT INTO notes_fts (id, title, content) VALUES (?, ?, ?)",
+            params![id, title, content],
+          )
+          .ok(); // Ignore errors for individual notes to allow migration to complete
+      }
+    }
+  }
+
   Ok(())
 }
 

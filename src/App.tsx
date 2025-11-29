@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { toast } from 'sonner';
 import { exit } from '@tauri-apps/plugin-process';
@@ -7,19 +7,41 @@ import { checkInitialization } from '@/lib/api/app';
 import { useNoteStore } from '@/stores/notes';
 import { useTemplateStore } from '@/stores/templates';
 
-import { Editor } from '@/components/editor';
-import { TemplateEditor } from '@/components/editor/TemplateEditor';
 import { InitializationScreen } from '@/components/InitializationScreen';
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { TitleBar } from '@/components/layout/title-bar';
-import { SettingsPage } from '@/components/settings/SettingsPage';
 
 import './App.css';
 import { ThemeProvider } from './components/theme/theme-provider';
 import { Toaster } from './components/ui/sonner';
 
 import { listen } from '@tauri-apps/api/event';
+
+function LoadingFallback() {
+  return (
+    <div className="flex-1 flex items-center justify-center text-muted-foreground">
+      読み込み中...
+    </div>
+  );
+}
+
+const fallbackElement = <LoadingFallback />;
+
+const Editor = lazy(async () => {
+  const module = await import('@/components/editor');
+  return { default: module.Editor };
+});
+
+const TemplateEditor = lazy(async () => {
+  const module = await import('@/components/editor/TemplateEditor');
+  return { default: module.TemplateEditor };
+});
+
+const SettingsPage = lazy(async () => {
+  const module = await import('@/components/settings/SettingsPage');
+  return { default: module.SettingsPage };
+});
 
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -133,11 +155,13 @@ export default function App() {
               isOpen={isSidebarOpen}
               onClose={() => setIsSidebarOpen(false)}
             />
-            {(() => {
-              if (isSettingsOpen) return <SettingsPage />;
-              if (isTemplateEditorOpen) return <TemplateEditor />;
-              return <Editor />;
-            })()}
+            <Suspense fallback={fallbackElement}>
+              {(() => {
+                if (isSettingsOpen) return <SettingsPage />;
+                if (isTemplateEditorOpen) return <TemplateEditor />;
+                return <Editor />;
+              })()}
+            </Suspense>
           </div>
         </div>
         <Toaster />

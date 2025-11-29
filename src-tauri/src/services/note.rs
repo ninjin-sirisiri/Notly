@@ -68,7 +68,17 @@ impl NoteService {
           params![title, parent_id, file_path_str, preview],
         )
         .map_err(|e| format!("ノートの作成に失敗しました: {}", e))?;
-      conn.last_insert_rowid()
+      let id = conn.last_insert_rowid();
+
+      // Update FTS index
+      conn
+        .execute(
+          "INSERT INTO notes_fts (id, title, content) VALUES (?, ?, ?)",
+          params![id, title, content],
+        )
+        .map_err(|e| format!("検索インデックスの更新に失敗しました: {}", e))?;
+
+      id
     };
 
     fs::write(&full_path, content.clone())
@@ -250,26 +260,35 @@ impl NoteService {
       return Ok(candidates);
     }
 
-    let query_lower = text_query.to_lowercase();
-    let mut matched_notes = Vec::new();
+    // Use FTS for text search
+    let conn = self.db.conn.lock().unwrap();
 
-    for note in candidates {
-      let title_matches = note.title.to_lowercase().contains(&query_lower);
+    // Construct FTS query: treat spaces as AND
+    let fts_query = text_query
+      .split_whitespace()
+      .map(|s| format!("\"{}\"", s.replace("\"", ""))) // Simple quote escaping
+      .collect::<Vec<_>>()
+      .join(" AND ");
 
-      let content_matches = if !title_matches {
-        fs::read_to_string(&note.file_path)
-          .map(|content| content.to_lowercase().contains(&query_lower))
-          .unwrap_or(false)
-      } else {
-        false
-      };
-
-      if title_matches || content_matches {
-        matched_notes.push(note);
-      }
+    // If query became empty after processing (e.g. only quotes), return empty
+    if fts_query.is_empty() {
+      return Ok(Vec::new());
     }
 
-    Ok(matched_notes)
+    let mut stmt = conn
+      .prepare("SELECT id FROM notes_fts WHERE notes_fts MATCH ? ORDER BY rank")
+      .map_err(|e| e.to_string())?;
+
+    let fts_ids: std::collections::HashSet<i64> = stmt
+      .query_map(params![fts_query], |row| row.get(0))
+      .map_err(|e| e.to_string())?
+      .filter_map(Result::ok)
+      .collect();
+
+    // Filter candidates by FTS results
+    candidates.retain(|n| fts_ids.contains(&n.id));
+
+    Ok(candidates)
   }
 
   fn get_relative_link_path(&self, path: &std::path::Path) -> String {
@@ -392,6 +411,14 @@ impl NoteService {
         )
         .map_err(|e| format!("ノートの更新に失敗しました: {}", e))?;
 
+      // Update FTS index
+      conn
+        .execute(
+          "UPDATE notes_fts SET title = ?, content = ? WHERE id = ?",
+          params![title, content, id],
+        )
+        .map_err(|e| format!("検索インデックスの更新に失敗しました: {}", e))?;
+
       conn
         .query_row(
           "SELECT updated_at FROM notes WHERE id = ?",
@@ -468,6 +495,11 @@ impl NoteService {
       )
       .map_err(|e| format!("ノートの削除に失敗しました: {}", e))?;
 
+    // FTSから削除
+    conn
+      .execute("DELETE FROM notes_fts WHERE id = ?", params![id])
+      .ok();
+
     Ok(())
   }
 
@@ -501,6 +533,11 @@ impl NoteService {
     conn
       .execute("DELETE FROM notes WHERE id = ?", params![id])
       .map_err(|e| format!("ノートの削除に失敗しました: {}", e))?;
+
+    // FTSから削除
+    conn
+      .execute("DELETE FROM notes_fts WHERE id = ?", params![id])
+      .ok();
 
     Ok(())
   }
@@ -562,6 +599,25 @@ impl NoteService {
       // ファイルを戻す
       fs::rename(&trash_path, &note_path)
         .map_err(|e| format!("ファイルの復元に失敗しました: {}", e))?;
+
+      // FTSに再登録
+      if let Ok(content) = fs::read_to_string(&note_path) {
+        let conn = self.db.conn.lock().unwrap();
+        // titleを取得する必要があるが、ここでは簡易的にファイル名から推測するか、
+        // あるいはDBから再取得する。DBから再取得が確実。
+        let title: String = conn
+          .query_row("SELECT title FROM notes WHERE id = ?", params![id], |row| {
+            row.get(0)
+          })
+          .unwrap_or_default();
+
+        conn
+          .execute(
+            "INSERT INTO notes_fts (id, title, content) VALUES (?, ?, ?)",
+            params![id, title, content],
+          )
+          .ok();
+      }
     }
 
     Ok(())

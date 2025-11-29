@@ -33,7 +33,7 @@ import { BulkActions } from './actions/BulkActions';
 import { SidebarHeader } from './header/SidebarHeader';
 import { TagList } from './TagList';
 import { TrashView } from './trash';
-import { FileItem } from './tree/FileItem';
+import { VirtualizedFileList } from './VirtualizedFileList';
 
 function RootDroppable({ children }: { children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -43,7 +43,7 @@ function RootDroppable({ children }: { children: React.ReactNode }) {
   return (
     <div
       ref={setNodeRef}
-      className={cn('overflow-y-auto h-full', isOver && 'bg-accent/50')}>
+      className={cn('h-full flex flex-col overflow-hidden', isOver && 'bg-accent/50')}>
       {children}
     </div>
   );
@@ -402,16 +402,16 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
           ) : (
             <>
               {showTags && <TagList />}
-              <div className="h-full">
+              <div className="flex-1 overflow-hidden">
                 <DndContext
                   sensors={sensors}
                   onDragEnd={handleDragEnd}>
                   <RootDroppable>
                     <div
-                      className="overflow-y-auto h-full"
+                      className="flex flex-col h-full"
                       onClick={() => setCurrentFolder(null)}>
                       {isCreatingNote && (
-                        <div className="px-2 py-1">
+                        <div className="px-2 py-1 shrink-0">
                           <Input
                             ref={noteInputRef}
                             value={title}
@@ -425,7 +425,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                         </div>
                       )}
                       {isCreatingFolder && (
-                        <div className="px-2 py-1">
+                        <div className="px-2 py-1 shrink-0">
                           <Input
                             ref={folderInputRef}
                             value={folderName}
@@ -438,14 +438,9 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                           />
                         </div>
                       )}
-                      {files.map(item => (
-                        <FileItem
-                          key={
-                            'folder' in item ? `folder-${item.folder.id}` : `note-${item.note.id}`
-                          }
-                          item={item}
-                        />
-                      ))}
+                      <div className="flex-1 overflow-hidden">
+                        <VirtualizedFileList />
+                      </div>
                     </div>
                   </RootDroppable>
                 </DndContext>

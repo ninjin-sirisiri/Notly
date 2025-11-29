@@ -127,34 +127,32 @@
 
 ## Roadmap
 
-### Phase 1 (MVP) - 完了予定: TBD
+### 🚀 Performance Improvements (High Priority)
 
-- [x] プロジェクトセットアップ
-- [x] ローカルファイル保存
-- [x] 基本的なノート作成・編集・削除機能
-- [x] Markdownエディタ
-- [x] フォルダ管理
+- [ ] サイドバーのリスト仮想化 (Virtualization)
+- [ ] エディタのレンダリング最適化
+- [ ] データベースクエリの最適化
+- [ ] 起動時間の短縮
 
-### Phase 2 - 完了予定: TBD
+### ✨ Core Features (High Priority)
 
-- [x] 連続日数カウント機能
-- [x] 通知機能
-- [x] 検索機能
-- [x] ノート間リンク機能
+- [ ] 習慣化支援機能 (ストリーク, ヒートマップ, 目標設定)
+- [ ] 整理・リンク機能の高度化 (タグシステム, Wikiリンク)
+- [ ] 検索機能のオーバーホール (全文検索, 高度なフィルタ)
 
-### Phase 3 - 完了予定: TBD
+### 🎨 UX/UI Improvements (Medium Priority)
 
-- [x] テンプレート機能
-- [x] タグ機能
-- [x] WYSIWYGエディタモード
-- [x] 画像サポート
-- [x] ダークモード
+- [ ] テーマと外観のカスタマイズ
+- [ ] オンボーディング体験の向上
+- [ ] キーボード操作の完備
 
-### Phase 4 - 完了予定: TBD
+### 🔮 Future Extensions (Low Priority)
 
-- [x] グローバルホットキー
-- [x] パフォーマンス最適化
-- [x] バックアップ機能
+- [ ] クラウド同期 / バックアップ
+- [ ] プラグインシステム
+- [ ] モバイルコンパニオンアプリ
+
+詳細な計画は [tasks/roadmap.md](tasks/roadmap.md) を参照してください。
 
 <p align="right">(<a href="#readme-top">トップへ戻る</a>)</p>
 

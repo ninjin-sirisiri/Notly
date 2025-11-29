@@ -1,11 +1,24 @@
 import path from 'path';
 import { defineConfig } from 'vite';
 import oxlintPlugin from 'vite-plugin-oxlint';
+import type { Plugin } from 'rollup';
 
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 
 const host = process.env.TAURI_DEV_HOST;
+
+// Rollup plugin to exclude test files from build
+const excludeTestFiles = (): Plugin => ({
+  name: 'exclude-test-files',
+  resolveId(id) {
+    // Exclude test files from being included in the build
+    if (id.match(/\.(test|spec)\.(ts|tsx|js|jsx)$/)) {
+      return { id, external: true };
+    }
+    return null;
+  }
+});
 
 export default defineConfig(async () => ({
   plugins: [react(), tailwindcss(), oxlintPlugin()],
@@ -24,6 +37,8 @@ export default defineConfig(async () => ({
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
+      // Exclude test files from build
+      plugins: [excludeTestFiles()],
       // Exclude binary files that can't be processed by Vite
       external: [
         '@tailwindcss/oxide',

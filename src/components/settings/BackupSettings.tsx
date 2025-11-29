@@ -1,34 +1,30 @@
+import { Download, Upload, Info } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, Upload, Info } from 'lucide-react';
-import { open, save } from '@tauri-apps/plugin-dialog';
-import {
-  createBackup,
-  restoreBackup,
-  readBackupMetadata,
-  type BackupMetadata,
-} from '@/lib/api/backup';
-import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from '@/components/ui/dialog';
+import {
+  createBackup,
+  restoreBackup,
+  readBackupMetadata,
+  type BackupMetadata
+} from '@/lib/api/backup';
+import { open, save } from '@tauri-apps/plugin-dialog';
 
 export function BackupSettings() {
   const [isCreating, setIsCreating] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
-  const [selectedBackupFile, setSelectedBackupFile] = useState<string | null>(
-    null
-  );
-  const [backupMetadata, setBackupMetadata] = useState<BackupMetadata | null>(
-    null
-  );
+  const [selectedBackupFile, setSelectedBackupFile] = useState<string | null>(null);
+  const [backupMetadata, setBackupMetadata] = useState<BackupMetadata | null>(null);
 
   async function handleCreateBackup() {
     try {
@@ -41,9 +37,9 @@ export function BackupSettings() {
         filters: [
           {
             name: 'ZIP Archive',
-            extensions: ['zip'],
-          },
-        ],
+            extensions: ['zip']
+          }
+        ]
       });
 
       if (!selectedPath) {
@@ -52,20 +48,16 @@ export function BackupSettings() {
       }
 
       // 親ディレクトリを取得
-      const parentDir = selectedPath.slice(
-        0,
-        selectedPath.lastIndexOf('\\')
-      );
+      const parentDir = selectedPath.slice(0, selectedPath.lastIndexOf('\\'));
 
       const backupFilePath = await createBackup(parentDir);
 
       toast.success('バックアップ完了', {
-        description: `バックアップが正常に作成されました: ${backupFilePath}`,
+        description: `バックアップが正常に作成されました: ${backupFilePath}`
       });
     } catch (error) {
       toast.error('バックアップ失敗', {
-        description:
-          error instanceof Error ? error.message : 'バックアップの作成に失敗しました',
+        description: error instanceof Error ? error.message : 'バックアップの作成に失敗しました'
       });
     } finally {
       setIsCreating(false);
@@ -80,9 +72,9 @@ export function BackupSettings() {
         filters: [
           {
             name: 'ZIP Archive',
-            extensions: ['zip'],
-          },
-        ],
+            extensions: ['zip']
+          }
+        ]
       });
 
       if (!selected || typeof selected !== 'string') {
@@ -98,9 +90,7 @@ export function BackupSettings() {
     } catch (error) {
       toast.error('バックアップ読み取り失敗', {
         description:
-          error instanceof Error
-            ? error.message
-            : 'バックアップファイルの読み取りに失敗しました',
+          error instanceof Error ? error.message : 'バックアップファイルの読み取りに失敗しました'
       });
     }
   }
@@ -115,14 +105,13 @@ export function BackupSettings() {
       toast.success('復元完了', {
         description:
           'バックアップから正常に復元されました。変更を反映するには、アプリケーションを手動で再起動してください。',
-        duration: 5000,
+        duration: 5000
       });
 
       setRestoreDialogOpen(false);
     } catch (error) {
       toast.error('復元失敗', {
-        description:
-          error instanceof Error ? error.message : 'バックアップの復元に失敗しました',
+        description: error instanceof Error ? error.message : 'バックアップの復元に失敗しました'
       });
     } finally {
       setIsRestoring(false);
@@ -146,8 +135,7 @@ export function BackupSettings() {
             <Button
               onClick={handleCreateBackup}
               disabled={isCreating}
-              className="flex items-center gap-2"
-            >
+              className="flex items-center gap-2">
               <Download className="h-4 w-4" />
               {isCreating ? 'バックアップ中...' : 'バックアップを作成'}
             </Button>
@@ -156,8 +144,7 @@ export function BackupSettings() {
               onClick={handleSelectBackupFile}
               disabled={isRestoring}
               variant="outline"
-              className="flex items-center gap-2"
-            >
+              className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
               バックアップから復元
             </Button>
@@ -167,18 +154,12 @@ export function BackupSettings() {
             <div className="flex items-start gap-3">
               <Info className="h-5 w-5 text-blue-500 mt-0.5 shrink-0" />
               <div className="space-y-1">
-                <p className="text-sm font-medium text-blue-500">
-                  バックアップについて
-                </p>
+                <p className="text-sm font-medium text-blue-500">バックアップについて</p>
                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                   <li>バックアップには全てのノートとデータベースが含まれます</li>
                   <li>定期的にバックアップを取ることをお勧めします</li>
-                  <li>
-                    バックアップから復元すると、現在のデータは上書きされます
-                  </li>
-                  <li>
-                    復元後は、アプリケーションを手動で再起動してください
-                  </li>
+                  <li>バックアップから復元すると、現在のデータは上書きされます</li>
+                  <li>復元後は、アプリケーションを手動で再起動してください</li>
                 </ul>
               </div>
             </div>
@@ -186,7 +167,9 @@ export function BackupSettings() {
         </CardContent>
       </Card>
 
-      <Dialog open={restoreDialogOpen} onOpenChange={setRestoreDialogOpen}>
+      <Dialog
+        open={restoreDialogOpen}
+        onOpenChange={setRestoreDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>バックアップから復元</DialogTitle>
@@ -202,9 +185,7 @@ export function BackupSettings() {
                 <div>{backupMetadata.version}</div>
 
                 <div className="text-muted-foreground">作成日時:</div>
-                <div>
-                  {new Date(backupMetadata.created_at).toLocaleString('ja-JP')}
-                </div>
+                <div>{new Date(backupMetadata.created_at).toLocaleString('ja-JP')}</div>
 
                 <div className="text-muted-foreground">ノート数:</div>
                 <div>{backupMetadata.notes_count}</div>
@@ -219,11 +200,12 @@ export function BackupSettings() {
             <Button
               variant="outline"
               onClick={() => setRestoreDialogOpen(false)}
-              disabled={isRestoring}
-            >
+              disabled={isRestoring}>
               キャンセル
             </Button>
-            <Button onClick={handleRestoreBackup} disabled={isRestoring}>
+            <Button
+              onClick={handleRestoreBackup}
+              disabled={isRestoring}>
               {isRestoring ? '復元中...' : '復元'}
             </Button>
           </DialogFooter>

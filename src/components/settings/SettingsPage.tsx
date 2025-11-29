@@ -1,6 +1,7 @@
+import { AutoBackupSettings } from './AutoBackupSettings';
+import { BackupSettings } from './BackupSettings';
 import { HotkeySettings } from './HotkeySettings';
 import { NotificationSettings } from './NotificationSettings';
-import { BackupSettings } from './BackupSettings';
 
 export function SettingsPage() {
   return (
@@ -14,6 +15,7 @@ export function SettingsPage() {
         <NotificationSettings />
         <HotkeySettings />
         <BackupSettings />
+        <AutoBackupSettings />
       </div>
     </div>
   );

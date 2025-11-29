@@ -182,3 +182,23 @@ pub struct UpdateHotkeyInput {
   pub shortcut: String,
   pub enabled: bool,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BackupSettings {
+  pub id: i64,
+  pub enabled: bool,
+  pub frequency: String,
+  pub backup_path: Option<String>,
+  pub last_backup_at: Option<String>,
+  pub max_backups: i64,
+  pub created_at: String,
+  pub updated_at: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateBackupSettingsInput {
+  pub enabled: bool,
+  pub frequency: String,
+  pub backup_path: Option<String>,
+  pub max_backups: i64,
+}

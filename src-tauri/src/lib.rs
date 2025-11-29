@@ -206,6 +206,27 @@ pub fn run() {
             }
           }
         });
+
+        // Start auto backup checker
+        if let Some(backup_service) = app.try_state::<Arc<services::BackupService>>() {
+          let backup_service_clone = backup_service.inner().clone();
+          std::thread::spawn(move || {
+            loop {
+              // 1時間ごとにチェック
+              std::thread::sleep(std::time::Duration::from_secs(3600));
+
+              if let Ok(should_backup) = backup_service_clone.should_auto_backup()
+                && should_backup
+              {
+                if let Err(e) = backup_service_clone.run_auto_backup() {
+                  eprintln!("Auto backup failed: {}", e);
+                } else {
+                  println!("Auto backup completed successfully");
+                }
+              }
+            }
+          });
+        }
       }
 
       Ok(())
@@ -263,6 +284,8 @@ pub fn run() {
       commands::backup::create_backup,
       commands::backup::restore_backup,
       commands::backup::read_backup_metadata,
+      commands::backup::get_backup_settings,
+      commands::backup::update_backup_settings,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

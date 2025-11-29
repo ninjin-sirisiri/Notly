@@ -193,11 +193,10 @@ impl BackupService {
       if file.name().ends_with('/') {
         fs::create_dir_all(&outpath).map_err(|e| format!("Failed to create directory: {}", e))?;
       } else {
-        if let Some(p) = outpath.parent() {
-          if !p.exists() {
-            fs::create_dir_all(p)
-              .map_err(|e| format!("Failed to create parent directory: {}", e))?;
-          }
+        if let Some(p) = outpath.parent()
+          && !p.exists()
+        {
+          fs::create_dir_all(p).map_err(|e| format!("Failed to create parent directory: {}", e))?;
         }
         let mut outfile =
           fs::File::create(&outpath).map_err(|e| format!("Failed to create file: {}", e))?;
@@ -260,5 +259,153 @@ impl BackupService {
       .map_err(|e| format!("Failed to parse metadata: {}", e))?;
 
     Ok(metadata)
+  }
+
+  /// 自動バックアップ設定を取得
+  pub fn get_backup_settings(&self) -> Result<crate::db::models::BackupSettings, String> {
+    let conn = self.db.conn.lock().unwrap();
+
+    let settings = conn
+      .query_row(
+        "SELECT id, enabled, frequency, backup_path, last_backup_at, max_backups, created_at, updated_at 
+         FROM backup_settings WHERE id = 1",
+        [],
+        |row| {
+          Ok(crate::db::models::BackupSettings {
+            id: row.get(0)?,
+            enabled: row.get(1)?,
+            frequency: row.get(2)?,
+            backup_path: row.get(3)?,
+            last_backup_at: row.get(4)?,
+            max_backups: row.get(5)?,
+            created_at: row.get(6)?,
+            updated_at: row.get(7)?,
+          })
+        },
+      )
+      .map_err(|e| format!("Failed to get backup settings: {}", e))?;
+
+    Ok(settings)
+  }
+
+  /// 自動バックアップ設定を更新
+  pub fn update_backup_settings(
+    &self,
+    input: crate::db::models::UpdateBackupSettingsInput,
+  ) -> Result<crate::db::models::BackupSettings, String> {
+    let conn = self.db.conn.lock().unwrap();
+
+    conn
+      .execute(
+        "UPDATE backup_settings 
+         SET enabled = ?, frequency = ?, backup_path = ?, max_backups = ?, updated_at = CURRENT_TIMESTAMP 
+         WHERE id = 1",
+        rusqlite::params![
+          input.enabled,
+          input.frequency,
+          input.backup_path,
+          input.max_backups,
+        ],
+      )
+      .map_err(|e| format!("Failed to update backup settings: {}", e))?;
+
+    drop(conn);
+    self.get_backup_settings()
+  }
+
+  /// 自動バックアップを実行すべきかチェック
+  pub fn should_auto_backup(&self) -> Result<bool, String> {
+    let settings = self.get_backup_settings()?;
+
+    if !settings.enabled || settings.backup_path.is_none() {
+      return Ok(false);
+    }
+
+    if let Some(last_backup) = settings.last_backup_at {
+      let last_backup_time = chrono::DateTime::parse_from_rfc3339(&last_backup)
+        .map_err(|e| format!("Failed to parse last backup time: {}", e))?;
+
+      let now = chrono::Local::now();
+      let duration = now.signed_duration_since(last_backup_time);
+
+      let should_backup = match settings.frequency.as_str() {
+        "daily" => duration.num_hours() >= 24,
+        "weekly" => duration.num_days() >= 7,
+        "monthly" => duration.num_days() >= 30,
+        _ => false,
+      };
+
+      Ok(should_backup)
+    } else {
+      // 一度もバックアップしていない場合は実行
+      Ok(true)
+    }
+  }
+
+  /// 自動バックアップを実行
+  pub fn run_auto_backup(&self) -> Result<String, String> {
+    let settings = self.get_backup_settings()?;
+
+    if !settings.enabled {
+      return Err("Auto backup is disabled".to_string());
+    }
+
+    let backup_path = settings
+      .backup_path
+      .ok_or("Backup path not configured".to_string())?;
+
+    // バックアップを作成
+    let backup_file = self.create_backup(backup_path.clone())?;
+
+    // 最終バックアップ時刻を更新
+    let conn = self.db.conn.lock().unwrap();
+    conn
+      .execute(
+        "UPDATE backup_settings SET last_backup_at = ? WHERE id = 1",
+        [chrono::Local::now().to_rfc3339()],
+      )
+      .map_err(|e| format!("Failed to update last backup time: {}", e))?;
+
+    // 古いバックアップを削除
+    self.cleanup_old_backups(&backup_path, settings.max_backups as usize)?;
+
+    Ok(backup_file)
+  }
+
+  /// 古いバックアップファイルを削除
+  fn cleanup_old_backups(&self, backup_dir: &str, max_backups: usize) -> Result<(), String> {
+    let backup_path = PathBuf::from(backup_dir);
+
+    if !backup_path.exists() {
+      return Ok(());
+    }
+
+    let mut backups: Vec<(PathBuf, std::time::SystemTime)> = fs::read_dir(&backup_path)
+      .map_err(|e| format!("Failed to read backup directory: {}", e))?
+      .filter_map(|entry| {
+        let entry = entry.ok()?;
+        let path = entry.path();
+        if path.is_file()
+          && path.file_name()?.to_str()?.starts_with("notly_backup_")
+          && path.extension()? == "zip"
+        {
+          let metadata = fs::metadata(&path).ok()?;
+          let modified = metadata.modified().ok()?;
+          Some((path, modified))
+        } else {
+          None
+        }
+      })
+      .collect();
+
+    // 新しい順にソート
+    backups.sort_by(|a, b| b.1.cmp(&a.1));
+
+    // max_backupsを超える古いバックアップを削除
+    for (path, _) in backups.iter().skip(max_backups) {
+      fs::remove_file(path).map_err(|e| format!("Failed to remove old backup: {}", e))?;
+    }
+
+    Ok(())
   }
 }

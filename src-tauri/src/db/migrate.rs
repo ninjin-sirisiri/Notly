@@ -215,6 +215,28 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     [],
   )?;
 
+  // Create backup_settings table
+  conn.execute(
+    "CREATE TABLE IF NOT EXISTS backup_settings (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    enabled BOOLEAN DEFAULT FALSE,
+    frequency TEXT DEFAULT 'daily',
+    backup_path TEXT,
+    last_backup_at DATETIME,
+    max_backups INTEGER DEFAULT 10,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )",
+    [],
+  )?;
+
+  // Insert default backup settings if not exists
+  conn.execute(
+    "INSERT OR IGNORE INTO backup_settings (id, enabled, frequency, max_backups) 
+     VALUES (1, FALSE, 'daily', 10)",
+    [],
+  )?;
+
   Ok(())
 }
 

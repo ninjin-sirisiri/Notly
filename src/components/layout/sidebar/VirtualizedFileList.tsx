@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import { useFiles } from '@/hooks/useFiles';
 import { useFolderStore } from '@/stores/folders';
+import { VirtualizedProvider } from './context/VirtualizedContext';
 import { FileItem } from './tree/FileItem';
 import { flattenFiles } from './utils/flatten';
 
@@ -19,7 +20,9 @@ export const VirtualizedFileList = memo(function VirtualizedFileList() {
         const flatItem = flattenedItems[index];
         return (
           <div style={{ paddingLeft: `${flatItem.depth * 16}px` }}>
-            <FileItem item={flatItem.item} />
+            <VirtualizedProvider value>
+              <FileItem item={flatItem.item} />
+            </VirtualizedProvider>
           </div>
         );
       }}

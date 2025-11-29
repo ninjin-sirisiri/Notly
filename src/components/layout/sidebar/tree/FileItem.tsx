@@ -14,6 +14,7 @@ export const FileItem = memo(function FileItem({ item }: { item: FileItemType })
         folder={item.folder}
         FileItemComponent={FileItem}
         onClick={() => setCurrentFolder(item.folder)}
+        isVirtualized
       />
     );
   }

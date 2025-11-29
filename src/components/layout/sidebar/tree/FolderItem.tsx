@@ -127,12 +127,14 @@ type FolderItemProps = {
   folder: FolderWithChildren;
   FileItemComponent: React.ComponentType<{ item: FileItemType }>;
   onClick: () => void;
+  isVirtualized?: boolean;
 };
 
 export const FolderItem = memo(function FolderItem({
   folder,
   FileItemComponent,
-  onClick
+  onClick,
+  isVirtualized = false
 }: FolderItemProps) {
   // Optimized folder store selectors
   const isOpen = useFolderStore(state => state.openFolderIds.includes(folder.id));
@@ -565,7 +567,7 @@ export const FolderItem = memo(function FolderItem({
         </DialogContent>
       </Dialog>
 
-      {isOpen && folder.children && folder.children.length > 0 && (
+      {isOpen && folder.children && folder.children.length > 0 && !isVirtualized && (
         <div className="pl-4 relative">
           <div className="space-y-0.5 relative">
             {folder.children.map(item => (

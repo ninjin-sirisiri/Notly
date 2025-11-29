@@ -1,7 +1,7 @@
+import type { Plugin } from 'rollup';
 import path from 'path';
 import { defineConfig } from 'vite';
 import oxlintPlugin from 'vite-plugin-oxlint';
-import type { Plugin } from 'rollup';
 
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';

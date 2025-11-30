@@ -10,7 +10,6 @@ import {
   type DragEndEvent
 } from '@dnd-kit/core';
 
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useFiles } from '@/hooks/useFiles';
 import {
@@ -32,8 +31,8 @@ import { TemplateManagerDialog } from '@/components/templates/TemplateManagerDia
 import { BulkActions } from './actions/BulkActions';
 import { SidebarHeader } from './header/SidebarHeader';
 import { TagList } from './TagList';
-import { TrashView } from './trash';
 import { VirtualizedFileList } from './VirtualizedFileList';
+import { TrashView } from './trash';
 
 function RootDroppable({ children }: { children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -386,15 +385,6 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
           {showTrash ? (
             <div className="flex-1 overflow-hidden flex flex-col">
-              <div className="px-2 mb-2">
-                <Button
-                  className="w-full justify-start gap-2"
-                  onClick={() => setShowTrash(false)}
-                  size="sm"
-                  variant="ghost">
-                  ← ファイル一覧に戻る
-                </Button>
-              </div>
               <div className="flex-1 overflow-hidden">
                 <TrashView />
               </div>

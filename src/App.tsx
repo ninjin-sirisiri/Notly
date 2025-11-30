@@ -6,6 +6,7 @@ import { exit } from '@tauri-apps/plugin-process';
 import { checkInitialization } from '@/lib/api/app';
 import { useNoteStore } from '@/stores/notes';
 import { useTemplateStore } from '@/stores/templates';
+import { useSettingsStore } from '@/stores/settings';
 
 import { InitializationScreen } from '@/components/InitializationScreen';
 import { Header } from '@/components/layout/header';
@@ -46,9 +47,9 @@ const SettingsPage = lazy(async () => {
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { setCurrentNote, createNote } = useNoteStore();
   const { isTemplateEditorOpen } = useTemplateStore();
+  const { isSettingsOpen, toggleSettings } = useSettingsStore();
 
   useEffect(() => {
     async function checkInit() {
@@ -71,7 +72,7 @@ export default function App() {
         toast.success('Quick Note Shortcut Detected');
         createNote('Untitled', '', '', null);
         // Ensure settings and template editor are closed
-        setIsSettingsOpen(false);
+        useSettingsStore.getState().setSettingsOpen(false);
         useTemplateStore.getState().setTemplateEditorOpen(false);
       });
 
@@ -114,7 +115,7 @@ export default function App() {
 
   useHotkeys('ctrl+,', e => {
     e.preventDefault();
-    setIsSettingsOpen(prev => !prev);
+    toggleSettings();
   });
 
   if (isInitialized === null) {
@@ -148,7 +149,7 @@ export default function App() {
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header
             onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            onSettingsClick={() => setIsSettingsOpen(!isSettingsOpen)}
+            onSettingsClick={toggleSettings}
           />
           <div className="flex flex-1 overflow-hidden">
             <Sidebar

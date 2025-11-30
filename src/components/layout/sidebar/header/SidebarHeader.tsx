@@ -96,7 +96,13 @@ export function SidebarHeader({
             className="min-w-[200px]">
             <DropdownMenuCheckboxItem
               checked={selectionMode}
-              onCheckedChange={toggleSelectionMode}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  setShowTrash(false);
+                  setShowTags(false);
+                }
+                toggleSelectionMode();
+              }}
               className="justify-start">
               <CheckSquare className="mr-2 h-4 w-4" />
               選択モード
@@ -148,14 +154,26 @@ export function SidebarHeader({
             <DropdownMenuSeparator />
             <DropdownMenuCheckboxItem
               checked={showTrash}
-              onCheckedChange={setShowTrash}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  if (selectionMode) toggleSelectionMode();
+                  setShowTags(false);
+                }
+                setShowTrash(checked);
+              }}
               className="justify-start">
               <Trash2 className="mr-2 h-4 w-4" />
               ゴミ箱
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={showTags}
-              onCheckedChange={setShowTags}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  if (selectionMode) toggleSelectionMode();
+                  setShowTrash(false);
+                }
+                setShowTags(checked);
+              }}
               className="justify-start">
               <Tags className="mr-2 h-4 w-4" />
               タグ一覧

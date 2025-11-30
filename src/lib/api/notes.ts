@@ -82,8 +82,8 @@ export function importNote(
   parentId: number | null = null
 ): Promise<NoteWithContent> {
   return safeInvoke<NoteWithContent>('import_note', {
-    file_path: filePath,
-    parent_id: parentId
+    filePath: filePath,
+    parentId: parentId
   });
 }
 
@@ -92,8 +92,8 @@ export function importNotes(
   parentId: number | null = null
 ): Promise<NoteWithContent[]> {
   return safeInvoke<NoteWithContent[]>('import_notes', {
-    file_paths: filePaths,
-    parent_id: parentId
+    filePaths: filePaths,
+    parentId: parentId
   });
 }
 

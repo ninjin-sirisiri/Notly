@@ -24,6 +24,7 @@ import { exportNote } from '@/lib/export';
 import { cn } from '@/lib/utils';
 import { useNoteStore } from '@/stores/notes';
 import { useSelectionStore } from '@/stores/selection';
+import { useSettingsStore } from '@/stores/settings';
 import { type Note } from '@/types/notes';
 
 import { NoteInfoDialog } from './note-item/NoteInfoDialog';
@@ -172,6 +173,11 @@ export const NoteItem = memo(function NoteItem({ note }: NoteItemProps) {
                   if (selectionMode) {
                     toggleSelection(note.id, 'note');
                   } else {
+                    // Close settings if open
+                    const { isSettingsOpen, setSettingsOpen } = useSettingsStore.getState();
+                    if (isSettingsOpen) {
+                      setSettingsOpen(false);
+                    }
                     loadNote(note.id);
                   }
                 }}>

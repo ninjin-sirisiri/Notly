@@ -10,7 +10,7 @@ import { getNoteLinkMarkdown, parseMarkdownWithNoteLinks } from '../utils/markdo
 
 type UseMarkdownEditorProps = {
   content: string;
-  setContent: React.Dispatch<React.SetStateAction<string>>;
+  onUpdate: (content: string) => void;
   handleSave: () => void;
   isNewNote: boolean;
   noteId?: number;
@@ -18,7 +18,7 @@ type UseMarkdownEditorProps = {
 
 export function useMarkdownEditor({
   content,
-  setContent,
+  onUpdate,
   handleSave,
   isNewNote,
   noteId
@@ -97,7 +97,7 @@ export function useMarkdownEditor({
 
       // カスタムMarkdown変換を使用してNoteLinkノードを[[]]として保存
       const markdown = getNoteLinkMarkdown(editor);
-      setContent(markdown);
+      onUpdate(markdown);
     },
     onBlur: () => {
       if (!isNewNote) {

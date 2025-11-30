@@ -62,7 +62,7 @@ export function TemplateEditor() {
       />
       <MarkdownEditor
         content={content}
-        setContent={setContent}
+        onUpdate={setContent}
         handleSave={handleSave}
         isNewNote={!currentTemplate}
         noteId={currentTemplate?.id}

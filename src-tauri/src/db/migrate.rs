@@ -288,6 +288,44 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     }
   }
 
+  // Add indexes for performance optimization
+  conn
+    .execute(
+      "CREATE INDEX IF NOT EXISTS idx_notes_parent_id ON notes(parent_id)",
+      [],
+    )
+    .ok();
+  conn
+    .execute(
+      "CREATE INDEX IF NOT EXISTS idx_notes_is_deleted ON notes(is_deleted)",
+      [],
+    )
+    .ok();
+  conn
+    .execute(
+      "CREATE INDEX IF NOT EXISTS idx_notes_is_favorite ON notes(is_favorite)",
+      [],
+    )
+    .ok();
+  conn
+    .execute(
+      "CREATE INDEX IF NOT EXISTS idx_notes_updated_at ON notes(updated_at)",
+      [],
+    )
+    .ok();
+  conn
+    .execute(
+      "CREATE INDEX IF NOT EXISTS idx_folders_parent_id ON folders(parent_id)",
+      [],
+    )
+    .ok();
+  conn
+    .execute(
+      "CREATE INDEX IF NOT EXISTS idx_folders_is_deleted ON folders(is_deleted)",
+      [],
+    )
+    .ok();
+
   Ok(())
 }
 

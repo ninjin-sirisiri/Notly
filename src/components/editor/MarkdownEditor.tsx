@@ -6,16 +6,16 @@ import { EditorToolbar } from './toolbar/EditorToolbar';
 
 type Props = {
   content: string;
-  setContent: React.Dispatch<React.SetStateAction<string>>;
+  onUpdate: (content: string) => void;
   handleSave: () => void;
   isNewNote: boolean;
   noteId?: number;
 };
 
-export function MarkdownEditor({ content, setContent, handleSave, isNewNote, noteId }: Props) {
+export function MarkdownEditor({ content, onUpdate, handleSave, isNewNote, noteId }: Props) {
   const { editor } = useMarkdownEditor({
     content,
-    setContent,
+    onUpdate,
     handleSave,
     isNewNote,
     noteId

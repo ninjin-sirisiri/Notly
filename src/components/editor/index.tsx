@@ -8,6 +8,8 @@ import { EditorHeader } from './header/EditorHeader';
 import { MarkdownEditor } from './MarkdownEditor';
 import { NoteTags } from './NoteTags';
 
+import { debounce } from '@/utils/debounce';
+
 export function Editor() {
   const { currentNote, currentContent, updateNote, isLoading } = useCurrentNote();
   const createNote = useNoteStore(state => state.createNote);
@@ -17,6 +19,23 @@ export function Editor() {
   const [showFolderDialog, setShowFolderDialog] = useState(false);
   const previousNoteIdRef = useRef<number | undefined>(currentNote?.id);
   const previousContentRef = useRef<string | null>(currentContent);
+  const latestContentRef = useRef(content);
+
+  // Update ref when state changes (e.g. loaded new note)
+  useEffect(() => {
+    latestContentRef.current = content;
+  }, [content]);
+
+  // Debounced state updater
+  const debouncedSetContent = useRef(debounce((value: string) => setContent(value), 500)).current;
+
+  // Cleanup debounce on unmount
+  useEffect(() => () => debouncedSetContent.cancel(), [debouncedSetContent]);
+
+  function handleContentChange(newContent: string) {
+    latestContentRef.current = newContent;
+    debouncedSetContent(newContent);
+  }
 
   // ノートまたはコンテンツが変わったときの処理
   useEffect(() => {
@@ -33,15 +52,18 @@ export function Editor() {
         setTitle(currentNote.title);
         // 即座にエディタをクリア
         setContent('');
+        latestContentRef.current = '';
 
         // 次のフレームで新しいコンテンツを設定
         setTimeout(() => {
           const latestContent = useNoteStore.getState().currentContent;
           setContent(latestContent || '');
+          latestContentRef.current = latestContent || '';
         }, 0);
       } else {
         setTitle('');
         setContent('');
+        latestContentRef.current = '';
       }
     } else if (isContentChanged) {
       // ノートは同じだが、コンテンツが外部から更新された場合
@@ -49,6 +71,7 @@ export function Editor() {
       if (currentNote) {
         setTitle(currentNote.title);
         setContent(currentContent || '');
+        latestContentRef.current = currentContent || '';
       }
     }
   }, [currentNote, currentContent]);
@@ -56,7 +79,7 @@ export function Editor() {
   function handleSave() {
     // 既存のノートを更新
     if (currentNote?.id) {
-      updateNote(currentNote.id, title, content);
+      updateNote(currentNote.id, title, latestContentRef.current);
       return;
     }
 
@@ -66,7 +89,7 @@ export function Editor() {
 
   async function handleFolderSelect(folderId: number | null, folderPath: string) {
     try {
-      await createNote(title || '無題のノート', content, folderPath, folderId);
+      await createNote(title || '無題のノート', latestContentRef.current, folderPath, folderId);
     } catch {
       // エラーハンドリング: ユーザーには別途通知する可能性があるが、ここではスキップ
     }
@@ -87,7 +110,7 @@ export function Editor() {
         <MarkdownEditor
           key={currentNote?.id}
           content={content}
-          setContent={setContent}
+          onUpdate={handleContentChange}
           handleSave={handleSave}
           isNewNote={!currentNote}
           noteId={currentNote?.id}

@@ -5,8 +5,8 @@ import { exit } from '@tauri-apps/plugin-process';
 
 import { checkInitialization } from '@/lib/api/app';
 import { useNoteStore } from '@/stores/notes';
-import { useTemplateStore } from '@/stores/templates';
 import { useSettingsStore } from '@/stores/settings';
+import { useTemplateStore } from '@/stores/templates';
 
 import { InitializationScreen } from '@/components/InitializationScreen';
 import { Header } from '@/components/layout/header';

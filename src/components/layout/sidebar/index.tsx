@@ -31,8 +31,8 @@ import { TemplateManagerDialog } from '@/components/templates/TemplateManagerDia
 import { BulkActions } from './actions/BulkActions';
 import { SidebarHeader } from './header/SidebarHeader';
 import { TagList } from './TagList';
-import { VirtualizedFileList } from './VirtualizedFileList';
 import { TrashView } from './trash';
+import { VirtualizedFileList } from './VirtualizedFileList';
 
 function RootDroppable({ children }: { children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({

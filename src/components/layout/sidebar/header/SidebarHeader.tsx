@@ -96,7 +96,7 @@ export function SidebarHeader({
             className="min-w-[200px]">
             <DropdownMenuCheckboxItem
               checked={selectionMode}
-              onCheckedChange={(checked) => {
+              onCheckedChange={checked => {
                 if (checked) {
                   setShowTrash(false);
                   setShowTags(false);
@@ -154,7 +154,7 @@ export function SidebarHeader({
             <DropdownMenuSeparator />
             <DropdownMenuCheckboxItem
               checked={showTrash}
-              onCheckedChange={(checked) => {
+              onCheckedChange={checked => {
                 if (checked) {
                   if (selectionMode) toggleSelectionMode();
                   setShowTags(false);
@@ -167,7 +167,7 @@ export function SidebarHeader({
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={showTags}
-              onCheckedChange={(checked) => {
+              onCheckedChange={checked => {
                 if (checked) {
                   if (selectionMode) toggleSelectionMode();
                   setShowTrash(false);

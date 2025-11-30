@@ -13,8 +13,8 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { importNotes } from '@/lib/api/notes';
-import { useNoteStore } from '@/stores/notes';
 import { useFileStore } from '@/stores/files';
+import { useNoteStore } from '@/stores/notes';
 
 type ImportNotesDialogProps = {
   open: boolean;
@@ -45,7 +45,7 @@ export function ImportNotesDialog({ open, onOpenChange, parentId = null }: Impor
       const filePaths = Array.isArray(selected) ? selected : [selected];
       await importNotes(filePaths, parentId);
       await loadNotes();
-      
+
       // Update file store to refresh sidebar
       useFileStore.getState().loadFiles();
 

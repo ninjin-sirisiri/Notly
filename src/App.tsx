@@ -44,9 +44,15 @@ const SettingsPage = lazy(async () => {
   return { default: module.SettingsPage };
 });
 
+const ActivityDashboard = lazy(async () => {
+  const module = await import('@/components/activity/ActivityDashboard');
+  return { default: module.default };
+});
+
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
+  const [showActivityDashboard, setShowActivityDashboard] = useState(false);
   const { setCurrentNote, createNote } = useNoteStore();
   const { isTemplateEditorOpen } = useTemplateStore();
   const { isSettingsOpen, toggleSettings } = useSettingsStore();
@@ -74,6 +80,7 @@ export default function App() {
         // Ensure settings and template editor are closed
         useSettingsStore.getState().setSettingsOpen(false);
         useTemplateStore.getState().setTemplateEditorOpen(false);
+        setShowActivityDashboard(false);
       });
 
       if (ignore) {
@@ -92,6 +99,18 @@ export default function App() {
       }
     };
   }, [createNote]);
+
+  useEffect(() => {
+    function handleCloseActivityDashboard() {
+      setShowActivityDashboard(false);
+    }
+
+    globalThis.addEventListener('close-activity-dashboard', handleCloseActivityDashboard);
+
+    return () => {
+      globalThis.removeEventListener('close-activity-dashboard', handleCloseActivityDashboard);
+    };
+  }, []);
 
   useHotkeys('ctrl+b, cmd+b', e => {
     e.preventDefault();
@@ -117,6 +136,14 @@ export default function App() {
     e.preventDefault();
     toggleSettings();
   });
+
+  function handleActivityClick() {
+    setShowActivityDashboard(!showActivityDashboard);
+    if (!showActivityDashboard) {
+      useSettingsStore.getState().setSettingsOpen(false);
+      useTemplateStore.getState().setTemplateEditorOpen(false);
+    }
+  }
 
   if (isInitialized === null) {
     return (
@@ -150,6 +177,7 @@ export default function App() {
           <Header
             onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
             onSettingsClick={toggleSettings}
+            onActivityClick={handleActivityClick}
           />
           <div className="flex flex-1 overflow-hidden">
             <Sidebar
@@ -158,6 +186,7 @@ export default function App() {
             />
             <Suspense fallback={fallbackElement}>
               {(() => {
+                if (showActivityDashboard) return <ActivityDashboard />;
                 if (isSettingsOpen) return <SettingsPage />;
                 if (isTemplateEditorOpen) return <TemplateEditor />;
                 return <Editor />;

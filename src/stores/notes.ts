@@ -143,6 +143,12 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
       error: null
     });
     try {
+      // Get the old content to calculate character difference
+      const oldContent = get().currentNote?.id === id ? get().currentContent : null;
+      const oldCharCount = oldContent?.length || 0;
+      const newCharCount = content.length;
+      const charDiff = newCharCount - oldCharCount;
+
       const updatedNote = await updateNote(id, title, content);
       set(state => ({
         notes: state.notes.map(note => (note.id === id ? updatedNote : note)),
@@ -152,8 +158,8 @@ export const useNoteStore = create<NoteStore>()((set, get) => ({
       }));
       useFileStore.getState().loadFiles();
 
-      // Record activity for streak tracking
-      useStreakStore.getState().recordActivity();
+      // Record activity for streak tracking with character difference
+      useStreakStore.getState().recordActivity(charDiff);
     } catch (error) {
       set({
         isLoading: false,

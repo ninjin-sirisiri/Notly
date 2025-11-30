@@ -178,6 +178,8 @@ export const NoteItem = memo(function NoteItem({ note }: NoteItemProps) {
                     if (isSettingsOpen) {
                       setSettingsOpen(false);
                     }
+                    // Close activity dashboard if open
+                    globalThis.dispatchEvent(new CustomEvent('close-activity-dashboard'));
                     loadNote(note.id);
                   }
                 }}>

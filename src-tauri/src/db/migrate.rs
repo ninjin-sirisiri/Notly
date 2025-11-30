@@ -102,8 +102,40 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     "CREATE TABLE IF NOT EXISTS activity_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     activity_date DATE NOT NULL UNIQUE,
+    activity_count INTEGER DEFAULT 0,
+    char_count INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )",
+    [],
+  )?;
+
+  // Add activity_count and char_count columns to activity_log if they don't exist
+  conn
+    .execute(
+      "ALTER TABLE activity_log ADD COLUMN activity_count INTEGER DEFAULT 0",
+      [],
+    )
+    .ok();
+  conn
+    .execute(
+      "ALTER TABLE activity_log ADD COLUMN char_count INTEGER DEFAULT 0",
+      [],
+    )
+    .ok();
+
+  conn.execute(
+    "CREATE TABLE IF NOT EXISTS user_goals (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    daily_char_count INTEGER DEFAULT 0,
+    daily_note_count INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )",
+    [],
+  )?;
+
+  conn.execute(
+    "INSERT OR IGNORE INTO user_goals (id, daily_char_count, daily_note_count) VALUES (1, 1000, 0)",
     [],
   )?;
 

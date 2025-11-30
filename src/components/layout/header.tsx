@@ -1,14 +1,16 @@
-import { Flame, Menu, Settings } from 'lucide-react';
+import { BarChart3, Flame, Menu, Settings } from 'lucide-react';
 import { useEffect } from 'react';
 import { useStreakStore } from '../../stores/streak';
 import { ModeToggle } from '../theme/ModeToggle';
 
 export function Header({
   onMenuClick,
-  onSettingsClick
+  onSettingsClick,
+  onActivityClick
 }: {
   onMenuClick: () => void;
   onSettingsClick?: () => void;
+  onActivityClick?: () => void;
 }) {
   const { streak, fetchStreak } = useStreakStore();
 
@@ -33,7 +35,9 @@ export function Header({
         <h1 className="text-base md:text-lg font-bold text-foreground">Notly</h1>
       </div>
       <div className="flex items-center justify-between gap-2 md:gap-4">
-        <div className="flex items-center gap-1 md:gap-1.5 rounded-full bg-orange-100 dark:bg-orange-900/50 px-2 md:px-3 py-1">
+        <button
+          onClick={onActivityClick}
+          className="flex items-center gap-1 md:gap-1.5 rounded-full bg-orange-100 dark:bg-orange-900/50 px-2 md:px-3 py-1 hover:bg-orange-200 dark:hover:bg-orange-900/70 transition-colors cursor-pointer">
           <Flame className="h-4 w-4 text-orange-500 dark:text-orange-400" />
           <p className="hidden sm:block text-sm font-medium text-orange-600 dark:text-orange-300">
             継続 {streak} 日目
@@ -41,9 +45,15 @@ export function Header({
           <p className="sm:hidden text-sm font-medium text-orange-600 dark:text-orange-300">
             {streak}
           </p>
-        </div>
+        </button>
       </div>
       <div className="flex items-center justify-between gap-2 md:gap-4">
+        <button
+          onClick={onActivityClick}
+          className="flex items-center justify-center rounded-lg h-8 w-8 md:h-10 md:w-10 text-muted-foreground hover:bg-accent"
+          title="アクティビティ">
+          <BarChart3 className="h-5 w-5 md:h-6 md:w-6" />
+        </button>
         <ModeToggle />
         <button
           onClick={onSettingsClick}

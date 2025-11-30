@@ -1,5 +1,6 @@
 import { AutoBackupSettings } from './AutoBackupSettings';
 import { BackupSettings } from './BackupSettings';
+import GoalSettings from './GoalSettings';
 import { HotkeySettings } from './HotkeySettings';
 import { NotificationSettings } from './NotificationSettings';
 
@@ -12,6 +13,7 @@ export function SettingsPage() {
           <p className="mt-2 text-muted-foreground">アプリケーションの設定を管理します</p>
         </div>
 
+        <GoalSettings />
         <NotificationSettings />
         <HotkeySettings />
         <BackupSettings />

@@ -6,7 +6,7 @@ type StreakStore = {
   isLoading: boolean;
   error: string | null;
   fetchStreak: () => Promise<void>;
-  recordActivity: () => Promise<void>;
+  recordActivity: (charDiff?: number) => Promise<void>;
 };
 
 export const useStreakStore = create<StreakStore>(set => ({
@@ -24,9 +24,9 @@ export const useStreakStore = create<StreakStore>(set => ({
     }
   },
 
-  recordActivity: async () => {
+  recordActivity: async (charDiff = 0) => {
     try {
-      await invoke('record_daily_activity');
+      await invoke('record_daily_activity', { charDiff });
       // アクティビティ記録後、連続日数を再取得
       const streak = await invoke<number>('get_streak');
       set({ streak });

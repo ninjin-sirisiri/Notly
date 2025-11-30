@@ -75,7 +75,7 @@ describe('useStreakStore', () => {
       const state = useStreakStore.getState();
       expect(state.streak).toBe(newStreak);
       expect(state.error).toBeNull();
-      expect(mockInvoke).toHaveBeenCalledWith('record_daily_activity');
+      expect(mockInvoke).toHaveBeenCalledWith('record_daily_activity', { charDiff: 0 });
       expect(mockInvoke).toHaveBeenCalledWith('get_streak');
       expect(mockInvoke).toHaveBeenCalledTimes(2);
     });

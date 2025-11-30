@@ -1,6 +1,6 @@
 [package]
 name = "notly"
-version = "1.0.1"
+version = "1.0.2"
 description = "ノートをつけることを習慣化するためのアプリ"
 authors = ["ubsa"]
 edition = "2024"

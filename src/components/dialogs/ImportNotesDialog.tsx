@@ -1,7 +1,7 @@
+import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { FileUp } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { open as openDialog } from '@tauri-apps/plugin-dialog';
 
 import { Button } from '@/components/ui/button';
 import {

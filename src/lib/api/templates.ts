@@ -1,9 +1,9 @@
+import { invoke } from '@tauri-apps/api/core';
 import {
   type Template,
   type CreateTemplateInput,
   type UpdateTemplateInput
 } from '@/types/templates';
-import { invoke } from '@tauri-apps/api/core';
 
 export async function getAllTemplates(): Promise<Template[]> {
   return await invoke<Template[]>('get_all_templates');

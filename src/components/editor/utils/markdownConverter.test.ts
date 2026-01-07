@@ -1,5 +1,5 @@
-import { describe, test, expect } from 'bun:test';
 import { type JSONContent } from '@tiptap/react';
+import { describe, test, expect } from 'bun:test';
 import { processNode, parseMarkdownWithNoteLinks } from './markdownConverter';
 
 describe('processNode', () => {

@@ -1,6 +1,6 @@
-import { Bold, Italic, Strikethrough } from 'lucide-react';
 import { useEditorState, type Editor } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
+import { Bold, Italic, Strikethrough } from 'lucide-react';
 
 type TextBubbleMenuProps = {
   editor: Editor;

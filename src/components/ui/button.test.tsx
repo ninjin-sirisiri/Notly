@@ -1,6 +1,6 @@
+import { render } from '@testing-library/react';
 import { describe, test, expect, mock, beforeAll } from 'bun:test';
 import { Window } from 'happy-dom';
-import { render } from '@testing-library/react';
 import { Button } from './button';
 
 // DOM環境を初期化

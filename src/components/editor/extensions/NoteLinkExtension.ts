@@ -1,10 +1,10 @@
-import tippy, { type Instance as TippyInstance } from 'tippy.js';
-import { useFolderStore } from '@/stores/folders';
-import { useNoteStore } from '@/stores/notes';
 import { Node, mergeAttributes, nodePasteRule, nodeInputRule } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { ReactRenderer } from '@tiptap/react';
 import { Suggestion as SuggestionPlugin } from '@tiptap/suggestion';
+import tippy, { type Instance as TippyInstance } from 'tippy.js';
+import { useFolderStore } from '@/stores/folders';
+import { useNoteStore } from '@/stores/notes';
 import { SuggestionList, type SuggestionListRef, type SuggestionItem } from '../SuggestionList';
 
 export type NoteLinkOptions = {

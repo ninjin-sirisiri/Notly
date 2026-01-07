@@ -1,8 +1,8 @@
+import { render } from '@testing-library/react';
 import { describe, test, expect, beforeEach, mock, beforeAll } from 'bun:test';
 import { Window } from 'happy-dom';
 import { useTagStore } from '@/stores/tags';
 import { type Tag } from '@/types/tags';
-import { render } from '@testing-library/react';
 import { TagSelector } from './TagSelector';
 
 // DOM環境を初期化

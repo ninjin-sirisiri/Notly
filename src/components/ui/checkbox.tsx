@@ -1,5 +1,5 @@
-import { CheckIcon } from 'lucide-react';
 import { Root, Indicator } from '@radix-ui/react-checkbox';
+import { CheckIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 

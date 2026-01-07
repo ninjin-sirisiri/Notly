@@ -1,7 +1,7 @@
+import { exit } from '@tauri-apps/plugin-process';
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { toast } from 'sonner';
-import { exit } from '@tauri-apps/plugin-process';
 
 import { checkInitialization } from '@/lib/api/app';
 import { useNoteStore } from '@/stores/notes';

@@ -1,9 +1,9 @@
+import { open } from '@tauri-apps/plugin-dialog';
 import { FolderOpen } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { initializeApp } from '@/lib/api/app';
-import { open } from '@tauri-apps/plugin-dialog';
 
 type InitializationScreenProps = {
   onInitialized: () => void;

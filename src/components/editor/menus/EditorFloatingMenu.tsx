@@ -1,6 +1,6 @@
-import { Heading1, Heading2, List } from 'lucide-react';
 import { type Editor } from '@tiptap/react';
 import { FloatingMenu } from '@tiptap/react/menus';
+import { Heading1, Heading2, List } from 'lucide-react';
 
 type EditorFloatingMenuProps = {
   editor: Editor;

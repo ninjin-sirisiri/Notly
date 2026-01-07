@@ -1,3 +1,4 @@
+import { open, save } from '@tauri-apps/plugin-dialog';
 import { Download, Upload, Info } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -17,7 +18,6 @@ import {
   readBackupMetadata,
   type BackupMetadata
 } from '@/lib/api/backup';
-import { open, save } from '@tauri-apps/plugin-dialog';
 
 export function BackupSettings() {
   const [isCreating, setIsCreating] = useState(false);

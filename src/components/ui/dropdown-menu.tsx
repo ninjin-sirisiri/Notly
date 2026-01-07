@@ -1,4 +1,3 @@
-import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';
 import {
   CheckboxItem,
   Content,
@@ -16,6 +15,7 @@ import {
   SubTrigger,
   Trigger
 } from '@radix-ui/react-dropdown-menu';
+import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 

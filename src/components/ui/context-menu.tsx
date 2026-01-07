@@ -1,4 +1,3 @@
-import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';
 import {
   Root,
   Trigger,
@@ -16,6 +15,7 @@ import {
   ItemIndicator,
   Content
 } from '@radix-ui/react-context-menu';
+import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 

@@ -1,3 +1,4 @@
+import { open } from '@tauri-apps/plugin-dialog';
 import { FolderOpen } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -18,7 +19,6 @@ import {
   updateBackupSettings,
   type BackupSettings as BackupSettingsType
 } from '@/lib/api/backup';
-import { open } from '@tauri-apps/plugin-dialog';
 
 export function AutoBackupSettings() {
   const [settings, setSettings] = useState<BackupSettingsType | null>(null);

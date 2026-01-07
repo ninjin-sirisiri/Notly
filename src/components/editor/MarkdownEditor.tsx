@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import { EditorContent } from '@tiptap/react';
+import { useEffect } from 'react';
 import { useMarkdownEditor } from './hooks/useMarkdownEditor';
 import { BubbleMenus } from './menus';
 import { EditorToolbar } from './toolbar/EditorToolbar';

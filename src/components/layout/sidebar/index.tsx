@@ -1,6 +1,3 @@
-import { useEffect, useRef, useState } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
-import { toast } from 'sonner';
 import {
   DndContext,
   PointerSensor,
@@ -9,6 +6,9 @@ import {
   useDroppable,
   type DragEndEvent
 } from '@dnd-kit/core';
+import { useEffect, useRef, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { toast } from 'sonner';
 
 import { Input } from '@/components/ui/input';
 import { useFiles } from '@/hooks/useFiles';

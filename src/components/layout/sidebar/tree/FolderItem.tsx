@@ -1,3 +1,4 @@
+import { useDraggable, useDroppable } from '@dnd-kit/core';
 import {
   Archive,
   ArrowUpDown,
@@ -50,7 +51,6 @@ import {
   Zap
 } from 'lucide-react';
 import React, { useEffect, useState, memo } from 'react';
-import { useDraggable, useDroppable } from '@dnd-kit/core';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';

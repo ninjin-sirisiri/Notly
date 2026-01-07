@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
-import { useNoteStore } from '@/stores/notes';
 import { Markdown } from '@tiptap/markdown';
 import { useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
+import { useEffect, useRef } from 'react';
+import { useNoteStore } from '@/stores/notes';
 import { AutoCloseExtension } from '../extensions/AutoCloseExtension';
 import { ImageExtension } from '../extensions/ImageExtension';
 import { NoteLinkExtension } from '../extensions/NoteLinkExtension';

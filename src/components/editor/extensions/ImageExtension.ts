@@ -1,7 +1,7 @@
-import { toast } from 'sonner';
 import { invoke } from '@tauri-apps/api/core';
 import { Image } from '@tiptap/extension-image';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { toast } from 'sonner';
 
 export const ImageExtension = Image.extend({
   addProseMirrorPlugins() {

@@ -1,3 +1,4 @@
+import { type Editor } from '@tiptap/react';
 import {
   Bold,
   Italic,
@@ -11,7 +12,6 @@ import {
   Undo,
   Redo
 } from 'lucide-react';
-import { type Editor } from '@tiptap/react';
 
 type Props = {
   editor: Editor | null;

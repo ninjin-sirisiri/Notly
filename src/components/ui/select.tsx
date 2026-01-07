@@ -1,4 +1,3 @@
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import {
   Root,
   Group,
@@ -16,6 +15,7 @@ import {
   Viewport,
   Label
 } from '@radix-ui/react-select';
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 

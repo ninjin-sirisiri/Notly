@@ -1,6 +1,6 @@
+import { invoke } from '@tauri-apps/api/core';
 import { create } from 'zustand';
 import { type ActivityLogItem, type DailyProgress, type UserGoal } from '@/types/activity';
-import { invoke } from '@tauri-apps/api/core';
 
 type ActivityState = {
   streak: number;

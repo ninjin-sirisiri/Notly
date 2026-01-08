@@ -12,12 +12,15 @@ import {
   Undo,
   Redo
 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 type Props = {
   editor: Editor | null;
 };
 
 export function EditorToolbar({ editor }: Props) {
+  const { t } = useTranslation('editor');
+
   if (!editor) {
     return null;
   }
@@ -32,7 +35,7 @@ export function EditorToolbar({ editor }: Props) {
             ? 'p-1 rounded bg-accent text-accent-foreground'
             : 'p-1 rounded hover:bg-accent text-muted-foreground'
         }
-        title="太字">
+        title={t('toolbar.bold')}>
         <Bold size={18} />
       </button>
       <button
@@ -43,7 +46,7 @@ export function EditorToolbar({ editor }: Props) {
             ? 'p-1 rounded bg-accent text-accent-foreground'
             : 'p-1 rounded hover:bg-accent text-muted-foreground'
         }
-        title="斜体">
+        title={t('toolbar.italic')}>
         <Italic size={18} />
       </button>
       <button
@@ -54,7 +57,7 @@ export function EditorToolbar({ editor }: Props) {
             ? 'p-1 rounded bg-accent text-accent-foreground'
             : 'p-1 rounded hover:bg-accent text-muted-foreground'
         }
-        title="打ち消し線">
+        title={t('toolbar.strike')}>
         <Strikethrough size={18} />
       </button>
 
@@ -67,7 +70,7 @@ export function EditorToolbar({ editor }: Props) {
             ? 'p-1 rounded bg-accent text-accent-foreground'
             : 'p-1 rounded hover:bg-accent text-muted-foreground'
         }
-        title="見出し1">
+        title={t('toolbar.heading1')}>
         <Heading1 size={18} />
       </button>
       <button
@@ -77,7 +80,7 @@ export function EditorToolbar({ editor }: Props) {
             ? 'p-1 rounded bg-accent text-accent-foreground'
             : 'p-1 rounded hover:bg-accent text-muted-foreground'
         }
-        title="見出し2">
+        title={t('toolbar.heading2')}>
         <Heading2 size={18} />
       </button>
 
@@ -90,7 +93,7 @@ export function EditorToolbar({ editor }: Props) {
             ? 'p-1 rounded bg-accent text-accent-foreground'
             : 'p-1 rounded hover:bg-accent text-muted-foreground'
         }
-        title="箇条書き">
+        title={t('toolbar.bulletList')}>
         <List size={18} />
       </button>
       <button
@@ -100,7 +103,7 @@ export function EditorToolbar({ editor }: Props) {
             ? 'p-1 rounded bg-accent text-accent-foreground'
             : 'p-1 rounded hover:bg-accent text-muted-foreground'
         }
-        title="番号付きリスト">
+        title={t('toolbar.orderedList')}>
         <ListOrdered size={18} />
       </button>
 
@@ -113,7 +116,7 @@ export function EditorToolbar({ editor }: Props) {
             ? 'p-1 rounded bg-accent text-accent-foreground'
             : 'p-1 rounded hover:bg-accent text-muted-foreground'
         }
-        title="引用">
+        title={t('toolbar.blockquote')}>
         <Quote size={18} />
       </button>
       <button
@@ -123,7 +126,7 @@ export function EditorToolbar({ editor }: Props) {
             ? 'p-1 rounded bg-accent text-accent-foreground'
             : 'p-1 rounded hover:bg-accent text-muted-foreground'
         }
-        title="コードブロック">
+        title={t('toolbar.codeBlock')}>
         <Code size={18} />
       </button>
 
@@ -133,14 +136,14 @@ export function EditorToolbar({ editor }: Props) {
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().chain().focus().undo().run()}
         className="p-1 rounded hover:bg-accent text-muted-foreground disabled:opacity-50"
-        title="元に戻す">
+        title={t('toolbar.undo')}>
         <Undo size={18} />
       </button>
       <button
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().chain().focus().redo().run()}
         className="p-1 rounded hover:bg-accent text-muted-foreground disabled:opacity-50"
-        title="やり直す">
+        title={t('toolbar.redo')}>
         <Redo size={18} />
       </button>
     </div>

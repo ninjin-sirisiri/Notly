@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useTemplateStore } from '@/stores/templates';
 
 export function CreateNoteButton({
@@ -20,6 +21,7 @@ export function CreateNoteButton({
   disabled: boolean;
   onTemplateSelect: () => void;
 }) {
+  const { t } = useTranslation();
   const { templates, loadTemplates } = useTemplateStore();
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function CreateNoteButton({
         disabled={disabled}
         className="rounded-r-none border-r border-r-border/50">
         <FileText className="h-4 w-4" />
-        ノート
+        {t('actions.newNote')}
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -50,14 +52,14 @@ export function CreateNoteButton({
         <DropdownMenuContent align="start">
           <DropdownMenuItem onClick={onClick}>
             <FileText className="mr-2 h-4 w-4" />
-            空のノート
+            {t('sidebar.emptyNote')}
           </DropdownMenuItem>
           {templates.length > 0 && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onTemplateSelect}>
                 <FileText className="mr-2 h-4 w-4" />
-                テンプレートから作成
+                {t('sidebar.createFromTemplate')}
               </DropdownMenuItem>
             </>
           )}

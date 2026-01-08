@@ -1,5 +1,6 @@
 import { FileText, Type } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { useTranslation } from '@/hooks/useTranslation';
 import { type DailyProgress, type UserGoal } from '@/types/activity';
 
 type DailyGoalsProps = {
@@ -9,6 +10,8 @@ type DailyGoalsProps = {
 };
 
 function DailyGoals({ progress, goals, className = '' }: DailyGoalsProps) {
+  const { t } = useTranslation('activity');
+
   const charProgress =
     goals.daily_char_count > 0
       ? Math.min((progress.char_count / goals.daily_char_count) * 100, 100)
@@ -21,14 +24,14 @@ function DailyGoals({ progress, goals, className = '' }: DailyGoalsProps) {
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <h3 className="text-sm font-medium">今日の目標</h3>
+      <h3 className="text-sm font-medium">{t('goals.title')}</h3>
 
       {goals.daily_char_count > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <Type className="h-4 w-4 text-muted-foreground" />
-              <span>文字数</span>
+              <span>{t('goals.charCount')}</span>
             </div>
             <span className="text-muted-foreground">
               {progress.char_count.toLocaleString()} / {goals.daily_char_count.toLocaleString()}
@@ -46,7 +49,7 @@ function DailyGoals({ progress, goals, className = '' }: DailyGoalsProps) {
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-muted-foreground" />
-              <span>ノート数</span>
+              <span>{t('goals.noteCount')}</span>
             </div>
             <span className="text-muted-foreground">
               {progress.note_count} / {goals.daily_note_count}
@@ -60,7 +63,7 @@ function DailyGoals({ progress, goals, className = '' }: DailyGoalsProps) {
       )}
 
       {goals.daily_char_count === 0 && goals.daily_note_count === 0 && (
-        <p className="text-sm text-muted-foreground">目標が設定されていません</p>
+        <p className="text-sm text-muted-foreground">{t('goals.noGoals')}</p>
       )}
     </div>
   );

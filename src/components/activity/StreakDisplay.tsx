@@ -1,4 +1,5 @@
 import { Flame } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 type StreakDisplayProps = {
   streak: number;
@@ -6,12 +7,14 @@ type StreakDisplayProps = {
 };
 
 function StreakDisplay({ streak, className = '' }: StreakDisplayProps) {
+  const { t } = useTranslation('activity');
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <Flame className={`h-5 w-5 ${streak > 0 ? 'text-orange-500' : 'text-gray-400'}`} />
       <div className="flex flex-col">
         <span className="text-2xl font-bold">{streak}</span>
-        <span className="text-xs text-muted-foreground">日連続</span>
+        <span className="text-xs text-muted-foreground">{t('streak.daysConsecutive')}</span>
       </div>
     </div>
   );

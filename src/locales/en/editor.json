@@ -1,0 +1,32 @@
+{
+  "toolbar": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "strike": "Strikethrough",
+    "code": "Code",
+    "heading1": "Heading 1",
+    "heading2": "Heading 2",
+    "heading": "Heading",
+    "bulletList": "Bullet List",
+    "orderedList": "Numbered List",
+    "blockquote": "Quote",
+    "codeBlock": "Code Block",
+    "link": "Link",
+    "image": "Image",
+    "undo": "Undo",
+    "redo": "Redo",
+    "toggleListType": "Toggle list type"
+  },
+  "header": {
+    "save": "Save",
+    "saving": "Saving..."
+  },
+  "dialog": {
+    "selectFolder": "Select Folder",
+    "selectFolderDescription": "Choose a folder to save the note.",
+    "root": "Root",
+    "cancel": "Cancel",
+    "select": "Select"
+  },
+  "placeholder": "Start writing..."
+}

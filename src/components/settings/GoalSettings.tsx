@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useActivityStore } from '@/stores/activity';
 import { type UserGoal } from '@/types/activity';
 
 function GoalSettings() {
+  const { t } = useTranslation('settings');
   const { goals, fetchGoals, updateGoals, isLoading } = useActivityStore();
   const [localGoals, setLocalGoals] = useState<UserGoal>({
     daily_char_count: 0,
@@ -29,15 +31,13 @@ function GoalSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-4">目標設定</h3>
-        <p className="text-sm text-muted-foreground mb-6">
-          1日の執筆目標を設定して、継続的な習慣化をサポートします。
-        </p>
+        <h3 className="text-lg font-medium mb-4">{t('goals.title')}</h3>
+        <p className="text-sm text-muted-foreground mb-6">{t('goals.description')}</p>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="daily_char_count">1日の目標文字数</Label>
+          <Label htmlFor="daily_char_count">{t('goals.dailyCharCount')}</Label>
           <Input
             id="daily_char_count"
             type="number"
@@ -46,13 +46,13 @@ function GoalSettings() {
             onChange={e =>
               setLocalGoals({ ...localGoals, daily_char_count: Number(e.target.value) })
             }
-            placeholder="例: 1000"
+            placeholder={t('goals.dailyCharCountPlaceholder')}
           />
-          <p className="text-xs text-muted-foreground">0に設定すると目標として表示されません</p>
+          <p className="text-xs text-muted-foreground">{t('goals.dailyCharCountHelp')}</p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="daily_note_count">1日の目標ノート数</Label>
+          <Label htmlFor="daily_note_count">{t('goals.dailyNoteCount')}</Label>
           <Input
             id="daily_note_count"
             type="number"
@@ -61,16 +61,16 @@ function GoalSettings() {
             onChange={e =>
               setLocalGoals({ ...localGoals, daily_note_count: Number(e.target.value) })
             }
-            placeholder="例: 3"
+            placeholder={t('goals.dailyNotePlaceholder')}
           />
-          <p className="text-xs text-muted-foreground">0に設定すると目標として表示されません</p>
+          <p className="text-xs text-muted-foreground">{t('goals.dailyNoteCountHelp')}</p>
         </div>
       </div>
 
       <Button
         onClick={handleSave}
         disabled={isLoading}>
-        {isLoading ? '保存中...' : '保存'}
+        {isLoading ? t('goals.saving') : t('goals.save')}
       </Button>
     </div>
   );

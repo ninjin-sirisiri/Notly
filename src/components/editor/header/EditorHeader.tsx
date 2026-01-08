@@ -2,6 +2,8 @@ import { Save } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { useTranslation } from '@/hooks/useTranslation';
+import { formatDateTime } from '@/lib/dateFormat';
 
 type Props = {
   title: string;
@@ -20,6 +22,8 @@ export function EditorHeader({
   isLoading,
   isNewNote
 }: Props) {
+  const { t } = useTranslation('editor');
+
   return (
     <div className="flex items-center sm:justify-between gap-2 p-2">
       <input
@@ -40,13 +44,13 @@ export function EditorHeader({
           {isLoading ? (
             <>
               <Spinner />
-              <span>Saving...</span>
+              <span>{t('header.saving')}</span>
             </>
           ) : (
-            <span>Save</span>
+            <span>{t('header.save')}</span>
           )}
         </Button>
-        <span className="text-xs text-muted-foreground">{created_at.toLocaleString()}</span>
+        <span className="text-xs text-muted-foreground">{formatDateTime(created_at)}</span>
       </div>
     </div>
   );

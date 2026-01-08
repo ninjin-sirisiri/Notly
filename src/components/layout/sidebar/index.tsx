@@ -19,6 +19,7 @@ import {
   useDeleteFolder
 } from '@/hooks/useFolder';
 import { useCreateNote, useMoveNote, useDeleteNote } from '@/hooks/useNote';
+import { useTranslation } from '@/hooks/useTranslation';
 import { toggleFavoriteNotes } from '@/lib/api/notes';
 import { addTagToNotes } from '@/lib/api/tags';
 import { cn } from '@/lib/utils';
@@ -49,6 +50,7 @@ function RootDroppable({ children }: { children: React.ReactNode }) {
 }
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const { t } = useTranslation();
   const { files } = useFiles();
   const allNotes = useNoteStore(state => state.notes);
   const { currentFolder } = useFolderStore();
@@ -122,9 +124,9 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             folderPath,
             currentNote.parent_id
           );
-          toast.success('Note duplicated');
+          toast.success(t('messages.noteDuplicated'));
         } catch {
-          toast.error('Failed to duplicate note');
+          toast.error(t('errors.duplicateFailed'));
         }
       }
     },
@@ -156,12 +158,15 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     try {
       let newTitle = title.trim();
       if (!newTitle) {
-        const untitledNotes = allNotes.filter(note => note.title.startsWith('無題'));
-        newTitle = untitledNotes.length > 0 ? `無題 ${untitledNotes.length + 1}` : '無題';
+        const untitledNotes = allNotes.filter(note => note.title.startsWith(t('labels.untitled')));
+        newTitle =
+          untitledNotes.length > 0
+            ? `${t('labels.untitled')} ${untitledNotes.length + 1}`
+            : t('labels.untitled');
       }
       await createNote(newTitle, '', currentFolder?.folderPath ?? '', currentFolder?.id ?? null);
     } catch (error) {
-      toast.error('Failed to create note:', {
+      toast.error(t('errors.createNoteFailed'), {
         description: error as string
       });
     } finally {
@@ -173,10 +178,10 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
   async function handleCreateFolder() {
     if (!isCreatingFolder) return;
     try {
-      const newFolderName = folderName.trim() || '新しいフォルダ';
+      const newFolderName = folderName.trim() || t('labels.newFolder');
       await createFolder(newFolderName, currentFolder?.folderPath ?? '', currentFolder?.id ?? null);
     } catch (error) {
-      toast.error('Failed to create folder:', {
+      toast.error(t('errors.createFolderFailed'), {
         description: error as string
       });
     } finally {
@@ -251,10 +256,10 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         ...noteIds.map(id => deleteNote(id)),
         ...folderIds.map(id => deleteFolder(id))
       ]);
-      toast.success(`${selectedItems.length}個のアイテムを削除しました`);
+      toast.success(t('messages.itemsDeleted', { count: selectedItems.length }));
       clearSelection();
     } catch (error) {
-      toast.error('削除に失敗しました', {
+      toast.error(t('errors.deleteFailed'), {
         description: error as string
       });
     }
@@ -271,10 +276,10 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         ...noteIds.map(id => moveNote(id, targetFolderId)),
         ...folderIds.map(id => moveFolder(id, targetFolderId))
       ]);
-      toast.success(`${selectedItems.length}個のアイテムを移動しました`);
+      toast.success(t('messages.itemsMoved', { count: selectedItems.length }));
       clearSelection();
     } catch (error) {
-      toast.error('移動に失敗しました', {
+      toast.error(t('errors.moveFailed'), {
         description: error as string
       });
     }
@@ -287,11 +292,11 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
     try {
       await toggleFavoriteNotes(noteIds);
-      toast.success('お気に入りを更新しました');
+      toast.success(t('messages.favoriteUpdated'));
       clearSelection();
       useNoteStore.getState().loadNotes();
     } catch (error) {
-      toast.error('お気に入りの更新に失敗しました', {
+      toast.error(t('errors.favoriteUpdateFailed'), {
         description: error as string
       });
     }
@@ -304,10 +309,10 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
     try {
       await addTagToNotes(noteIds, tagId);
-      toast.success('タグを追加しました');
+      toast.success(t('messages.tagAdded'));
       clearSelection();
     } catch (error) {
-      toast.error('タグの追加に失敗しました', {
+      toast.error(t('errors.tagAddFailed'), {
         description: error as string
       });
     }
@@ -408,7 +413,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                             onChange={e => setTitle(e.target.value)}
                             onKeyDown={handleNoteKeyDown}
                             onBlur={handleNoteBlur}
-                            placeholder="ノートのタイトル..."
+                            placeholder={t('labels.notePlaceholder')}
                             disabled={isNoteCreating}
                             className="h-8"
                           />
@@ -422,7 +427,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                             onChange={e => setFolderName(e.target.value)}
                             onKeyDown={handleFolderKeyDown}
                             onBlur={handleFolderBlur}
-                            placeholder="フォルダ名..."
+                            placeholder={t('labels.folderPlaceholder')}
                             disabled={isFolderCreating}
                             className="h-8"
                           />
@@ -450,17 +455,22 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         onOpenChange={setShowTemplateSelect}
         onSelect={async content => {
           try {
-            const untitledNotes = allNotes.filter(note => note.title.startsWith('無題'));
-            const newTitle = untitledNotes.length > 0 ? `無題 ${untitledNotes.length + 1}` : '無題';
+            const untitledNotes = allNotes.filter(note =>
+              note.title.startsWith(t('labels.untitled'))
+            );
+            const newTitle =
+              untitledNotes.length > 0
+                ? `${t('labels.untitled')} ${untitledNotes.length + 1}`
+                : t('labels.untitled');
             await createNote(
               newTitle,
               content,
               currentFolder?.folderPath ?? '',
               currentFolder?.id ?? null
             );
-            toast.success('テンプレートからノートを作成しました');
+            toast.success(t('messages.templateCreated'));
           } catch (error) {
-            toast.error('ノートの作成に失敗しました', {
+            toast.error(t('errors.noteCreationFailed'), {
               description: error as string
             });
           }

@@ -1,0 +1,32 @@
+{
+  "toolbar": {
+    "bold": "太字",
+    "italic": "斜体",
+    "strike": "打ち消し線",
+    "code": "コード",
+    "heading1": "見出し1",
+    "heading2": "見出し2",
+    "heading": "見出し",
+    "bulletList": "箇条書き",
+    "orderedList": "番号付きリスト",
+    "blockquote": "引用",
+    "codeBlock": "コードブロック",
+    "link": "リンク",
+    "image": "画像",
+    "undo": "元に戻す",
+    "redo": "やり直す",
+    "toggleListType": "リストタイプを切り替え"
+  },
+  "header": {
+    "save": "保存",
+    "saving": "保存中..."
+  },
+  "dialog": {
+    "selectFolder": "保存先フォルダを選択",
+    "selectFolderDescription": "ノートを保存するフォルダを選択してください。",
+    "root": "ルート",
+    "cancel": "キャンセル",
+    "select": "選択"
+  },
+  "placeholder": "書き始める..."
+}

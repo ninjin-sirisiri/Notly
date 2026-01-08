@@ -10,6 +10,8 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTranslation } from '@/hooks/useTranslation';
+import { formatShortDate } from '@/lib/dateFormat';
 import { cn } from '@/lib/utils';
 import { useTemplateStore } from '@/stores/templates';
 
@@ -22,6 +24,7 @@ type SelectTemplateDialogProps = {
 export function SelectTemplateDialog({ open, onOpenChange, onSelect }: SelectTemplateDialogProps) {
   const { templates, loadTemplates, isLoading } = useTemplateStore();
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (open) {
@@ -42,7 +45,7 @@ export function SelectTemplateDialog({ open, onOpenChange, onSelect }: SelectTem
     if (isLoading) {
       return (
         <div className="flex items-center justify-center h-32">
-          <p className="text-muted-foreground">読み込み中...</p>
+          <p className="text-muted-foreground">{t('dialogs.selectTemplate.loading')}</p>
         </div>
       );
     }
@@ -51,7 +54,7 @@ export function SelectTemplateDialog({ open, onOpenChange, onSelect }: SelectTem
       return (
         <div className="flex flex-col items-center justify-center h-32 space-y-2">
           <FileText className="h-12 w-12 text-muted-foreground" />
-          <p className="text-muted-foreground">テンプレートがありません</p>
+          <p className="text-muted-foreground">{t('dialogs.selectTemplate.noTemplates')}</p>
         </div>
       );
     }
@@ -74,7 +77,7 @@ export function SelectTemplateDialog({ open, onOpenChange, onSelect }: SelectTem
               )}
               <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2">
                 <Calendar className="h-3 w-3" />
-                <span>{new Date(template.updatedAt).toLocaleDateString('ja-JP')}</span>
+                <span>{formatShortDate(template.updatedAt)}</span>
               </div>
             </div>
           </button>
@@ -89,8 +92,8 @@ export function SelectTemplateDialog({ open, onOpenChange, onSelect }: SelectTem
       onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>テンプレートを選択</DialogTitle>
-          <DialogDescription>テンプレートを選択して新しいノートを作成します</DialogDescription>
+          <DialogTitle>{t('dialogs.selectTemplate.title')}</DialogTitle>
+          <DialogDescription>{t('dialogs.selectTemplate.description')}</DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[400px] pr-4">{renderContent()}</ScrollArea>
         <DialogFooter>
@@ -101,13 +104,13 @@ export function SelectTemplateDialog({ open, onOpenChange, onSelect }: SelectTem
               onOpenChange(false);
               setSelectedId(null);
             }}>
-            キャンセル
+            {t('actions.cancel')}
           </Button>
           <Button
             type="button"
             onClick={handleSelect}
             disabled={!selectedId || isLoading}>
-            選択
+            {t('actions.select')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,6 +1,7 @@
 import { Folder, FolderRoot } from 'lucide-react';
 import { useState } from 'react';
 
+import { useTranslation } from '@/hooks/useTranslation';
 import { cn } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
 import { type FolderWithChildren } from '@/types/files';
@@ -22,6 +23,7 @@ type Props = {
 };
 
 export function FolderSelectDialog({ open, onOpenChange, onSelectFolder }: Props) {
+  const { t } = useTranslation('editor');
   const folders = useFolderStore(state => state.folders);
   const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
 
@@ -64,8 +66,8 @@ export function FolderSelectDialog({ open, onOpenChange, onSelectFolder }: Props
       onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>保存先フォルダを選択</DialogTitle>
-          <DialogDescription>ノートを保存するフォルダを選択してください。</DialogDescription>
+          <DialogTitle>{t('dialog.selectFolder')}</DialogTitle>
+          <DialogDescription>{t('dialog.selectFolderDescription')}</DialogDescription>
         </DialogHeader>
         <div className="py-4 max-h-[400px] overflow-y-auto">
           <div className="space-y-1">
@@ -80,7 +82,7 @@ export function FolderSelectDialog({ open, onOpenChange, onSelectFolder }: Props
                   : 'hover:bg-accent/50 text-muted-foreground hover:text-accent-foreground'
               )}>
               <FolderRoot size={16} />
-              <span>ルート</span>
+              <span>{t('dialog.root')}</span>
             </button>
             {/* フォルダリスト */}
             {rootFolders.map(folder => renderFolder(folder))}
@@ -90,9 +92,9 @@ export function FolderSelectDialog({ open, onOpenChange, onSelectFolder }: Props
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}>
-            キャンセル
+            {t('dialog.cancel')}
           </Button>
-          <Button onClick={handleSelect}>選択</Button>
+          <Button onClick={handleSelect}>{t('dialog.select')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

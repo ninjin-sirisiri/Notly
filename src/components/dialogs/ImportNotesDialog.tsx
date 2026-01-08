@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import { useTranslation } from '@/hooks/useTranslation';
 import { importNotes } from '@/lib/api/notes';
 import { useFileStore } from '@/stores/files';
 import { useNoteStore } from '@/stores/notes';
@@ -25,6 +26,7 @@ type ImportNotesDialogProps = {
 export function ImportNotesDialog({ open, onOpenChange, parentId = null }: ImportNotesDialogProps) {
   const [isImporting, setIsImporting] = useState(false);
   const { loadNotes } = useNoteStore();
+  const { t } = useTranslation();
 
   async function handleImport() {
     try {
@@ -49,11 +51,11 @@ export function ImportNotesDialog({ open, onOpenChange, parentId = null }: Impor
       // Update file store to refresh sidebar
       useFileStore.getState().loadFiles();
 
-      toast.success(`${filePaths.length}個のノートをインポートしました`);
+      toast.success(t('messages.notesImported', { count: filePaths.length }));
 
       onOpenChange(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'ノートのインポートに失敗しました');
+      toast.error(error instanceof Error ? error.message : t('dialogs.importNotes.importFailed'));
     } finally {
       setIsImporting(false);
     }
@@ -65,23 +67,23 @@ export function ImportNotesDialog({ open, onOpenChange, parentId = null }: Impor
       onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>ノートをインポート</DialogTitle>
-          <DialogDescription>
-            Markdownファイル (.md) を選択してインポートします。 複数のファイルを同時に選択できます。
-          </DialogDescription>
+          <DialogTitle>{t('dialogs.importNotes.title')}</DialogTitle>
+          <DialogDescription>{t('dialogs.importNotes.description')}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isImporting}>
-            キャンセル
+            {t('actions.cancel')}
           </Button>
           <Button
             onClick={handleImport}
             disabled={isImporting}>
             <FileUp className="mr-2 h-4 w-4" />
-            {isImporting ? 'インポート中...' : 'ファイルを選択'}
+            {isImporting
+              ? t('dialogs.importNotes.importing')
+              : t('dialogs.importNotes.selectFiles')}
           </Button>
         </DialogFooter>
       </DialogContent>

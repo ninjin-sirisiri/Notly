@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
+import { useTranslation } from '@/hooks/useTranslation';
 
 type FolderItemDeleteDialogProps = {
   open: boolean;
@@ -22,20 +23,22 @@ export function FolderItemDeleteDialog({
   folderName,
   onConfirm
 }: FolderItemDeleteDialogProps) {
+  const { t } = useTranslation();
+
   return (
     <AlertDialog
       open={open}
       onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>フォルダを削除しますか？</AlertDialogTitle>
+          <AlertDialogTitle>{t('dialogs.deleteFolder.title')}</AlertDialogTitle>
           <AlertDialogDescription>
-            「{folderName}」を削除します。この操作は取り消せません。
+            {t('dialogs.deleteFolder.description', { name: folderName })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>キャンセル</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>削除</AlertDialogAction>
+          <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>{t('actions.delete')}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

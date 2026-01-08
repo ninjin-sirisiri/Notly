@@ -4,11 +4,13 @@ import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useNotificationStore } from '../../stores/notification';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 
 export function NotificationSettings() {
+  const { t } = useTranslation('settings');
   const { settings, isLoading, loadSettings, updateSettings } = useNotificationStore();
 
   const [enabled, setEnabled] = useState(true);
@@ -34,16 +36,16 @@ export function NotificationSettings() {
         notification_time: notificationTime,
         message
       });
-      toast.success('通知設定を保存しました');
+      toast.success(t('notifications.saveSuccess'));
     } catch {
-      toast.error('通知設定の保存に失敗しました');
+      toast.error(t('notifications.saveError'));
     }
   }
 
   if (isLoading && !settings) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-muted-foreground">読み込み中...</div>
+        <div className="text-muted-foreground">{t('notifications.loading')}</div>
       </div>
     );
   }
@@ -55,10 +57,8 @@ export function NotificationSettings() {
           <Bell className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold">通知設定</h2>
-          <p className="text-sm text-muted-foreground">
-            毎日決まった時間に通知を受け取ることができます
-          </p>
+          <h2 className="text-xl font-semibold">{t('notifications.title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('notifications.description')}</p>
         </div>
       </div>
 
@@ -68,9 +68,9 @@ export function NotificationSettings() {
             <Label
               htmlFor="notification-enabled"
               className="text-base">
-              通知を有効にする
+              {t('notifications.enable')}
             </Label>
-            <p className="text-sm text-muted-foreground">設定した時間に通知を送信します</p>
+            <p className="text-sm text-muted-foreground">{t('notifications.enableDescription')}</p>
           </div>
           <Switch
             id="notification-enabled"
@@ -80,7 +80,7 @@ export function NotificationSettings() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="notification-time">通知時間</Label>
+          <Label htmlFor="notification-time">{t('notifications.time')}</Label>
           <Input
             id="notification-time"
             type="time"
@@ -89,22 +89,20 @@ export function NotificationSettings() {
             disabled={!enabled}
             className="max-w-xs"
           />
-          <p className="text-xs text-muted-foreground">毎日この時間に通知を送信します</p>
+          <p className="text-xs text-muted-foreground">{t('notifications.timeHelp')}</p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="notification-message">通知メッセージ</Label>
+          <Label htmlFor="notification-message">{t('notifications.message')}</Label>
           <Textarea
             id="notification-message"
             value={message}
             onChange={e => setMessage(e.target.value)}
             disabled={!enabled}
-            placeholder="通知に表示するメッセージを入力"
+            placeholder={t('notifications.messagePlaceholder')}
             className="min-h-[100px] resize-none"
           />
-          <p className="text-xs text-muted-foreground">
-            通知に表示されるメッセージをカスタマイズできます
-          </p>
+          <p className="text-xs text-muted-foreground">{t('notifications.messageHelp')}</p>
         </div>
 
         <div className="flex justify-end pt-4">
@@ -112,7 +110,7 @@ export function NotificationSettings() {
             onClick={handleSave}
             disabled={isLoading}>
             <Save className="mr-2 h-4 w-4" />
-            保存
+            {t('notifications.save')}
           </Button>
         </div>
       </div>

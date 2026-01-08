@@ -30,6 +30,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useFileStore } from '@/stores/files';
 import { useFolderStore } from '@/stores/folders';
 
@@ -75,6 +76,7 @@ export function SidebarHeader({
   setShowTemplateManager,
   setShowTemplateSelect
 }: SidebarHeaderProps) {
+  const { t } = useTranslation();
   const { sortBy, sortOrder, setSortBy, setSortOrder } = useFileStore();
   const [showImportDialog, setShowImportDialog] = useState(false);
 
@@ -105,48 +107,48 @@ export function SidebarHeader({
               }}
               className="justify-start">
               <CheckSquare className="mr-2 h-4 w-4" />
-              選択モード
+              {t('sidebar.selectionMode')}
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => useFolderStore.getState().expandAllFolders()}>
               <ChevronsDown className="mr-2 h-4 w-4" />
-              すべて展開
+              {t('sidebar.expandAll')}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => useFolderStore.getState().collapseAllFolders()}>
               <ChevronsUp className="mr-2 h-4 w-4" />
-              すべて折りたたむ
+              {t('sidebar.collapseAll')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuSub>
               <DropdownMenuSubTrigger className="pl-8">
                 <ArrowUpDown className="mr-2 h-4 w-4" />
-                並び替え
+                {t('sidebar.sortBy')}
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
                 <DropdownMenuItem onClick={() => setSortBy('name')}>
                   <Type className="mr-2 h-4 w-4" />
-                  <span>名前</span>
+                  <span>{t('sidebar.sortByName')}</span>
                   {sortBy === 'name' && <Check className="ml-auto h-4 w-4" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSortBy('createdAt')}>
                   <Calendar className="mr-2 h-4 w-4" />
-                  <span>作成日</span>
+                  <span>{t('sidebar.sortByCreated')}</span>
                   {sortBy === 'createdAt' && <Check className="ml-auto h-4 w-4" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSortBy('updatedAt')}>
                   <Clock className="mr-2 h-4 w-4" />
-                  <span>更新日</span>
+                  <span>{t('sidebar.sortByUpdated')}</span>
                   {sortBy === 'updatedAt' && <Check className="ml-auto h-4 w-4" />}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setSortOrder('asc')}>
                   <ArrowUp className="mr-2 h-4 w-4" />
-                  <span>昇順</span>
+                  <span>{t('sidebar.ascending')}</span>
                   {sortOrder === 'asc' && <Check className="ml-auto h-4 w-4" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSortOrder('desc')}>
                   <ArrowDown className="mr-2 h-4 w-4" />
-                  <span>降順</span>
+                  <span>{t('sidebar.descending')}</span>
                   {sortOrder === 'desc' && <Check className="ml-auto h-4 w-4" />}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
@@ -163,7 +165,7 @@ export function SidebarHeader({
               }}
               className="justify-start">
               <Trash2 className="mr-2 h-4 w-4" />
-              ゴミ箱
+              {t('sidebar.trash')}
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={showTags}
@@ -176,21 +178,21 @@ export function SidebarHeader({
               }}
               className="justify-start">
               <Tags className="mr-2 h-4 w-4" />
-              タグ一覧
+              {t('sidebar.tagList')}
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => setShowTemplateManager(!showTemplateManager)}
               className="pl-8">
               <FileText className="mr-2 h-4 w-4" />
-              テンプレート管理
+              {t('sidebar.templateManager')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => setShowImportDialog(true)}
               className="pl-8">
               <FileUp className="mr-2 h-4 w-4" />
-              ノートをインポート
+              {t('sidebar.importNotes')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -219,7 +221,7 @@ export function SidebarHeader({
               variant="ghost"
               size="icon"
               onClick={handleSelectAll}
-              title="全選択">
+              title={t('sidebar.selectAll')}>
               <CheckCheck className="h-4 w-4" />
             </Button>
           )}

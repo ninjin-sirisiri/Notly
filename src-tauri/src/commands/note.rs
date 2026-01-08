@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use crate::db::models::*;
+use crate::i18n::I18n;
 use crate::services::NoteService;
 use tauri::State;
 
@@ -11,7 +12,9 @@ pub async fn create_note<R: tauri::Runtime>(
   input: CreateNoteInput,
   state: State<'_, AppState>,
   _app: tauri::AppHandle<R>,
+  locale: Option<String>,
 ) -> Result<NoteWithContent, String> {
+  let _i18n = I18n::new(locale.as_deref().unwrap_or("en"));
   let context = state.get_context().map_err(|e| e.to_string())?;
   let notes_dir = std::path::PathBuf::from(&context.config.data_dir).join("notes");
   let db = Arc::clone(&context.db);
@@ -69,7 +72,9 @@ pub async fn update_note<R: tauri::Runtime>(
   input: UpdateNoteInput,
   state: State<'_, AppState>,
   _app: tauri::AppHandle<R>,
+  locale: Option<String>,
 ) -> Result<NoteWithContent, String> {
+  let _i18n = I18n::new(locale.as_deref().unwrap_or("en"));
   let context = state.get_context().map_err(|e| e.to_string())?;
   let notes_dir = std::path::PathBuf::from(&context.config.data_dir).join("notes");
   let db = Arc::clone(&context.db);
@@ -87,7 +92,9 @@ pub async fn delete_note<R: tauri::Runtime>(
   id: i64,
   state: State<'_, AppState>,
   _app: tauri::AppHandle<R>,
+  locale: Option<String>,
 ) -> Result<(), String> {
+  let _i18n = I18n::new(locale.as_deref().unwrap_or("en"));
   let context = state.get_context().map_err(|e| e.to_string())?;
   let notes_dir = std::path::PathBuf::from(&context.config.data_dir).join("notes");
   let db = Arc::clone(&context.db);
@@ -248,7 +255,9 @@ pub async fn import_note<R: tauri::Runtime>(
   parent_id: Option<i64>,
   state: State<'_, AppState>,
   _app: tauri::AppHandle<R>,
+  locale: Option<String>,
 ) -> Result<NoteWithContent, String> {
+  let _i18n = I18n::new(locale.as_deref().unwrap_or("en"));
   let context = state.get_context().map_err(|e| e.to_string())?;
   let notes_dir = std::path::PathBuf::from(&context.config.data_dir).join("notes");
   let db = Arc::clone(&context.db);
@@ -267,7 +276,9 @@ pub async fn import_notes<R: tauri::Runtime>(
   parent_id: Option<i64>,
   state: State<'_, AppState>,
   _app: tauri::AppHandle<R>,
+  locale: Option<String>,
 ) -> Result<Vec<NoteWithContent>, String> {
+  let _i18n = I18n::new(locale.as_deref().unwrap_or("en"));
   let context = state.get_context().map_err(|e| e.to_string())?;
   let notes_dir = std::path::PathBuf::from(&context.config.data_dir).join("notes");
   let db = Arc::clone(&context.db);

@@ -1,0 +1,179 @@
+{
+  "app": {
+    "name": "Notly",
+    "description": "ノートをつけることを習慣化するためのアプリ"
+  },
+  "actions": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "close": "閉じる",
+    "confirm": "確認",
+    "back": "戻る",
+    "select": "選択",
+    "move": "移動",
+    "favorite": "お気に入り",
+    "duplicate": "複製",
+    "restore": "復元",
+    "selectAll": "すべて選択",
+    "clearSelection": "選択解除",
+    "newNote": "新規ノート",
+    "newFolder": "新規フォルダ",
+    "browse": "参照"
+  },
+  "navigation": {
+    "notes": "ノート",
+    "folders": "フォルダ",
+    "tags": "タグ",
+    "settings": "設定",
+    "activity": "アクティビティ",
+    "trash": "ゴミ箱"
+  },
+  "labels": {
+    "title": "タイトル",
+    "name": "名前",
+    "description": "説明",
+    "color": "色",
+    "path": "パス",
+    "folder": "フォルダ",
+    "tag": "タグ",
+    "template": "テンプレート",
+    "search": "検索",
+    "filter": "フィルター",
+    "sort": "並び替え",
+    "untitled": "無題",
+    "newFolder": "新しいフォルダ",
+    "notePlaceholder": "ノートのタイトル...",
+    "folderPlaceholder": "フォルダ名...",
+    "searchPlaceholder": "ノートを検索..."
+  },
+  "streak": {
+    "current": "継続 {{count}} 日目",
+    "title": "継続日数"
+  },
+  "messages": {
+    "welcome": "ようこそ、{{name}}さん！",
+    "itemCount": "{{count}}個のアイテム",
+    "greeting": "こんにちは{{firstName}} {{lastName}}さん",
+    "savedAt": "{{time}}に保存されました",
+    "notesByUser": "{{author}}による{{count}}個のノート",
+    "itemsDeleted": "{{count}}個のアイテムを削除しました",
+    "itemsMoved": "{{count}}個のアイテムを移動しました",
+    "noteDuplicated": "ノートを複製しました",
+    "favoriteUpdated": "お気に入りを更新しました",
+    "tagAdded": "タグを追加しました",
+    "templateCreated": "テンプレートからノートを作成しました",
+    "notesImported": "{{count}}個のノートをインポートしました",
+    "tagCreated": "タグを作成しました",
+    "tagUpdated": "タグを更新しました"
+  },
+  "errors": {
+    "createNoteFailed": "ノートの作成に失敗しました",
+    "createFolderFailed": "フォルダの作成に失敗しました",
+    "deleteFailed": "削除に失敗しました",
+    "moveFailed": "移動に失敗しました",
+    "duplicateFailed": "ノートの複製に失敗しました",
+    "favoriteUpdateFailed": "お気に入りの更新に失敗しました",
+    "tagAddFailed": "タグの追加に失敗しました",
+    "noteCreationFailed": "ノートの作成に失敗しました"
+  },
+  "tooltips": {
+    "activity": "アクティビティ",
+    "settings": "設定",
+    "menu": "メニュー"
+  },
+  "sidebar": {
+    "selectionMode": "選択モード",
+    "expandAll": "すべて展開",
+    "collapseAll": "すべて折りたたむ",
+    "sortBy": "並び替え",
+    "sortByName": "名前",
+    "sortByCreated": "作成日",
+    "sortByUpdated": "更新日",
+    "ascending": "昇順",
+    "descending": "降順",
+    "trash": "ゴミ箱",
+    "tagList": "タグ一覧",
+    "templateManager": "テンプレート管理",
+    "importNotes": "ノートをインポート",
+    "selectAll": "全選択",
+    "emptyNote": "空のノート",
+    "createFromTemplate": "テンプレートから作成"
+  },
+  "dialogs": {
+    "importNotes": {
+      "title": "ノートをインポート",
+      "description": "Markdownファイル (.md) を選択してインポートします。複数のファイルを同時に選択できます。",
+      "selectFiles": "ファイルを選択",
+      "importing": "インポート中...",
+      "importFailed": "ノートのインポートに失敗しました"
+    },
+    "selectTemplate": {
+      "title": "テンプレートを選択",
+      "description": "テンプレートを選択して新しいノートを作成します",
+      "noTemplates": "テンプレートがありません",
+      "loading": "読み込み中..."
+    },
+    "manageTemplates": {
+      "title": "テンプレート管理",
+      "description": "テンプレートの編集と削除を行います",
+      "createNew": "新規作成",
+      "updatedAt": "更新日:",
+      "loading": "読み込み中...",
+      "noTemplates": "テンプレートがありません"
+    },
+    "deleteTemplate": {
+      "title": "テンプレートを削除しますか?",
+      "description": "この操作は取り消すことができません。"
+    },
+    "tagDialog": {
+      "titleCreate": "新しいタグを作成",
+      "titleEdit": "タグを編集",
+      "nameLabel": "タグ名",
+      "namePlaceholder": "タグ名を入力...",
+      "colorLabel": "色",
+      "error": "エラーが発生しました"
+    },
+    "deleteNote": {
+      "title": "ノートを削除しますか？",
+      "description": "「{{title}}」を削除します。この操作は取り消せません。"
+    },
+    "deleteFolder": {
+      "title": "フォルダを削除しますか？",
+      "description": "「{{name}}」を削除します。この操作は取り消せません。"
+    },
+    "selectIcon": {
+      "title": "アイコンを選択"
+    },
+    "selectColor": {
+      "title": "色を選択",
+      "apply": "適用"
+    },
+    "sortSettings": {
+      "title": "並び替え設定",
+      "sortBy": "並び順",
+      "order": "順序",
+      "name": "名前",
+      "createdAt": "作成日時",
+      "updatedAt": "更新日時",
+      "default": "デフォルト",
+      "ascending": "昇順",
+      "descending": "降順",
+      "apply": "適用"
+    }
+  },
+  "contextMenu": {
+    "rename": "名前を変更",
+    "move": "移動",
+    "delete": "削除",
+    "export": "エクスポート",
+    "details": "詳細",
+    "changeIcon": "アイコン変更",
+    "changeColor": "色変更",
+    "sortSettings": "並び替え設定",
+    "addFavorite": "お気に入りに追加",
+    "removeFavorite": "お気に入り解除"
+  }
+}

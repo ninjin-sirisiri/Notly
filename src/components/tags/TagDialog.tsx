@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useTagStore } from '@/stores/tags';
 
 type TagDialogProps = {
@@ -30,6 +31,7 @@ export function TagDialog({
   const [name, setName] = useState(initialName);
   const [color, setColor] = useState(initialColor || '#808080');
   const { createTag, updateTag } = useTagStore();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (open) {
@@ -43,14 +45,14 @@ export function TagDialog({
     try {
       if (tagId) {
         await updateTag(tagId, name, color);
-        toast.success('タグを更新しました');
+        toast.success(t('messages.tagUpdated'));
       } else {
         await createTag(name, color);
-        toast.success('タグを作成しました');
+        toast.success(t('messages.tagCreated'));
       }
       onOpenChange(false);
     } catch (error) {
-      toast.error('エラーが発生しました', {
+      toast.error(t('dialogs.tagDialog.error'), {
         description: String(error)
       });
     }
@@ -62,23 +64,25 @@ export function TagDialog({
       onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{tagId ? 'タグを編集' : '新しいタグを作成'}</DialogTitle>
+          <DialogTitle>
+            {tagId ? t('dialogs.tagDialog.titleEdit') : t('dialogs.tagDialog.titleCreate')}
+          </DialogTitle>
         </DialogHeader>
         <form
           onSubmit={handleSubmit}
           className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">タグ名</Label>
+            <Label htmlFor="name">{t('dialogs.tagDialog.nameLabel')}</Label>
             <Input
               id="name"
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="タグ名を入力..."
+              placeholder={t('dialogs.tagDialog.namePlaceholder')}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="color">色</Label>
+            <Label htmlFor="color">{t('dialogs.tagDialog.colorLabel')}</Label>
             <div className="flex gap-2">
               <Input
                 id="color"
@@ -100,9 +104,9 @@ export function TagDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}>
-              キャンセル
+              {t('actions.cancel')}
             </Button>
-            <Button type="submit">{tagId ? '更新' : '作成'}</Button>
+            <Button type="submit">{tagId ? t('actions.edit') : t('actions.create')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

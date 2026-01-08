@@ -1,5 +1,6 @@
 import { type Note, type NoteWithContent } from '@/types/notes';
 
+import { getCurrentLanguage } from '../i18n';
 import { safeInvoke } from '../tauri';
 
 export function createNote(
@@ -8,13 +9,15 @@ export function createNote(
   folderPath = '',
   parentId: number | null = null
 ): Promise<NoteWithContent> {
+  const locale = getCurrentLanguage();
   return safeInvoke<NoteWithContent>('create_note', {
     input: {
       content,
       folder_path: folderPath,
       parent_id: parentId,
       title
-    }
+    },
+    locale
   });
 }
 
@@ -27,17 +30,20 @@ export function loadNote(id: number): Promise<NoteWithContent> {
 }
 
 export function updateNote(id: number, title: string, content: string): Promise<NoteWithContent> {
+  const locale = getCurrentLanguage();
   return safeInvoke<NoteWithContent>('update_note', {
     input: {
       content,
       id,
       title
-    }
+    },
+    locale
   });
 }
 
 export function deleteNote(id: number): Promise<void> {
-  return safeInvoke<void>('delete_note', { id });
+  const locale = getCurrentLanguage();
+  return safeInvoke<void>('delete_note', { id, locale });
 }
 
 export function moveNote(id: number, newParentId: number | null): Promise<Note> {
@@ -81,9 +87,11 @@ export function importNote(
   filePath: string,
   parentId: number | null = null
 ): Promise<NoteWithContent> {
+  const locale = getCurrentLanguage();
   return safeInvoke<NoteWithContent>('import_note', {
     filePath: filePath,
-    parentId: parentId
+    parentId: parentId,
+    locale
   });
 }
 
@@ -91,9 +99,11 @@ export function importNotes(
   filePaths: string[],
   parentId: number | null = null
 ): Promise<NoteWithContent[]> {
+  const locale = getCurrentLanguage();
   return safeInvoke<NoteWithContent[]>('import_notes', {
     filePaths: filePaths,
-    parentId: parentId
+    parentId: parentId,
+    locale
   });
 }
 

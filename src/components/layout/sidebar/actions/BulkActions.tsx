@@ -2,6 +2,7 @@ import { FolderInput, Star, Tag, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useFolderStore } from '@/stores/folders';
 import { useTagStore } from '@/stores/tags';
 import { type FolderWithChildren } from '@/types/files';
@@ -23,6 +24,7 @@ export function BulkActions({
   onFavorite,
   onTag
 }: BulkActionsProps) {
+  const { t } = useTranslation();
   const [showBulkMoveMenu, setShowBulkMoveMenu] = useState(false);
   const [showBulkTagMenu, setShowBulkTagMenu] = useState(false);
   const { folders } = useFolderStore();
@@ -47,7 +49,7 @@ export function BulkActions({
     <div className="px-2 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-          {selectedCount}個選択中
+          {t('messages.itemCount', { count: selectedCount })}
         </span>
         <Button
           variant="ghost"
@@ -55,7 +57,7 @@ export function BulkActions({
           onClick={onClearSelection}
           className="h-6 px-2">
           <X className="h-3 w-3 mr-1" />
-          解除
+          {t('actions.clearSelection')}
         </Button>
       </div>
       <div className="grid grid-cols-2 gap-2">
@@ -66,7 +68,7 @@ export function BulkActions({
             onClick={() => setShowBulkMoveMenu(!showBulkMoveMenu)}
             className="w-full h-8 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600">
             <FolderInput className="h-3 w-3 mr-1" />
-            移動
+            {t('actions.move')}
           </Button>
           {showBulkMoveMenu && (
             <div className="absolute z-10 left-0 top-full mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg max-h-64 overflow-y-auto">
@@ -101,7 +103,7 @@ export function BulkActions({
           onClick={onFavorite}
           className="w-full h-8 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600">
           <Star className="h-3 w-3 mr-1" />
-          お気に入り
+          {t('actions.favorite')}
         </Button>
 
         <div className="relative">
@@ -111,7 +113,7 @@ export function BulkActions({
             onClick={() => setShowBulkTagMenu(!showBulkTagMenu)}
             className="w-full h-8 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600">
             <Tag className="h-3 w-3 mr-1" />
-            タグ
+            {t('labels.tag')}
           </Button>
           {showBulkTagMenu && (
             <div className="absolute z-10 left-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg max-h-64 overflow-y-auto">
@@ -145,7 +147,7 @@ export function BulkActions({
           onClick={onDelete}
           className="w-full h-8">
           <Trash2 className="h-3 w-3 mr-1" />
-          削除
+          {t('actions.delete')}
         </Button>
       </div>
     </div>

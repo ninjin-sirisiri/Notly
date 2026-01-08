@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import { getCurrentLanguage } from '../i18n';
 
 export type BackupMetadata = {
   version: string;
@@ -31,7 +32,8 @@ export type UpdateBackupSettingsInput = {
  * @returns 作成されたバックアップファイルのパス
  */
 export async function createBackup(backupPath: string): Promise<string> {
-  return await invoke<string>('create_backup', { backupPath });
+  const locale = getCurrentLanguage();
+  return await invoke<string>('create_backup', { backupPath, locale });
 }
 
 /**
@@ -39,7 +41,8 @@ export async function createBackup(backupPath: string): Promise<string> {
  * @param backupFile 復元するバックアップファイルのパス
  */
 export async function restoreBackup(backupFile: string): Promise<void> {
-  return await invoke<void>('restore_backup', { backupFile });
+  const locale = getCurrentLanguage();
+  return await invoke<void>('restore_backup', { backupFile, locale });
 }
 
 /**
@@ -48,14 +51,16 @@ export async function restoreBackup(backupFile: string): Promise<void> {
  * @returns バックアップメタデータ
  */
 export async function readBackupMetadata(backupFile: string): Promise<BackupMetadata> {
-  return await invoke<BackupMetadata>('read_backup_metadata', { backupFile });
+  const locale = getCurrentLanguage();
+  return await invoke<BackupMetadata>('read_backup_metadata', { backupFile, locale });
 }
 
 /**
  * 自動バックアップ設定を取得
  */
 export async function getBackupSettings(): Promise<BackupSettings> {
-  return await invoke<BackupSettings>('get_backup_settings');
+  const locale = getCurrentLanguage();
+  return await invoke<BackupSettings>('get_backup_settings', { locale });
 }
 
 /**
@@ -64,5 +69,6 @@ export async function getBackupSettings(): Promise<BackupSettings> {
 export async function updateBackupSettings(
   input: UpdateBackupSettingsInput
 ): Promise<BackupSettings> {
-  return await invoke<BackupSettings>('update_backup_settings', { input });
+  const locale = getCurrentLanguage();
+  return await invoke<BackupSettings>('update_backup_settings', { input, locale });
 }

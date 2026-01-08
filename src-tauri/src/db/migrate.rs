@@ -226,6 +226,20 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     [],
   )?;
 
+  // Fix any NULL timestamps in templates table
+  conn
+    .execute(
+      "UPDATE templates SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL",
+      [],
+    )
+    .ok();
+  conn
+    .execute(
+      "UPDATE templates SET updated_at = CURRENT_TIMESTAMP WHERE updated_at IS NULL",
+      [],
+    )
+    .ok();
+
   // Create hotkeys table
   conn.execute(
     "CREATE TABLE IF NOT EXISTS hotkeys (

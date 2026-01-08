@@ -65,6 +65,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useDeleteFolder, useMoveFolder, useUpdateFolder } from '@/hooks/useFolder';
+import { useTranslation } from '@/hooks/useTranslation';
 import { cn, getContrastColor } from '@/lib/utils';
 import { useFolderStore } from '@/stores/folders';
 import { useSelectionStore } from '@/stores/selection';
@@ -136,6 +137,8 @@ export const FolderItem = memo(function FolderItem({
   onClick,
   isVirtualized = false
 }: FolderItemProps) {
+  const { t } = useTranslation();
+
   // Optimized folder store selectors
   const isOpen = useFolderStore(state => state.openFolderIds.includes(folder.id));
   const isActive = useFolderStore(state => state.currentFolder?.id === folder.id);
@@ -420,30 +423,30 @@ export const FolderItem = memo(function FolderItem({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => setIsEditing(true)}>
                     <Edit2 className="mr-2 h-4 w-4" />
-                    名前を変更
+                    {t('contextMenu.rename')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setShowMoveMenu(true)}>
                     <FolderInput className="mr-2 h-4 w-4" />
-                    移動
+                    {t('contextMenu.move')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleIconChange}>
                     <Settings2 className="mr-2 h-4 w-4" />
-                    アイコン変更
+                    {t('contextMenu.changeIcon')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleColorChange}>
                     <Palette className="mr-2 h-4 w-4" />
-                    色変更
+                    {t('contextMenu.changeColor')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSortSettings}>
                     <ArrowUpDown className="mr-2 h-4 w-4" />
-                    並び替え設定
+                    {t('contextMenu.sortSettings')}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => setShowDeleteConfirm(true)}
                     className="text-destructive focus:text-destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
-                    削除
+                    {t('actions.delete')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -463,7 +466,7 @@ export const FolderItem = memo(function FolderItem({
         onOpenChange={setShowIconDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>アイコンを選択</DialogTitle>
+            <DialogTitle>{t('dialogs.selectIcon.title')}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-6 gap-2">
             {Object.entries(iconMap).map(([iconKey, IconComponent]) => (
@@ -485,7 +488,7 @@ export const FolderItem = memo(function FolderItem({
         onOpenChange={setShowColorPicker}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>色を選択</DialogTitle>
+            <DialogTitle>{t('dialogs.selectColor.title')}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center space-y-4">
             <Input
@@ -494,7 +497,7 @@ export const FolderItem = memo(function FolderItem({
               onChange={e => setSelectedColor(e.target.value)}
               className="h-10 w-10 p-1 cursor-pointer"
             />
-            <Button onClick={confirmColorChange}>適用</Button>
+            <Button onClick={confirmColorChange}>{t('dialogs.selectColor.apply')}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -505,63 +508,63 @@ export const FolderItem = memo(function FolderItem({
         onOpenChange={setShowSortSettings}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>並び替え設定</DialogTitle>
+            <DialogTitle>{t('dialogs.sortSettings.title')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>並び順</Label>
+              <Label>{t('dialogs.sortSettings.sortBy')}</Label>
               <div className="flex flex-wrap gap-2 mt-1">
                 <Button
                   variant={tempSortBy === 'name' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTempSortBy('name')}>
-                  名前
+                  {t('dialogs.sortSettings.name')}
                 </Button>
                 <Button
                   variant={tempSortBy === 'createdAt' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTempSortBy('createdAt')}>
-                  作成日時
+                  {t('dialogs.sortSettings.createdAt')}
                 </Button>
                 <Button
                   variant={tempSortBy === 'updatedAt' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTempSortBy('updatedAt')}>
-                  更新日時
+                  {t('dialogs.sortSettings.updatedAt')}
                 </Button>
                 <Button
                   variant={tempSortBy === null ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTempSortBy(null)}>
-                  デフォルト
+                  {t('dialogs.sortSettings.default')}
                 </Button>
               </div>
             </div>
             <div>
-              <Label>順序</Label>
+              <Label>{t('dialogs.sortSettings.order')}</Label>
               <div className="flex gap-2 mt-1">
                 <Button
                   variant={tempSortOrder === 'asc' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTempSortOrder('asc')}>
-                  昇順
+                  {t('dialogs.sortSettings.ascending')}
                 </Button>
                 <Button
                   variant={tempSortOrder === 'desc' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTempSortOrder('desc')}>
-                  降順
+                  {t('dialogs.sortSettings.descending')}
                 </Button>
                 <Button
                   variant={tempSortOrder === null ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTempSortOrder(null)}>
-                  デフォルト
+                  {t('dialogs.sortSettings.default')}
                 </Button>
               </div>
             </div>
             <div className="flex justify-end">
-              <Button onClick={confirmSortChange}>適用</Button>
+              <Button onClick={confirmSortChange}>{t('dialogs.sortSettings.apply')}</Button>
             </div>
           </div>
         </DialogContent>

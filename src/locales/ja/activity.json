@@ -1,0 +1,26 @@
+{
+  "title": "アクティビティ",
+  "dashboard": {
+    "streakCard": "連続記録",
+    "todayProgress": "今日の進捗",
+    "activityCard": "アクティビティ",
+    "activityDescription": "過去1年間のアクティビティを表示しています"
+  },
+  "streak": {
+    "current": "現在の連続日数",
+    "longest": "最長連続日数",
+    "days": "日",
+    "daysConsecutive": "日連続",
+    "messageActive": "素晴らしい！{{count}}日間連続でノートを書いています！",
+    "messageStart": "今日からノートを書いて、連続記録を始めましょう！"
+  },
+  "goals": {
+    "title": "今日の目標",
+    "charCount": "文字数",
+    "noteCount": "ノート数",
+    "noGoals": "目標が設定されていません"
+  },
+  "heatmap": {
+    "activities": "アクティビティ"
+  }
+}

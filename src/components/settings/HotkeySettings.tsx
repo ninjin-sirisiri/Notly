@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Kbd, KbdGroup } from '@/components/ui/kbd';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useHotkeyStore } from '../../stores/hotkeys';
 import { HOTKEY_ACTION_LABELS } from '../../types/hotkeys';
 
@@ -50,6 +51,7 @@ function mapKeyToTauriFormat(key: string): string {
 }
 
 export function HotkeySettings() {
+  const { t } = useTranslation('settings');
   const { hotkeys, isLoading, loadHotkeys, updateHotkey } = useHotkeyStore();
   const [editingHotkeys, setEditingHotkeys] = useState<
     Record<string, { shortcut: string; enabled: boolean }>
@@ -142,10 +144,10 @@ export function HotkeySettings() {
         shortcut: current.shortcut,
         enabled: current.enabled
       });
-      toast.success('ショートカットキーを保存しました');
+      toast.success(t('hotkeys.saveSuccess'));
       setEditingAction(null);
     } catch {
-      toast.error('ショートカットキーの保存に失敗しました');
+      toast.error(t('hotkeys.saveError'));
     }
   }
 
@@ -166,7 +168,7 @@ export function HotkeySettings() {
   if (isLoading && hotkeys.length === 0) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-muted-foreground">読み込み中...</div>
+        <div className="text-muted-foreground">{t('hotkeys.loading')}</div>
       </div>
     );
   }
@@ -178,10 +180,8 @@ export function HotkeySettings() {
           <Keyboard className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold">ショートカットキー設定</h2>
-          <p className="text-sm text-muted-foreground">
-            グローバルショートカットキーをカスタマイズできます
-          </p>
+          <h2 className="text-xl font-semibold">{t('hotkeys.title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('hotkeys.description')}</p>
         </div>
       </div>
 
@@ -203,7 +203,7 @@ export function HotkeySettings() {
                   <Label
                     htmlFor={`hotkey-${hotkey.action}`}
                     className="text-base">
-                    {HOTKEY_ACTION_LABELS[hotkey.action] || hotkey.action}
+                    {t(`hotkeys.actions.${HOTKEY_ACTION_LABELS[hotkey.action] || hotkey.action}`)}
                   </Label>
                   <Switch
                     checked={editing.enabled}
@@ -223,14 +223,14 @@ export function HotkeySettings() {
                       onKeyUp={handleKeyUp}
                       onFocus={handleInputFocus}
                       disabled={!editing.enabled}
-                      placeholder="キーを押してください..."
+                      placeholder={t('hotkeys.pressKeys')}
                       autoFocus
                       className="cursor-text"
                     />
                     <p className="text-xs text-muted-foreground">
                       {recordingKeys.length > 0
-                        ? '録音中... キーを離すと確定されます。Escでキャンセル。'
-                        : 'フィールドにフォーカスして、設定したいキーの組み合わせを押してください。Escでキャンセル。'}
+                        ? t('hotkeys.recordingHint')
+                        : t('hotkeys.inputHint')}
                     </p>
                   </div>
                 ) : (

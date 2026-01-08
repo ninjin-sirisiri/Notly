@@ -1,11 +1,14 @@
 import { findParentNode, posToDOMRect, type Editor } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
+import { useTranslation } from '@/hooks/useTranslation';
 
 type ListBubbleMenuProps = {
   editor: Editor;
 };
 
 export function ListBubbleMenu({ editor }: ListBubbleMenuProps) {
+  const { t } = useTranslation('editor');
+
   return (
     <BubbleMenu
       editor={editor}
@@ -40,7 +43,7 @@ export function ListBubbleMenu({ editor }: ListBubbleMenuProps) {
             chain.run();
           }}
           type="button">
-          リストタイプを切り替え
+          {t('toolbar.toggleListType')}
         </button>
       </div>
     </BubbleMenu>

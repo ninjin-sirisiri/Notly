@@ -60,7 +60,8 @@
       "warn",
       {
         "allow": [
-          "*/*.css"
+          "*/*.css",
+          "i18next"
         ]
       }
     ],
@@ -103,6 +104,16 @@
     "init-declarations": "off",
     "max-depth": "off",
     "no-continue": "off",
-    "new-cap": "off"
+    "new-cap": "off",
+    "max-statements": "off",
+    "capitalized-comments": "off",
+    "no-inline-comments": "off",
+    "no-console": "off",
+    "react/jsx-props-no-spreading": "off",
+    "import/no-named-as-default-member": "off",
+    "promise/prefer-await-to-callbacks": "off",
+    "unicorn/prefer-string-raw": "off",
+    "oxc/no-map-spread": "off",
+    "unicorn/no-immediate-mutation": "off"
   }
 }

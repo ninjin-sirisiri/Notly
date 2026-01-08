@@ -1,0 +1,120 @@
+{
+  "title": "設定",
+  "description": "アプリケーションの設定を管理します",
+  "language": {
+    "title": "言語",
+    "description": "使用する言語を選択してください"
+  },
+  "theme": {
+    "title": "テーマ",
+    "description": "テーマを選択してください"
+  },
+  "goals": {
+    "title": "目標設定",
+    "description": "1日の執筆目標を設定して、継続的な習慣化をサポートします。",
+    "dailyCharCount": "1日の目標文字数",
+    "dailyCharCountPlaceholder": "例: 1000",
+    "dailyCharCountHelp": "0に設定すると目標として表示されません",
+    "dailyNoteCount": "1日の目標ノート数",
+    "dailyNotePlaceholder": "例: 3",
+    "dailyNoteCountHelp": "0に設定すると目標として表示されません",
+    "save": "保存",
+    "saving": "保存中..."
+  },
+  "notifications": {
+    "title": "通知設定",
+    "description": "毎日決まった時間に通知を受け取ることができます",
+    "enable": "通知を有効にする",
+    "enableDescription": "設定した時間に通知を送信します",
+    "time": "通知時間",
+    "timeHelp": "毎日この時間に通知を送信します",
+    "message": "通知メッセージ",
+    "messagePlaceholder": "通知に表示するメッセージを入力",
+    "messageHelp": "通知に表示されるメッセージをカスタマイズできます",
+    "save": "保存",
+    "loading": "読み込み中...",
+    "saveSuccess": "通知設定を保存しました",
+    "saveError": "通知設定の保存に失敗しました"
+  },
+  "hotkeys": {
+    "title": "ショートカットキー設定",
+    "description": "グローバルショートカットキーをカスタマイズできます",
+    "loading": "読み込み中...",
+    "recordingHint": "録音中... キーを離すと確定されます。Escでキャンセル。",
+    "inputHint": "フィールドにフォーカスして、設定したいキーの組み合わせを押してください。Escでキャンセル。",
+    "pressKeys": "キーを押してください...",
+    "saveSuccess": "ショートカットキーを保存しました",
+    "saveError": "ショートカットキーの保存に失敗しました",
+    "actions": {
+      "quick_note": "クイックノート作成",
+      "toggle_window": "ウィンドウの表示/非表示"
+    }
+  },
+  "backup": {
+    "title": "バックアップと復元",
+    "description": "ノートとデータベースをバックアップして、データを保護します。",
+    "createBackup": "バックアップを作成",
+    "creatingBackup": "バックアップ中...",
+    "restoreBackup": "バックアップから復元",
+    "saveBackupTitle": "バックアップを保存",
+    "selectBackupTitle": "バックアップファイルを選択",
+    "backupSuccess": "バックアップ完了",
+    "backupSuccessDescription": "バックアップが正常に作成されました: {{path}}",
+    "backupError": "バックアップ失敗",
+    "backupErrorDescription": "バックアップの作成に失敗しました",
+    "restoreSuccess": "復元完了",
+    "restoreSuccessDescription": "バックアップから正常に復元されました。変更を反映するには、アプリケーションを手動で再起動してください。",
+    "restoreError": "復元失敗",
+    "restoreErrorDescription": "バックアップの復元に失敗しました",
+    "readError": "バックアップ読み取り失敗",
+    "readErrorDescription": "バックアップファイルの読み取りに失敗しました",
+    "aboutTitle": "バックアップについて",
+    "aboutItems": {
+      "includes": "バックアップには全てのノートとデータベースが含まれます",
+      "recommend": "定期的にバックアップを取ることをお勧めします",
+      "overwrite": "バックアップから復元すると、現在のデータは上書きされます",
+      "restart": "復元後は、アプリケーションを手動で再起動してください"
+    },
+    "restoreDialog": {
+      "title": "バックアップから復元",
+      "description": "選択したバックアップから復元しますか？現在のデータは上書きされます。",
+      "version": "バージョン:",
+      "createdAt": "作成日時:",
+      "notesCount": "ノート数:",
+      "foldersCount": "フォルダ数:",
+      "cancel": "キャンセル",
+      "restore": "復元",
+      "restoring": "復元中..."
+    }
+  },
+  "autoBackup": {
+    "title": "自動バックアップ",
+    "description": "定期的に自動でバックアップを作成します",
+    "loading": "読み込み中...",
+    "enable": "自動バックアップを有効化",
+    "enableDescription": "定期的に自動でバックアップを作成します",
+    "frequency": "バックアップ頻度",
+    "frequencyOptions": {
+      "daily": "毎日",
+      "weekly": "毎週",
+      "monthly": "毎月"
+    },
+    "backupPath": "バックアップ保存先",
+    "backupPathPlaceholder": "保存先を選択してください",
+    "browse": "参照",
+    "maxBackups": "保持するバックアップ数",
+    "maxBackupsHelp": "この数を超える古いバックアップは自動的に削除されます",
+    "lastBackup": "最終バックアップ:",
+    "save": "設定を保存",
+    "saving": "保存中...",
+    "selectPathTitle": "自動バックアップ保存先を選択",
+    "loadError": "設定読み込みエラー",
+    "loadErrorDescription": "設定の読み込みに失敗しました",
+    "selectError": "フォルダ選択エラー",
+    "selectErrorDescription": "フォルダの選択に失敗しました",
+    "saveSuccess": "保存完了",
+    "saveSuccessDescription": "自動バックアップ設定が保存されました",
+    "saveError": "保存失敗",
+    "saveErrorDescription": "設定の保存に失敗しました"
+  }
+}

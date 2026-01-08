@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { loadNote } from '@/lib/api/notes';
 import { getTagsByNote } from '@/lib/api/tags';
+import { formatDateTime } from '@/lib/dateFormat';
 import { type Note } from '@/types/notes';
 import { type Tag } from '@/types/tags';
 
@@ -12,16 +13,6 @@ type NoteInfoDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
-
-function formatDate(dateStr: Date | string) {
-  return new Date(dateStr).toLocaleString('ja-JP', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
 
 export function NoteInfoDialog({ noteId, open, onOpenChange }: NoteInfoDialogProps) {
   const [info, setInfo] = useState<{
@@ -73,10 +64,10 @@ export function NoteInfoDialog({ noteId, open, onOpenChange }: NoteInfoDialogPro
             <div className="font-medium">{info.note.title}</div>
 
             <div className="text-muted-foreground">作成日時</div>
-            <div>{formatDate(info.note.created_at)}</div>
+            <div>{formatDateTime(info.note.created_at)}</div>
 
             <div className="text-muted-foreground">更新日時</div>
-            <div>{formatDate(info.note.updated_at)}</div>
+            <div>{formatDateTime(info.note.updated_at)}</div>
 
             <div className="text-muted-foreground">文字数</div>
             <div>{charCount} 文字</div>

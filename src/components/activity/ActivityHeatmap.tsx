@@ -1,3 +1,5 @@
+import { useTranslation } from '@/hooks/useTranslation';
+import { formatISODate } from '@/lib/dateFormat';
 import { type ActivityLogItem } from '@/types/activity';
 
 type ActivityHeatmapProps = {
@@ -22,11 +24,9 @@ function getLevelColor(level: number): string {
   }
 }
 
-function formatDate(date: Date): string {
-  return date.toISOString().split('T')[0];
-}
-
 function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) {
+  const { t } = useTranslation('activity');
+
   // Create a map for quick lookup
   const activityMap = new Map(data.map(item => [item.date, item]));
 
@@ -55,10 +55,10 @@ function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) {
       <div className="inline-flex gap-1">
         {weeks.map(week => (
           <div
-            key={formatDate(week[0])}
+            key={formatISODate(week[0])}
             className="flex flex-col gap-1">
             {week.map(date => {
-              const dateStr = formatDate(date);
+              const dateStr = formatISODate(date);
               const activity = activityMap.get(dateStr);
               const level = activity?.level ?? 0;
               const count = activity?.count ?? 0;
@@ -67,7 +67,7 @@ function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) {
                 <div
                   key={dateStr}
                   className={`w-3 h-3 rounded-sm ${getLevelColor(level)} transition-colors cursor-pointer hover:ring-2 hover:ring-green-500`}
-                  title={`${dateStr}: ${count} activities`}
+                  title={`${dateStr}: ${count} ${t('heatmap.activities')}`}
                 />
               );
             })}

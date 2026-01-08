@@ -111,7 +111,10 @@ export default defineConfig(async () => ({
           ],
 
           // DnD functionality
-          dnd: ['@dnd-kit/core']
+          dnd: ['@dnd-kit/core'],
+
+          // i18n
+          i18n: ['i18next', 'react-i18next', 'i18next-browser-languagedetector']
         }
       }
     }

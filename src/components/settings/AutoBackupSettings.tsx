@@ -14,38 +14,42 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   getBackupSettings,
   updateBackupSettings,
   type BackupSettings as BackupSettingsType
 } from '@/lib/api/backup';
+import { formatDateTime } from '@/lib/dateFormat';
 
 export function AutoBackupSettings() {
+  const { t } = useTranslation('settings');
   const [settings, setSettings] = useState<BackupSettingsType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    loadSettings();
-  }, []);
 
   async function loadSettings() {
     try {
       const data = await getBackupSettings();
       setSettings(data);
     } catch (error) {
-      toast.error('設定読み込みエラー', {
-        description: error instanceof Error ? error.message : '設定の読み込みに失敗しました'
+      toast.error(t('autoBackup.loadError'), {
+        description: error instanceof Error ? error.message : t('autoBackup.loadErrorDescription')
       });
     } finally {
       setIsLoading(false);
     }
   }
 
+  useEffect(() => {
+    loadSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function handleSelectBackupPath() {
     try {
       const selected = await open({
-        title: '自動バックアップ保存先を選択',
+        title: t('autoBackup.selectPathTitle'),
         directory: true
       });
 
@@ -53,8 +57,8 @@ export function AutoBackupSettings() {
         setSettings({ ...settings, backup_path: selected });
       }
     } catch (error) {
-      toast.error('フォルダ選択エラー', {
-        description: error instanceof Error ? error.message : 'フォルダの選択に失敗しました'
+      toast.error(t('autoBackup.selectError'), {
+        description: error instanceof Error ? error.message : t('autoBackup.selectErrorDescription')
       });
     }
   }
@@ -71,12 +75,12 @@ export function AutoBackupSettings() {
         max_backups: settings.max_backups
       });
       setSettings(updated);
-      toast.success('保存完了', {
-        description: '自動バックアップ設定が保存されました'
+      toast.success(t('autoBackup.saveSuccess'), {
+        description: t('autoBackup.saveSuccessDescription')
       });
     } catch (error) {
-      toast.error('保存失敗', {
-        description: error instanceof Error ? error.message : '設定の保存に失敗しました'
+      toast.error(t('autoBackup.saveError'), {
+        description: error instanceof Error ? error.message : t('autoBackup.saveErrorDescription')
       });
     } finally {
       setIsSaving(false);
@@ -87,10 +91,10 @@ export function AutoBackupSettings() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>自動バックアップ</CardTitle>
+          <CardTitle>{t('autoBackup.title')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">読み込み中...</p>
+          <p className="text-sm text-muted-foreground">{t('autoBackup.loading')}</p>
         </CardContent>
       </Card>
     );
@@ -99,14 +103,14 @@ export function AutoBackupSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>自動バックアップ</CardTitle>
-        <CardDescription>定期的に自動でバックアップを作成します</CardDescription>
+        <CardTitle>{t('autoBackup.title')}</CardTitle>
+        <CardDescription>{t('autoBackup.description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label htmlFor="auto-backup-enabled">自動バックアップを有効化</Label>
-            <p className="text-sm text-muted-foreground">定期的に自動でバックアップを作成します</p>
+            <Label htmlFor="auto-backup-enabled">{t('autoBackup.enable')}</Label>
+            <p className="text-sm text-muted-foreground">{t('autoBackup.enableDescription')}</p>
           </div>
           <Switch
             id="auto-backup-enabled"
@@ -118,7 +122,7 @@ export function AutoBackupSettings() {
         {settings.enabled && (
           <>
             <div className="space-y-2">
-              <Label htmlFor="frequency">バックアップ頻度</Label>
+              <Label htmlFor="frequency">{t('autoBackup.frequency')}</Label>
               <Select
                 value={settings.frequency}
                 onValueChange={(value: 'daily' | 'weekly' | 'monthly') =>
@@ -128,21 +132,23 @@ export function AutoBackupSettings() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="daily">毎日</SelectItem>
-                  <SelectItem value="weekly">毎週</SelectItem>
-                  <SelectItem value="monthly">毎月</SelectItem>
+                  <SelectItem value="daily">{t('autoBackup.frequencyOptions.daily')}</SelectItem>
+                  <SelectItem value="weekly">{t('autoBackup.frequencyOptions.weekly')}</SelectItem>
+                  <SelectItem value="monthly">
+                    {t('autoBackup.frequencyOptions.monthly')}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="backup-path">バックアップ保存先</Label>
+              <Label htmlFor="backup-path">{t('autoBackup.backupPath')}</Label>
               <div className="flex gap-2">
                 <Input
                   id="backup-path"
                   value={settings.backup_path || ''}
                   readOnly
-                  placeholder="保存先を選択してください"
+                  placeholder={t('autoBackup.backupPathPlaceholder')}
                   className="flex-1"
                 />
                 <Button
@@ -150,13 +156,13 @@ export function AutoBackupSettings() {
                   onClick={handleSelectBackupPath}
                   className="shrink-0">
                   <FolderOpen className="h-4 w-4 mr-2" />
-                  参照
+                  {t('autoBackup.browse')}
                 </Button>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="max-backups">保持するバックアップ数</Label>
+              <Label htmlFor="max-backups">{t('autoBackup.maxBackups')}</Label>
               <Input
                 id="max-backups"
                 type="number"
@@ -170,15 +176,13 @@ export function AutoBackupSettings() {
                   })
                 }
               />
-              <p className="text-xs text-muted-foreground">
-                この数を超える古いバックアップは自動的に削除されます
-              </p>
+              <p className="text-xs text-muted-foreground">{t('autoBackup.maxBackupsHelp')}</p>
             </div>
 
             {settings.last_backup_at && (
               <div className="rounded-lg border p-3 bg-muted/50">
                 <p className="text-sm text-muted-foreground">
-                  最終バックアップ: {new Date(settings.last_backup_at).toLocaleString('ja-JP')}
+                  {t('autoBackup.lastBackup')} {formatDateTime(settings.last_backup_at)}
                 </p>
               </div>
             )}
@@ -189,7 +193,7 @@ export function AutoBackupSettings() {
           onClick={handleSave}
           disabled={isSaving}
           className="w-full">
-          {isSaving ? '保存中...' : '設定を保存'}
+          {isSaving ? t('autoBackup.saving') : t('autoBackup.save')}
         </Button>
       </CardContent>
     </Card>

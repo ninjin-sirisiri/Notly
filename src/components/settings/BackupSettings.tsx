@@ -12,14 +12,17 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   createBackup,
   restoreBackup,
   readBackupMetadata,
   type BackupMetadata
 } from '@/lib/api/backup';
+import { formatDateTime, formatISODate } from '@/lib/dateFormat';
 
 export function BackupSettings() {
+  const { t } = useTranslation('settings');
   const [isCreating, setIsCreating] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
@@ -32,8 +35,8 @@ export function BackupSettings() {
 
       // バックアップ保存先を選択
       const selectedPath = await save({
-        title: 'バックアップを保存',
-        defaultPath: `notly_backup_${new Date().toISOString().split('T')[0]}.zip`,
+        title: t('backup.saveBackupTitle'),
+        defaultPath: `notly_backup_${formatISODate(new Date())}.zip`,
         filters: [
           {
             name: 'ZIP Archive',
@@ -52,12 +55,12 @@ export function BackupSettings() {
 
       const backupFilePath = await createBackup(parentDir);
 
-      toast.success('バックアップ完了', {
-        description: `バックアップが正常に作成されました: ${backupFilePath}`
+      toast.success(t('backup.backupSuccess'), {
+        description: t('backup.backupSuccessDescription', { path: backupFilePath })
       });
     } catch (error) {
-      toast.error('バックアップ失敗', {
-        description: error instanceof Error ? error.message : 'バックアップの作成に失敗しました'
+      toast.error(t('backup.backupError'), {
+        description: error instanceof Error ? error.message : t('backup.backupErrorDescription')
       });
     } finally {
       setIsCreating(false);
@@ -67,7 +70,7 @@ export function BackupSettings() {
   async function handleSelectBackupFile() {
     try {
       const selected = await open({
-        title: 'バックアップファイルを選択',
+        title: t('backup.selectBackupTitle'),
         multiple: false,
         filters: [
           {
@@ -88,9 +91,8 @@ export function BackupSettings() {
       setBackupMetadata(metadata);
       setRestoreDialogOpen(true);
     } catch (error) {
-      toast.error('バックアップ読み取り失敗', {
-        description:
-          error instanceof Error ? error.message : 'バックアップファイルの読み取りに失敗しました'
+      toast.error(t('backup.readError'), {
+        description: error instanceof Error ? error.message : t('backup.readErrorDescription')
       });
     }
   }
@@ -102,16 +104,15 @@ export function BackupSettings() {
       setIsRestoring(true);
       await restoreBackup(selectedBackupFile);
 
-      toast.success('復元完了', {
-        description:
-          'バックアップから正常に復元されました。変更を反映するには、アプリケーションを手動で再起動してください。',
+      toast.success(t('backup.restoreSuccess'), {
+        description: t('backup.restoreSuccessDescription'),
         duration: 5000
       });
 
       setRestoreDialogOpen(false);
     } catch (error) {
-      toast.error('復元失敗', {
-        description: error instanceof Error ? error.message : 'バックアップの復元に失敗しました'
+      toast.error(t('backup.restoreError'), {
+        description: error instanceof Error ? error.message : t('backup.restoreErrorDescription')
       });
     } finally {
       setIsRestoring(false);
@@ -122,13 +123,11 @@ export function BackupSettings() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>バックアップと復元</CardTitle>
+          <CardTitle>{t('backup.title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              ノートとデータベースをバックアップして、データを保護します。
-            </p>
+            <p className="text-sm text-muted-foreground">{t('backup.description')}</p>
           </div>
 
           <div className="flex gap-4">
@@ -137,7 +136,7 @@ export function BackupSettings() {
               disabled={isCreating}
               className="flex items-center gap-2">
               <Download className="h-4 w-4" />
-              {isCreating ? 'バックアップ中...' : 'バックアップを作成'}
+              {isCreating ? t('backup.creatingBackup') : t('backup.createBackup')}
             </Button>
 
             <Button
@@ -146,7 +145,7 @@ export function BackupSettings() {
               variant="outline"
               className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
-              バックアップから復元
+              {t('backup.restoreBackup')}
             </Button>
           </div>
 
@@ -154,12 +153,12 @@ export function BackupSettings() {
             <div className="flex items-start gap-3">
               <Info className="h-5 w-5 text-blue-500 mt-0.5 shrink-0" />
               <div className="space-y-1">
-                <p className="text-sm font-medium text-blue-500">バックアップについて</p>
+                <p className="text-sm font-medium text-blue-500">{t('backup.aboutTitle')}</p>
                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                  <li>バックアップには全てのノートとデータベースが含まれます</li>
-                  <li>定期的にバックアップを取ることをお勧めします</li>
-                  <li>バックアップから復元すると、現在のデータは上書きされます</li>
-                  <li>復元後は、アプリケーションを手動で再起動してください</li>
+                  <li>{t('backup.aboutItems.includes')}</li>
+                  <li>{t('backup.aboutItems.recommend')}</li>
+                  <li>{t('backup.aboutItems.overwrite')}</li>
+                  <li>{t('backup.aboutItems.restart')}</li>
                 </ul>
               </div>
             </div>
@@ -172,25 +171,25 @@ export function BackupSettings() {
         onOpenChange={setRestoreDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>バックアップから復元</DialogTitle>
-            <DialogDescription>
-              選択したバックアップから復元しますか？現在のデータは上書きされます。
-            </DialogDescription>
+            <DialogTitle>{t('backup.restoreDialog.title')}</DialogTitle>
+            <DialogDescription>{t('backup.restoreDialog.description')}</DialogDescription>
           </DialogHeader>
 
           {backupMetadata && (
             <div className="space-y-2 rounded-lg border p-4">
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="text-muted-foreground">バージョン:</div>
+                <div className="text-muted-foreground">{t('backup.restoreDialog.version')}</div>
                 <div>{backupMetadata.version}</div>
 
-                <div className="text-muted-foreground">作成日時:</div>
-                <div>{new Date(backupMetadata.created_at).toLocaleString('ja-JP')}</div>
+                <div className="text-muted-foreground">{t('backup.restoreDialog.createdAt')}</div>
+                <div>{formatDateTime(backupMetadata.created_at)}</div>
 
-                <div className="text-muted-foreground">ノート数:</div>
+                <div className="text-muted-foreground">{t('backup.restoreDialog.notesCount')}</div>
                 <div>{backupMetadata.notes_count}</div>
 
-                <div className="text-muted-foreground">フォルダ数:</div>
+                <div className="text-muted-foreground">
+                  {t('backup.restoreDialog.foldersCount')}
+                </div>
                 <div>{backupMetadata.folders_count}</div>
               </div>
             </div>
@@ -201,12 +200,14 @@ export function BackupSettings() {
               variant="outline"
               onClick={() => setRestoreDialogOpen(false)}
               disabled={isRestoring}>
-              キャンセル
+              {t('backup.restoreDialog.cancel')}
             </Button>
             <Button
               onClick={handleRestoreBackup}
               disabled={isRestoring}>
-              {isRestoring ? '復元中...' : '復元'}
+              {isRestoring
+                ? t('backup.restoreDialog.restoring')
+                : t('backup.restoreDialog.restore')}
             </Button>
           </DialogFooter>
         </DialogContent>

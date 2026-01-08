@@ -1,0 +1,60 @@
+{
+  "errors": {
+    "file_not_found": "File not found",
+    "permission_denied": "Permission denied",
+    "invalid_path": "Invalid path",
+    "database_error": "Database error occurred",
+    "io_error": "Input/output error",
+    "note_not_found": "Note not found",
+    "folder_not_found": "Folder not found",
+    "tag_not_found": "Tag not found",
+    "template_not_found": "Template not found",
+    "backup_failed": "Backup failed",
+    "restore_failed": "Restore failed",
+    "invalid_data": "Invalid data provided",
+    "operation_failed": "Operation failed"
+  },
+  "success": {
+    "note_created": "Note created successfully",
+    "note_updated": "Note updated successfully",
+    "note_deleted": "Note deleted successfully",
+    "note_restored": "Note restored successfully",
+    "folder_created": "Folder created successfully",
+    "folder_updated": "Folder updated successfully",
+    "folder_deleted": "Folder deleted successfully",
+    "folder_restored": "Folder restored successfully",
+    "tag_created": "Tag created successfully",
+    "tag_updated": "Tag updated successfully",
+    "tag_deleted": "Tag deleted successfully",
+    "template_created": "Template created successfully",
+    "template_updated": "Template updated successfully",
+    "template_deleted": "Template deleted successfully",
+    "backup_created": "Backup created successfully",
+    "backup_restored": "Backup restored successfully",
+    "settings_updated": "Settings updated successfully"
+  },
+  "notifications": {
+    "reminder": "Time to write in your notes!",
+    "streak_milestone": "You've reached a {{days}} day streak!",
+    "daily_goal_reached": "Daily goal reached!",
+    "backup_completed": "Backup completed successfully",
+    "backup_reminder": "It's time to backup your notes"
+  },
+  "file_operations": {
+    "saving": "Saving file...",
+    "loading": "Loading file...",
+    "deleting": "Deleting file...",
+    "moving": "Moving file...",
+    "copying": "Copying file...",
+    "importing": "Importing notes...",
+    "exporting": "Exporting notes..."
+  },
+  "backup": {
+    "creating": "Creating backup...",
+    "restoring": "Restoring from backup...",
+    "validating": "Validating backup...",
+    "complete": "Backup complete",
+    "auto_backup_enabled": "Auto backup enabled",
+    "auto_backup_disabled": "Auto backup disabled"
+  }
+}

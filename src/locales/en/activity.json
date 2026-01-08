@@ -1,0 +1,26 @@
+{
+  "title": "Activity",
+  "dashboard": {
+    "streakCard": "Streak Record",
+    "todayProgress": "Today's Progress",
+    "activityCard": "Activity",
+    "activityDescription": "Showing activity for the past year"
+  },
+  "streak": {
+    "current": "Current Streak",
+    "longest": "Longest Streak",
+    "days": "days",
+    "daysConsecutive": "days in a row",
+    "messageActive": "Amazing! You've been writing notes for {{count}} days in a row!",
+    "messageStart": "Start writing notes today to begin your streak!"
+  },
+  "goals": {
+    "title": "Today's Goals",
+    "charCount": "Character Count",
+    "noteCount": "Note Count",
+    "noGoals": "No goals set"
+  },
+  "heatmap": {
+    "activities": "activities"
+  }
+}

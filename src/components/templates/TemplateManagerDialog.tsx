@@ -19,6 +19,8 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTranslation } from '@/hooks/useTranslation';
+import { formatShortDate } from '@/lib/dateFormat';
 import { useTemplateStore } from '@/stores/templates';
 import { type Template } from '@/types/templates';
 
@@ -37,6 +39,7 @@ export function TemplateManagerDialog({ open, onOpenChange }: TemplateManagerDia
     setTemplateEditorOpen
   } = useTemplateStore();
   const [deleteTemplateId, setDeleteTemplateId] = useState<number | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (open) {
@@ -71,7 +74,7 @@ export function TemplateManagerDialog({ open, onOpenChange }: TemplateManagerDia
     if (isLoading) {
       return (
         <div className="flex items-center justify-center h-32">
-          <p className="text-muted-foreground">読み込み中...</p>
+          <p className="text-muted-foreground">{t('dialogs.manageTemplates.loading')}</p>
         </div>
       );
     }
@@ -80,7 +83,7 @@ export function TemplateManagerDialog({ open, onOpenChange }: TemplateManagerDia
       return (
         <div className="flex flex-col items-center justify-center h-32 space-y-2">
           <FileText className="h-12 w-12 text-muted-foreground" />
-          <p className="text-muted-foreground">テンプレートがありません</p>
+          <p className="text-muted-foreground">{t('dialogs.manageTemplates.noTemplates')}</p>
         </div>
       );
     }
@@ -95,7 +98,7 @@ export function TemplateManagerDialog({ open, onOpenChange }: TemplateManagerDia
               <div className="flex-1 space-y-1 min-w-0">
                 <h3 className="font-semibold truncate">{template.name}</h3>
                 <div className="text-xs text-muted-foreground pt-1">
-                  更新日: {new Date(template.updatedAt).toLocaleDateString('ja-JP')}
+                  {t('dialogs.manageTemplates.updatedAt')} {formatShortDate(template.updatedAt)}
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -128,15 +131,15 @@ export function TemplateManagerDialog({ open, onOpenChange }: TemplateManagerDia
           <DialogHeader>
             <div className="flex items-center justify-between">
               <div>
-                <DialogTitle>テンプレート管理</DialogTitle>
-                <DialogDescription>テンプレートの編集と削除を行います</DialogDescription>
+                <DialogTitle>{t('dialogs.manageTemplates.title')}</DialogTitle>
+                <DialogDescription>{t('dialogs.manageTemplates.description')}</DialogDescription>
               </div>
               <Button
                 onClick={handleCreate}
                 size="sm"
                 className="gap-2">
                 <Plus className="h-4 w-4" />
-                新規作成
+                {t('dialogs.manageTemplates.createNew')}
               </Button>
             </div>
           </DialogHeader>
@@ -149,12 +152,16 @@ export function TemplateManagerDialog({ open, onOpenChange }: TemplateManagerDia
         onOpenChange={isOpen => !isOpen && setDeleteTemplateId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>テンプレートを削除しますか?</AlertDialogTitle>
-            <AlertDialogDescription>この操作は取り消すことができません。</AlertDialogDescription>
+            <AlertDialogTitle>{t('dialogs.deleteTemplate.title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('dialogs.deleteTemplate.description')}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>キャンセル</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete}>削除</AlertDialogAction>
+            <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              {t('actions.delete')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

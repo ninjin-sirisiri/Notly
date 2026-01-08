@@ -1,0 +1,120 @@
+{
+  "title": "Settings",
+  "description": "Manage application settings",
+  "language": {
+    "title": "Language",
+    "description": "Select your preferred language"
+  },
+  "theme": {
+    "title": "Theme",
+    "description": "Choose your theme preference"
+  },
+  "goals": {
+    "title": "Goal Settings",
+    "description": "Set daily writing goals to support continuous habit formation.",
+    "dailyCharCount": "Daily Character Goal",
+    "dailyCharCountPlaceholder": "e.g., 1000",
+    "dailyCharCountHelp": "Set to 0 to hide this goal",
+    "dailyNoteCount": "Daily Note Goal",
+    "dailyNotePlaceholder": "e.g., 3",
+    "dailyNoteCountHelp": "Set to 0 to hide this goal",
+    "save": "Save",
+    "saving": "Saving..."
+  },
+  "notifications": {
+    "title": "Notification Settings",
+    "description": "Receive notifications at a set time every day",
+    "enable": "Enable Notifications",
+    "enableDescription": "Send notifications at the set time",
+    "time": "Notification Time",
+    "timeHelp": "Notifications will be sent at this time every day",
+    "message": "Notification Message",
+    "messagePlaceholder": "Enter the message to display in notifications",
+    "messageHelp": "Customize the message displayed in notifications",
+    "save": "Save",
+    "loading": "Loading...",
+    "saveSuccess": "Notification settings saved",
+    "saveError": "Failed to save notification settings"
+  },
+  "hotkeys": {
+    "title": "Hotkey Settings",
+    "description": "Customize global hotkeys",
+    "loading": "Loading...",
+    "recordingHint": "Recording... Release keys to confirm. Press Esc to cancel.",
+    "inputHint": "Focus on the field and press the key combination you want to set. Press Esc to cancel.",
+    "pressKeys": "Press keys...",
+    "saveSuccess": "Hotkey saved",
+    "saveError": "Failed to save hotkey",
+    "actions": {
+      "quick_note": "Quick Note Creation",
+      "toggle_window": "Show/Hide Window"
+    }
+  },
+  "backup": {
+    "title": "Backup and Restore",
+    "description": "Protect your data by backing up notes and database.",
+    "createBackup": "Create Backup",
+    "creatingBackup": "Creating Backup...",
+    "restoreBackup": "Restore from Backup",
+    "saveBackupTitle": "Save Backup",
+    "selectBackupTitle": "Select Backup File",
+    "backupSuccess": "Backup Complete",
+    "backupSuccessDescription": "Backup created successfully: {{path}}",
+    "backupError": "Backup Failed",
+    "backupErrorDescription": "Failed to create backup",
+    "restoreSuccess": "Restore Complete",
+    "restoreSuccessDescription": "Successfully restored from backup. Please manually restart the application to apply changes.",
+    "restoreError": "Restore Failed",
+    "restoreErrorDescription": "Failed to restore from backup",
+    "readError": "Backup Read Failed",
+    "readErrorDescription": "Failed to read backup file",
+    "aboutTitle": "About Backups",
+    "aboutItems": {
+      "includes": "Backups include all notes and database",
+      "recommend": "We recommend taking backups regularly",
+      "overwrite": "Restoring from backup will overwrite current data",
+      "restart": "After restoring, please manually restart the application"
+    },
+    "restoreDialog": {
+      "title": "Restore from Backup",
+      "description": "Restore from the selected backup? Current data will be overwritten.",
+      "version": "Version:",
+      "createdAt": "Created:",
+      "notesCount": "Notes:",
+      "foldersCount": "Folders:",
+      "cancel": "Cancel",
+      "restore": "Restore",
+      "restoring": "Restoring..."
+    }
+  },
+  "autoBackup": {
+    "title": "Auto Backup",
+    "description": "Automatically create backups periodically",
+    "loading": "Loading...",
+    "enable": "Enable Auto Backup",
+    "enableDescription": "Automatically create backups periodically",
+    "frequency": "Backup Frequency",
+    "frequencyOptions": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "backupPath": "Backup Location",
+    "backupPathPlaceholder": "Select a location",
+    "browse": "Browse",
+    "maxBackups": "Number of Backups to Keep",
+    "maxBackupsHelp": "Older backups exceeding this number will be automatically deleted",
+    "lastBackup": "Last Backup:",
+    "save": "Save Settings",
+    "saving": "Saving...",
+    "selectPathTitle": "Select Auto Backup Location",
+    "loadError": "Settings Load Error",
+    "loadErrorDescription": "Failed to load settings",
+    "selectError": "Folder Selection Error",
+    "selectErrorDescription": "Failed to select folder",
+    "saveSuccess": "Save Complete",
+    "saveSuccessDescription": "Auto backup settings saved",
+    "saveError": "Save Failed",
+    "saveErrorDescription": "Failed to save settings"
+  }
+}

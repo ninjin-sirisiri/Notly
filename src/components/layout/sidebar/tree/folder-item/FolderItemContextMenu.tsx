@@ -7,6 +7,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger
 } from '@/components/ui/context-menu';
+import { useTranslation } from '@/hooks/useTranslation';
 
 type FolderItemContextMenuProps = {
   children: React.ReactNode;
@@ -27,6 +28,8 @@ export function FolderItemContextMenu({
   onColorChange,
   onSortSettings
 }: FolderItemContextMenuProps) {
+  const { t } = useTranslation();
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
@@ -37,7 +40,7 @@ export function FolderItemContextMenu({
             onRename();
           }}>
           <Edit2 className="mr-2 h-4 w-4" />
-          名前を変更
+          {t('contextMenu.rename')}
         </ContextMenuItem>
         <ContextMenuItem
           onClick={e => {
@@ -45,7 +48,7 @@ export function FolderItemContextMenu({
             onMove();
           }}>
           <FolderInput className="mr-2 h-4 w-4" />
-          移動
+          {t('contextMenu.move')}
         </ContextMenuItem>
         <ContextMenuItem
           onClick={e => {
@@ -53,7 +56,7 @@ export function FolderItemContextMenu({
             onIconChange();
           }}>
           <Settings2 className="mr-2 h-4 w-4" />
-          アイコン変更
+          {t('contextMenu.changeIcon')}
         </ContextMenuItem>
         <ContextMenuItem
           onClick={e => {
@@ -61,7 +64,7 @@ export function FolderItemContextMenu({
             onColorChange();
           }}>
           <Palette className="mr-2 h-4 w-4" />
-          色変更
+          {t('contextMenu.changeColor')}
         </ContextMenuItem>
         <ContextMenuItem
           onClick={e => {
@@ -69,7 +72,7 @@ export function FolderItemContextMenu({
             onSortSettings();
           }}>
           <ArrowUpDown className="mr-2 h-4 w-4" />
-          並び替え設定
+          {t('contextMenu.sortSettings')}
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem
@@ -79,7 +82,7 @@ export function FolderItemContextMenu({
           }}
           className="text-red-600 focus:text-red-600">
           <Trash2 className="mr-2 h-4 w-4" />
-          削除
+          {t('actions.delete')}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

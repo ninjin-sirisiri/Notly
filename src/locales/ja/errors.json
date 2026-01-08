@@ -1,0 +1,10 @@
+{
+  "general": "エラーが発生しました",
+  "notFound": "見つかりません",
+  "saveFailed": "保存に失敗しました",
+  "loadFailed": "読み込みに失敗しました",
+  "deleteFailed": "削除に失敗しました",
+  "networkError": "ネットワークエラー",
+  "importFailed": "インポートに失敗しました",
+  "tagError": "タグ操作に失敗しました"
+}

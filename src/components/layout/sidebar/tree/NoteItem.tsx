@@ -19,6 +19,7 @@ import {
   useNotes,
   useToggleFavorite
 } from '@/hooks/useNote';
+import { useTranslation } from '@/hooks/useTranslation';
 import { loadNote as fetchNote } from '@/lib/api/notes';
 import { exportNote } from '@/lib/export';
 import { cn } from '@/lib/utils';
@@ -37,6 +38,7 @@ type NoteItemProps = {
 };
 
 export const NoteItem = memo(function NoteItem({ note }: NoteItemProps) {
+  const { t } = useTranslation();
   const { loadNote } = useNotes();
   const { deleteNote } = useDeleteNote();
   const { moveNote } = useMoveNote();
@@ -210,26 +212,28 @@ export const NoteItem = memo(function NoteItem({ note }: NoteItemProps) {
                             note.isFavorite && 'fill-yellow-400 text-yellow-400'
                           )}
                         />
-                        {note.isFavorite ? 'お気に入り解除' : 'お気に入りに追加'}
+                        {note.isFavorite
+                          ? t('contextMenu.removeFavorite')
+                          : t('contextMenu.addFavorite')}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setIsEditing(true)}>
                         <Edit2 className="mr-2 h-4 w-4" />
-                        名前を変更
+                        {t('contextMenu.rename')}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setShowMoveMenu(true)}>
                         <FolderInput className="mr-2 h-4 w-4" />
-                        移動
+                        {t('contextMenu.move')}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={handleDuplicate}>
                         <Copy className="mr-2 h-4 w-4" />
-                        複製
+                        {t('actions.duplicate')}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => setShowDeleteConfirm(true)}
                         className="text-destructive focus:text-destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
-                        削除
+                        {t('actions.delete')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

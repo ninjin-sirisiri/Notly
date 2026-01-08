@@ -1,0 +1,181 @@
+{
+  "app": {
+    "name": "Notly",
+    "description": "A note-taking app to build a habit"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "select": "Select",
+    "move": "Move",
+    "favorite": "Favorite",
+    "duplicate": "Duplicate",
+    "restore": "Restore",
+    "selectAll": "Select All",
+    "clearSelection": "Clear Selection",
+    "newNote": "Note",
+    "newFolder": "Folder",
+    "browse": "Browse"
+  },
+  "navigation": {
+    "notes": "Notes",
+    "folders": "Folders",
+    "tags": "Tags",
+    "settings": "Settings",
+    "activity": "Activity",
+    "trash": "Trash"
+  },
+  "labels": {
+    "title": "Title",
+    "name": "Name",
+    "description": "Description",
+    "color": "Color",
+    "path": "Path",
+    "folder": "Folder",
+    "tag": "Tag",
+    "template": "Template",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "untitled": "Untitled",
+    "newFolder": "New Folder",
+    "notePlaceholder": "Note title...",
+    "folderPlaceholder": "Folder name...",
+    "searchPlaceholder": "Search notes..."
+  },
+  "streak": {
+    "current": "Day {{count}} streak",
+    "title": "Streak"
+  },
+  "messages": {
+    "welcome": "Welcome, {{name}}!",
+    "itemCount": "{{count}} item",
+    "itemCount_other": "{{count}} items",
+    "greeting": "Hello {{firstName}} {{lastName}}",
+    "savedAt": "Saved at {{time}}",
+    "notesByUser": "{{count}} note by {{author}}",
+    "notesByUser_other": "{{count}} notes by {{author}}",
+    "itemsDeleted": "{{count}} items deleted",
+    "itemsMoved": "{{count}} items moved",
+    "noteDuplicated": "Note duplicated",
+    "favoriteUpdated": "Favorite updated",
+    "tagAdded": "Tag added",
+    "templateCreated": "Note created from template",
+    "notesImported": "{{count}} notes imported",
+    "tagCreated": "Tag created",
+    "tagUpdated": "Tag updated"
+  },
+  "errors": {
+    "createNoteFailed": "Failed to create note",
+    "createFolderFailed": "Failed to create folder",
+    "deleteFailed": "Failed to delete",
+    "moveFailed": "Failed to move",
+    "duplicateFailed": "Failed to duplicate note",
+    "favoriteUpdateFailed": "Failed to update favorite",
+    "tagAddFailed": "Failed to add tag",
+    "noteCreationFailed": "Failed to create note"
+  },
+  "tooltips": {
+    "activity": "Activity",
+    "settings": "Settings",
+    "menu": "Menu"
+  },
+  "sidebar": {
+    "selectionMode": "Selection Mode",
+    "expandAll": "Expand All",
+    "collapseAll": "Collapse All",
+    "sortBy": "Sort By",
+    "sortByName": "Name",
+    "sortByCreated": "Created Date",
+    "sortByUpdated": "Updated Date",
+    "ascending": "Ascending",
+    "descending": "Descending",
+    "trash": "Trash",
+    "tagList": "Tag List",
+    "templateManager": "Template Manager",
+    "importNotes": "Import Notes",
+    "selectAll": "Select All",
+    "emptyNote": "Empty Note",
+    "createFromTemplate": "Create from Template"
+  },
+  "dialogs": {
+    "importNotes": {
+      "title": "Import Notes",
+      "description": "Select Markdown files (.md) to import. You can select multiple files at once.",
+      "selectFiles": "Select Files",
+      "importing": "Importing...",
+      "importFailed": "Failed to import notes"
+    },
+    "selectTemplate": {
+      "title": "Select Template",
+      "description": "Select a template to create a new note",
+      "noTemplates": "No templates available",
+      "loading": "Loading..."
+    },
+    "manageTemplates": {
+      "title": "Manage Templates",
+      "description": "Edit and delete templates",
+      "createNew": "Create New",
+      "updatedAt": "Updated:",
+      "loading": "Loading...",
+      "noTemplates": "No templates available"
+    },
+    "deleteTemplate": {
+      "title": "Delete Template?",
+      "description": "This action cannot be undone."
+    },
+    "tagDialog": {
+      "titleCreate": "Create New Tag",
+      "titleEdit": "Edit Tag",
+      "nameLabel": "Tag Name",
+      "namePlaceholder": "Enter tag name...",
+      "colorLabel": "Color",
+      "error": "An error occurred"
+    },
+    "deleteNote": {
+      "title": "Delete Note?",
+      "description": "Delete \"{{title}}\". This action cannot be undone."
+    },
+    "deleteFolder": {
+      "title": "Delete Folder?",
+      "description": "Delete \"{{name}}\". This action cannot be undone."
+    },
+    "selectIcon": {
+      "title": "Select Icon"
+    },
+    "selectColor": {
+      "title": "Select Color",
+      "apply": "Apply"
+    },
+    "sortSettings": {
+      "title": "Sort Settings",
+      "sortBy": "Sort By",
+      "order": "Order",
+      "name": "Name",
+      "createdAt": "Created Date",
+      "updatedAt": "Updated Date",
+      "default": "Default",
+      "ascending": "Ascending",
+      "descending": "Descending",
+      "apply": "Apply"
+    }
+  },
+  "contextMenu": {
+    "rename": "Rename",
+    "move": "Move",
+    "delete": "Delete",
+    "export": "Export",
+    "details": "Details",
+    "changeIcon": "Change Icon",
+    "changeColor": "Change Color",
+    "sortSettings": "Sort Settings",
+    "addFavorite": "Add to Favorites",
+    "removeFavorite": "Remove from Favorites"
+  }
+}

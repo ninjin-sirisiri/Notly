@@ -5,9 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function sleep(ms: number) {
+export function sleep(ms: number): Promise<void> {
   // eslint-disable-next-line promise/avoid-new
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise<void>(resolve => {
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  });
 }
 
 export function getContrastColor(hexcolor: string) {

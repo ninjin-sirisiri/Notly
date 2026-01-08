@@ -1,12 +1,14 @@
 import { useEditorState, type Editor } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import { Bold, Italic, Strikethrough } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 type TextBubbleMenuProps = {
   editor: Editor;
 };
 
 export function TextBubbleMenu({ editor }: TextBubbleMenuProps) {
+  const { t } = useTranslation('editor');
   const editorState = useEditorState({
     editor,
     selector: ctx => {
@@ -37,7 +39,7 @@ export function TextBubbleMenu({ editor }: TextBubbleMenuProps) {
               ? 'rounded bg-accent hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
               : 'rounded hover:bg-gray-200 dark:hover:bg-gray-600'
           }
-          title="太字"
+          title={t('toolbar.bold')}
           type="button">
           <Bold />
         </button>
@@ -48,7 +50,7 @@ export function TextBubbleMenu({ editor }: TextBubbleMenuProps) {
               ? 'rounded bg-accent hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
               : 'rounded hover:bg-gray-200 dark:hover:bg-gray-600'
           }
-          title="斜体"
+          title={t('toolbar.italic')}
           type="button">
           <Italic />
         </button>
@@ -59,7 +61,7 @@ export function TextBubbleMenu({ editor }: TextBubbleMenuProps) {
               ? 'rounded bg-accent hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
               : 'rounded hover:bg-gray-200 dark:hover:bg-gray-600'
           }
-          title="打ち消し線"
+          title={t('toolbar.strike')}
           type="button">
           <Strikethrough />
         </button>
